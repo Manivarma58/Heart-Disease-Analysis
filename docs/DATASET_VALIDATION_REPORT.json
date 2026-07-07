@@ -1,0 +1,36 @@
+{
+  "source_file": "C:\\Users\\MANI VARMA\\Documents\\Codex\\2026-07-06\\datavibe-heart-disease-analytics-platform-complete-2\\data\\Heart_new2.csv",
+  "clean_file": "C:\\Users\\MANI VARMA\\Documents\\Codex\\2026-07-06\\datavibe-heart-disease-analytics-platform-complete-2\\data\\Heart_new2_clean.csv",
+  "expected_columns_present": true,
+  "source_rows": 4500,
+  "clean_rows": 4494,
+  "columns": 18,
+  "missing_cells": 0,
+  "duplicate_rows_removed": 6,
+  "invalid_rows_removed": 0,
+  "heart_disease_distribution": {
+    "No": 4011,
+    "Yes": 483
+  },
+  "sex_distribution": {
+    "Female": 2600,
+    "Male": 1894
+  },
+  "age_category_distribution": {
+    "55-59": 394,
+    "80 or older": 309,
+    "65-69": 537,
+    "75-79": 320,
+    "40-44": 298,
+    "70-74": 438,
+    "60-64": 469,
+    "50-54": 386,
+    "45-49": 313,
+    "18-24": 267,
+    "35-39": 271,
+    "30-34": 269,
+    "25-29": 223
+  },
+  "tableau_ready": true,
+  "validation_errors_sample": []
+}

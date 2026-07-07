@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Sign in - DataVibe{% endblock %}
+{% block content %}
+<section class="auth-shell">
+  <form class="auth-card" method="post">
+    <p class="eyebrow">Demo access</p>
+    <h1>Sign in</h1>
+    <label>Email
+      <input name="email" type="email" value="doctor@datavibe.local" required>
+    </label>
+    <label>Password
+      <input name="password" type="password" value="datavibe123" required>
+    </label>
+    <button class="button" type="submit">Continue</button>
+    <div class="demo-logins">
+      <strong>Demo accounts</strong>
+      <span>doctor@datavibe.local</span>
+      <span>ramesh@datavibe.local</span>
+      <span>anita@datavibe.local</span>
+      <span>admin@datavibe.local</span>
+      <small>Password: datavibe123</small>
+    </div>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}DataVibe - Heart Disease Analytics{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="hero-copy">
+    <p class="eyebrow">Healthcare analytics platform</p>
+    <h1>DataVibe</h1>
+    <p>Role-aware cardiovascular insights for clinical teams, public health leaders, and patients.</p>
+    <div class="hero-actions">
+      <a class="button" href="{{ url_for('auth.login') }}">Open demo</a>
+      <a class="button ghost" href="#personas">View personas</a>
+    </div>
+  </div>
+  <div class="live-panel" aria-label="Live risk analytics preview">
+    <div class="pulse-line"></div>
+    <div class="metric-grid">
+      <div><span>High-risk cohort</span><strong>22%</strong></div>
+      <div><span>Avg. risk score</span><strong>14.8</strong></div>
+      <div><span>Regions tracked</span><strong>5</strong></div>
+    </div>
+  </div>
+</section>
+<section id="personas" class="band">
+  <div class="section-head">
+    <p class="eyebrow">Three focused workspaces</p>
+    <h2>One dataset, three decisions</h2>
+  </div>
+  <div class="cards three">
+    <article class="card">
+      <i data-lucide="stethoscope"></i>
+      <h3>Dr. Sharma</h3>
+      <p>Clinical risk review, high-risk patient triage, and treatment prompts.</p>
+    </article>
+    <article class="card">
+      <i data-lucide="map"></i>
+      <h3>Ramesh</h3>
+      <p>Regional prevalence, policy levers, and resource allocation views.</p>
+    </article>
+    <article class="card">
+      <i data-lucide="heart-pulse"></i>
+      <h3>Anita</h3>
+      <p>Personal health score, progress tracking, and lifestyle guidance.</p>
+    </article>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}DataVibe{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/datavibe.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="{{ url_for('dashboard.index') }}" aria-label="DataVibe home">
+      <span class="brand-mark">DV</span>
+      <span>
+        <strong>DataVibe</strong>
+        <small>Feel the Data. Save Hearts.</small>
+      </span>
+    </a>
+    <nav class="topnav">
+      {% if session.get("user") %}
+        <a href="{{ url_for('dashboard.home') }}">Dashboard</a>
+        {% if session.user.persona == "admin" %}<a href="{{ url_for('admin.data_upload') }}">Data Upload</a>{% endif %}
+        <span class="user-pill">{{ session.user.name }} · {{ session.user.role }}</span>
+        <a class="button ghost" href="{{ url_for('auth.logout') }}">Sign out</a>
+      {% else %}
+        <a class="button" href="{{ url_for('auth.login') }}">Sign in</a>
+      {% endif %}
+    </nav>
+  </header>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <section class="toast-stack" aria-live="polite">
+        {% for category, message in messages %}
+          <div class="toast {{ category }}">{{ message }}</div>
+        {% endfor %}
+      </section>
+    {% endif %}
+  {% endwith %}
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

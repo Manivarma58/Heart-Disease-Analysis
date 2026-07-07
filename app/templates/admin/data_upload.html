@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Data Upload - DataVibe{% endblock %}
+{% block content %}
+<section class="auth-shell">
+  <form class="auth-card" method="post" enctype="multipart/form-data">
+    <p class="eyebrow">Data operations</p>
+    <h1>Upload dataset</h1>
+    <label>CSV or Excel file
+      <input name="dataset" type="file" accept=".csv,.xlsx,.xls" required>
+    </label>
+    <label>Validation mode
+      <select name="mode">
+        <option>Validate and stage</option>
+        <option>Validate, clean, and import</option>
+      </select>
+    </label>
+    <button class="button" type="submit">Run validation</button>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Public Health Dashboard - DataVibe{% endblock %}
+{% block content %}
+<section class="dashboard-shell">
+  <aside class="sidebar">
+    <a class="active" href="#"><i data-lucide="map"></i> Regional Health</a>
+    <a href="{{ url_for('public_health.visualizations_dashboard') }}"><i data-lucide="bar-chart-3"></i> Interactive Charts</a>
+    <a href="#"><i data-lucide="landmark"></i> Policy Impact</a>
+    <a href="#"><i data-lucide="wallet-cards"></i> Resources</a>
+    <a href="#"><i data-lucide="presentation"></i> Reports</a>
+  </aside>
+  <section class="workspace">
+    <div class="workspace-head">
+      <div>
+        <p class="eyebrow">Policy workspace</p>
+        <h1>Population health trends</h1>
+      </div>
+      <a class="button ghost" href="{{ url_for('dashboard.overview_api') }}">API summary</a>
+    </div>
+    <div class="kpi-row">
+      <article class="kpi"><span>Patients sampled</span><strong>{{ totals.patients }}</strong></article>
+      <article class="kpi moderate"><span>Average risk</span><strong>{{ totals.avg_risk }}%</strong></article>
+      <article class="kpi high"><span>Report time</span><strong>{{ report.generated_at[11:16] }}</strong></article>
+    </div>
+    <section class="tableau-frame">
+      <div>
+        <h2>Tableau policy workbook</h2>
+        <p>{{ tableau.message }}</p>
+      </div>
+      {% if tableau.configured %}
+        <div class="tableau-embed" data-tableau-url="{{ tableau.url }}"></div>
+      {% else %}
+        <div class="map-grid">
+          {% for row in report.regions %}
+          <div><strong>{{ row.region }}</strong><span>{{ row.high_risk }} high risk</span></div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </section>
+    <div class="split">
+      <section class="panel">
+        <h2>Regional indicators</h2>
+        <table>
+          <thead><tr><th>Region</th><th>Area</th><th>Patients</th><th>Avg risk</th><th>Cases</th></tr></thead>
+          <tbody>
+          {% for row in regional %}
+            <tr><td>{{ row.region }}</td><td>{{ row.urban_rural }}</td><td>{{ row.patients }}</td><td>{{ row.avg_risk }}%</td><td>{{ row.cases }}</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </section>
+      <section class="panel">
+        <h2>Lifestyle risk summary</h2>
+        <table>
+          <thead><tr><th>Activity</th><th>Smoking</th><th>Patients</th><th>Avg risk</th></tr></thead>
+          <tbody>
+          {% for row in lifestyle[:10] %}
+            <tr><td>{{ row.physical_activity }}</td><td>{{ row.smoking_status }}</td><td>{{ row.patients }}</td><td>{{ row.avg_risk }}%</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </section>
+    </div>
+  </section>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/tableau_embed.js') }}"></script>{% endblock %}

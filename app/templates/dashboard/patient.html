@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Patient Dashboard - DataVibe{% endblock %}
+{% block content %}
+<section class="dashboard-shell">
+  <aside class="sidebar">
+    <a class="active" href="#"><i data-lucide="heart-pulse"></i> My Health</a>
+    <a href="#"><i data-lucide="target"></i> Goals</a>
+    <a href="#"><i data-lucide="book-open"></i> Learn</a>
+    <a href="#"><i data-lucide="message-circle"></i> Care Team</a>
+  </aside>
+  <section class="workspace">
+    <div class="workspace-head">
+      <div>
+        <p class="eyebrow">Patient workspace</p>
+        <h1>Hello, {{ patient.first_name }}</h1>
+      </div>
+      <button class="button ghost" type="button">Book follow-up</button>
+    </div>
+    <section class="patient-hero">
+      <div class="risk-gauge {{ patient.risk_category|lower }}" style="--score: {{ patient.framingham_score * 2.8 }}deg">
+        <span>{{ patient.framingham_score }}%</span>
+        <small>{{ patient.risk_category }} risk</small>
+      </div>
+      <div>
+        <h2>Your heart health snapshot</h2>
+        <p>{{ recommendation }}</p>
+        <div class="metric-grid compact">
+          <div><span>Age</span><strong>{{ age }}</strong></div>
+          <div><span>BP</span><strong>{{ patient.systolic_bp }}/{{ patient.diastolic_bp }}</strong></div>
+          <div><span>BMI</span><strong>{{ patient.bmi }}</strong></div>
+          <div><span>Activity</span><strong>{{ patient.physical_activity }}</strong></div>
+        </div>
+      </div>
+    </section>
+    <section class="tableau-frame">
+      <div>
+        <h2>Tableau personal workbook</h2>
+        <p>{{ tableau.message }}</p>
+      </div>
+      {% if tableau.configured %}
+        <div class="tableau-embed" data-tableau-url="{{ tableau.url }}"></div>
+      {% else %}
+        <div class="timeline">
+          <span style="height: 46%"></span><span style="height: 55%"></span><span style="height: 48%"></span><span style="height: 42%"></span><span style="height: 38%"></span>
+        </div>
+      {% endif %}
+    </section>
+    <div class="cards three">
+      <article class="card"><i data-lucide="footprints"></i><h3>Weekly challenge</h3><p>Complete 150 minutes of moderate activity this week.</p></article>
+      <article class="card"><i data-lucide="salad"></i><h3>Nutrition focus</h3><p>Choose high-fiber meals and reduce saturated fat.</p></article>
+      <article class="card"><i data-lucide="moon"></i><h3>Recovery</h3><p>Aim for 7 hours of sleep for better blood pressure control.</p></article>
+    </div>
+  </section>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/tableau_embed.js') }}"></script>{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Clinical Dashboard - DataVibe{% endblock %}
+{% block content %}
+<section class="dashboard-shell">
+  <aside class="sidebar">
+    <a class="active" href="#"><i data-lucide="activity"></i> Risk Review</a>
+    <a href="#"><i data-lucide="clipboard-plus"></i> Clinical Notes</a>
+    <a href="#"><i data-lucide="calendar-days"></i> Appointments</a>
+    <a href="#"><i data-lucide="send"></i> Referrals</a>
+  </aside>
+  <section class="workspace">
+    <div class="workspace-head">
+      <div>
+        <p class="eyebrow">Cardiologist workspace</p>
+        <h1>Clinical risk analysis</h1>
+      </div>
+      <div class="search-box">
+        <i data-lucide="search"></i>
+        <input id="patient-search" placeholder="Search patients, regions, risk">
+      </div>
+    </div>
+    <div class="kpi-row">
+      {% for item in risk_mix %}
+      <article class="kpi {{ item.risk_category|lower }}">
+        <span>{{ item.risk_category }} risk</span>
+        <strong>{{ item.count }}</strong>
+      </article>
+      {% endfor %}
+    </div>
+    <section class="tableau-frame">
+      <div>
+        <h2>Tableau clinical workbook</h2>
+        <p>{{ tableau.message }}</p>
+      </div>
+      {% if tableau.configured %}
+        <div class="tableau-embed" data-tableau-url="{{ tableau.url }}"></div>
+      {% else %}
+        <div class="fallback-chart">
+          {% for item in risk_mix %}<span style="height: {{ item.count * 4 }}px" title="{{ item.risk_category }}"></span>{% endfor %}
+        </div>
+      {% endif %}
+    </section>
+    <section class="cards patient-grid" id="patient-results">
+      {% for patient in patients %}
+      <article class="patient-card">
+        <div class="patient-top">
+          <span class="avatar">{{ patient.first_name[0] }}{{ patient.last_name[0] }}</span>
+          <span class="badge {{ patient.risk_category|lower }}">{{ patient.risk_category }}</span>
+        </div>
+        <h3>{{ patient.first_name }} {{ patient.last_name }}</h3>
+        <p>{{ age_from_dob(patient.date_of_birth) }} yrs · {{ patient.gender }} · {{ patient.region }}</p>
+        <dl>
+          <div><dt>Risk</dt><dd>{{ patient.framingham_score }}%</dd></div>
+          <div><dt>BP</dt><dd>{{ patient.systolic_bp }}</dd></div>
+          <div><dt>Chol.</dt><dd>{{ patient.cholesterol_total }}</dd></div>
+          <div><dt>BMI</dt><dd>{{ patient.bmi }}</dd></div>
+        </dl>
+        <p class="recommendation">{{ recommendation_for(patient.risk_category) }}</p>
+      </article>
+      {% endfor %}
+    </section>
+  </section>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script><script src="{{ url_for('static', filename='js/tableau_embed.js') }}"></script>{% endblock %}
