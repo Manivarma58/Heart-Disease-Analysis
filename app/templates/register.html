@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Register - DataVibe{% endblock %}
+{% block title %}Register - CardioViz{% endblock %}
 {% block content %}
 <style>
   /* Header overrides for Register page */
@@ -427,11 +427,11 @@
 <div class="reg-page-body">
   <!-- Custom Header -->
   <header class="reg-header">
-    <a class="reg-brand" href="{{ url_for('dashboard.index') }}">
-      <div class="reg-brand-mark">
-        <i data-lucide="activity" style="width: 1.5rem; height: 1.5rem;"></i>
+    <a class="reg-brand" href="{{ url_for('dashboard.index') }}" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none;">
+      <div style="width: 1.8rem; height: 1.8rem; border-radius: 6px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+        <img src="{{ url_for('static', filename='images/cardioviz_logo.png') }}" alt="CardioViz Logo" style="width: 100%; height: 100%; object-fit: cover;">
       </div>
-      <span>DataVibe</span>
+      <span>CardioViz</span>
     </a>
     <div class="reg-login-prompt">
       <span>Already have an account?</span>
@@ -442,7 +442,7 @@
   <!-- Title section -->
   <div class="reg-intro">
     <h1>Join the Precision Pulse</h1>
-    <p>Access clinical-grade intelligence and optimize cardiovascular patient outcomes with DataVibe.</p>
+    <p>Access clinical-grade intelligence and optimize cardiovascular patient outcomes with CardioViz.</p>
   </div>
 
   <!-- Layout -->
@@ -591,7 +591,7 @@
           </div>
 
           <p style="font-size: 0.8rem; color: #64748b; text-align: center; margin-bottom: 2rem;">
-            Didn't receive a verification code? <a href="#" onclick="alert('Demo code re-sent: DV-100200'); return false;" style="color:#3b82f6; font-weight: 700; text-decoration: none;">Resend Code</a>
+            Didn't receive a verification code? <a href="#" onclick="resendVerificationCode(); return false;" style="color:#3b82f6; font-weight: 700; text-decoration: none;">Resend Code</a>
           </p>
 
           <button class="btn-next" type="submit" id="submit-wizard-btn">
@@ -606,7 +606,7 @@
 
   <!-- Footer -->
   <footer class="reg-footer">
-    &copy; 2026 DATAVIBE CLINICAL INTELLIGENCE • SECURE HIPAA COMPLIANT REGISTRATION
+    &copy; 2026 CARDIOVIZ CLINICAL INTELLIGENCE • SECURE HIPAA COMPLIANT REGISTRATION
   </footer>
 </div>
 {% endblock %}
@@ -705,6 +705,22 @@
         return;
       }
 
+      // Generate a random 6-digit code and send it to the real email
+      if (!window.generatedVerificationCode) {
+        const randCode = Math.floor(100000 + Math.random() * 900000);
+        window.generatedVerificationCode = `DV-${randCode}`;
+        
+        const emailVal = document.getElementById("email").value.trim();
+        fetch(`/send-verification-code?email=${encodeURIComponent(emailVal)}&code=${encodeURIComponent(window.generatedVerificationCode)}`)
+          .then(res => res.json())
+          .then(data => {
+            console.log("Real verification code sent successfully to email!");
+          })
+          .catch(err => {
+            console.error("Error sending verification code to email:", err);
+          });
+      }
+
       // Transition timeline
       document.getElementById("time-step-2").classList.remove("active");
       document.getElementById("time-step-2").classList.add("completed");
@@ -741,9 +757,32 @@
         alert("Please enter your email verification code to complete sign up.");
         return;
       }
+      
+      // Real validation of the generated code
+      if (verificationCode.toUpperCase() !== window.generatedVerificationCode) {
+        e.preventDefault();
+        alert("Invalid verification code. Please enter the correct code sent to your email/phone.");
+        return;
+      }
+      
       submitWizardBtn.disabled = true;
       submitWizardBtn.innerText = "Creating Account and Registering Key...";
     });
+  }
+
+  function resendVerificationCode() {
+    const randCode = Math.floor(100000 + Math.random() * 900000);
+    window.generatedVerificationCode = `DV-${randCode}`;
+    
+    const emailVal = document.getElementById("email").value.trim();
+    fetch(`/send-verification-code?email=${encodeURIComponent(emailVal)}&code=${encodeURIComponent(window.generatedVerificationCode)}`)
+      .then(res => res.json())
+      .then(data => {
+        alert("A new verification code has been successfully sent to your email!");
+      })
+      .catch(err => {
+        alert("Error resending code. Please check your network connection.");
+      });
   }
 
   // Dynamically update form labels/placeholders based on Patient vs Professional role

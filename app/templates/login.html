@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Login - DataVibe{% endblock %}
+{% block title %}Login - CardioViz{% endblock %}
 {% block content %}
 <style>
   /* Base Body Styles */
@@ -421,10 +421,10 @@
 
   <!-- Header -->
   <div class="auth-header">
-    <div class="auth-brand-icon">
-      <i data-lucide="activity" style="width: 2.2rem; height: 2.2rem;"></i>
+    <div class="auth-brand-icon" style="overflow: hidden; display: flex; align-items: center; justify-content: center; background: none; border: none;">
+      <img src="{{ url_for('static', filename='images/cardioviz_logo.png') }}" alt="CardioViz Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
     </div>
-    <h1>DataVibe</h1>
+    <h1>CardioViz</h1>
     <p>Clinical Intelligence System</p>
   </div>
 
@@ -476,7 +476,7 @@
     <div class="social-divider">or continue with</div>
 
     <div class="social-row">
-      <a class="social-btn" id="google-btn" href="{{ url_for('auth.social_login', role='provider') }}">
+      <a class="social-btn" id="google-btn" href="{{ url_for('auth.social_login') }}">
         <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google logo">
         Google
       </a>
@@ -533,7 +533,7 @@
       input.placeholder = "doctor@datavibe.local or +1 (555) 000-0921";
       icon.setAttribute("data-lucide", "user");
       if (googleBtn) {
-        googleBtn.href = "/social-login?role=provider";
+        googleBtn.href = "/social-login";
       }
     } else {
       tabProvider.classList.remove("active");
@@ -543,7 +543,7 @@
       input.placeholder = "anita@datavibe.local or +1 (555) 000-0883";
       icon.setAttribute("data-lucide", "heart");
       if (googleBtn) {
-        googleBtn.href = "/social-login?role=patient";
+        googleBtn.href = "/social-login";
       }
     }
     

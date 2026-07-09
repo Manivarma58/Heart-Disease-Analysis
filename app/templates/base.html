@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}DataVibe{% endblock %}</title>
+  <title>{% block title %}CardioViz{% endblock %}</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/cardioviz_logo.png') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
@@ -42,11 +43,11 @@
 <body>
   {% if session.get("user") and not hide_default_header %}
   <header class="topbar dashboard-header" style="background: white; border-bottom: 1px solid #e2e8f0; padding: 0.5rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;">
-    <a class="brand" href="{{ url_for('dashboard.home') }}" aria-label="DataVibe home" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
-      <div style="background: #3b82f6; color: white; display: grid; place-items: center; width: 2.3rem; height: 2.3rem; border-radius: 8px;">
-        <i data-lucide="activity" style="width: 1.4rem; height: 1.4rem;"></i>
+    <a class="brand" href="{{ url_for('dashboard.home') }}" aria-label="CardioViz home" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
+      <div style="width: 2.3rem; height: 2.3rem; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+        <img src="{{ url_for('static', filename='images/cardioviz_logo.png') }}" alt="CardioViz Logo" style="width: 100%; height: 100%; object-fit: cover;">
       </div>
-      <span style="font-weight: 800; font-size: 1.3rem; color: #1e293b; font-family: Poppins, sans-serif; letter-spacing: -0.5px;">DataVibe</span>
+      <span style="font-weight: 800; font-size: 1.3rem; color: #1e293b; font-family: Poppins, sans-serif; letter-spacing: -0.5px;">CardioViz</span>
     </a>
 
     <div class="header-search" style="flex: 1; max-width: 32rem; margin: 0 2rem; position: relative;">
@@ -98,14 +99,10 @@
         <button class="profile-trigger" id="profile-trigger" style="background: transparent; border: 0; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; text-align: right; outline: none; padding: 0.25rem 0.5rem; border-radius: 8px;">
           <div class="profile-info" style="display: flex; flex-direction: column; line-height: 1.2;">
             <span class="profile-name" style="font-weight: 700; font-size: 0.88rem; color: #1e293b;">
-              {% if session.user.persona == 'clinical' %}Dr. Sharma
-              {% elif session.user.persona == 'public_health' %}Ramesh
-              {% else %}Anita Sharma{% endif %}
+              {{ session.user.name }}
             </span>
             <span class="role-badge {% if session.user.persona == 'clinical' %}clinical{% elif session.user.persona == 'public_health' %}public_health{% else %}patient{% endif %}">
-              {% if session.user.persona == 'clinical' %}Cardiologist
-              {% elif session.user.persona == 'public_health' %}Administrator
-              {% else %}Patient{% endif %}
+              {{ session.user.role }}
             </span>
           </div>
           {% if session.user.persona == 'clinical' %}
@@ -127,18 +124,13 @@
   </header>
   {% else %}
   <header class="topbar" style="background: white; border-bottom: 1px solid #e2e8f0; padding: 0.5rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;">
-    <a class="brand" href="{{ url_for('dashboard.index') }}" aria-label="DataVibe home" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
-      <div style="background: #3b82f6; color: white; display: grid; place-items: center; width: 2.3rem; height: 2.3rem; border-radius: 8px;">
-        <i data-lucide="activity" style="width: 1.4rem; height: 1.4rem;"></i>
+    <a class="brand" href="{{ url_for('dashboard.index') }}" aria-label="CardioViz home" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
+      <div style="width: 2.3rem; height: 2.3rem; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+        <img src="{{ url_for('static', filename='images/cardioviz_logo.png') }}" alt="CardioViz Logo" style="width: 100%; height: 100%; object-fit: cover;">
       </div>
-      <span style="font-weight: 800; font-size: 1.35rem; color: #1e293b; font-family: Poppins, sans-serif; letter-spacing: -0.5px;">DataVibe</span>
+      <span style="font-weight: 800; font-size: 1.35rem; color: #1e293b; font-family: Poppins, sans-serif; letter-spacing: -0.5px;">CardioViz</span>
     </a>
-    
-    <nav class="header-main-nav" style="display: flex; align-items: center; gap: 1.5rem; margin-left: 2.5rem; margin-right: auto;">
-      <a href="{{ url_for('auth.login') }}" style="font-weight: 600; color: #64748b; text-decoration: none; font-size: 0.92rem;">Clinical Analytics</a>
-      <a href="{{ url_for('auth.login') }}" style="font-weight: 600; color: #64748b; text-decoration: none; font-size: 0.92rem;">Public Health</a>
-      <a href="{{ url_for('auth.login') }}" style="font-weight: 600; color: #64748b; text-decoration: none; font-size: 0.92rem;">Patient Portal</a>
-    </nav>
+
 
     <nav class="topnav" style="display: flex; align-items: center; gap: 0.75rem;">
       <a href="{{ url_for('auth.login') }}" style="font-size: 0.88rem; font-weight: 700; color: #1e293b; text-decoration: none; padding: 0.5rem 1rem; transition: color 0.2s;">Login</a>
@@ -162,6 +154,26 @@
   </main>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% if session.user %}
+  <script>
+    (function() {
+      try {
+        let email = "{{ session.user.email }}";
+        let name = "{{ session.user.name }}";
+        let persona = "{{ session.user.persona }}";
+        let role = "{{ session.user.role }}";
+        
+        let accounts = JSON.parse(localStorage.getItem('stored_google_accounts') || '[]');
+        if (!accounts.some(a => a.email === email)) {
+          accounts.push({ email: email, name: name, persona: persona, role: role });
+          localStorage.setItem('stored_google_accounts', JSON.stringify(accounts));
+        }
+      } catch(e) {
+        console.error("Error saving account to browser storage:", e);
+      }
+    })();
+  </script>
+  {% endif %}
   {% block scripts %}{% endblock %}
 </body>
 </html>

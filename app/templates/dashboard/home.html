@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Dashboard - DataVibe{% endblock %}
+{% block title %}Dashboard - CardioViz{% endblock %}
 {% block content %}
 <style>
   /* Central Dashboard Layout */
@@ -922,7 +922,7 @@
         <div class="welcome-banner-card">
           <div style="max-width: 60%;">
             <span style="font-size: 0.78rem; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.5px;">Cardiology Coordinator</span>
-            <h2 style="font-size: 1.8rem; font-weight: 800; color: #1e293b; margin: 0.25rem 0 0.5rem;">Welcome back, Dr. Sharma</h2>
+            <h2 style="font-size: 1.8rem; font-weight: 800; color: #1e293b; margin: 0.25rem 0 0.5rem;">Welcome back, {{ session.user.name }}</h2>
             <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: #fee2e2; color: #ef4444; font-size: 0.8rem; font-weight: 700; padding: 0.25rem 0.75rem; border-radius: 99px; margin-bottom: 0.75rem;">
               <i data-lucide="alert-triangle" style="width: 0.9rem; height: 0.9rem;"></i>
               12 high-risk patients require immediate review
@@ -1141,7 +1141,7 @@
       <div class="welcome-banner-card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
         <div>
           <span style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Public Health Administrator</span>
-          <h2 style="font-size: 1.8rem; font-weight: 800; color: #1e293b; margin: 0.25rem 0 0.5rem;">Welcome back, Ramesh</h2>
+          <h2 style="font-size: 1.8rem; font-weight: 800; color: #1e293b; margin: 0.25rem 0 0.5rem;">Welcome back, {{ session.user.name }}</h2>
           <p style="margin: 0; font-size: 0.85rem; color: #64748b; font-style: italic;">
             "Public health is the foundation of a thriving society." — Daily Insight
           </p>
@@ -1320,7 +1320,7 @@
           
           <!-- Left: Welcome Anita card -->
           <div class="welcome-banner-card">
-            <h2 style="font-size: 1.8rem; font-weight: 800; color: #1e293b; margin: 0 0 0.5rem;">Welcome back, Anita! 👋</h2>
+            <h2 style="font-size: 1.8rem; font-weight: 800; color: #1e293b; margin: 0 0 0.5rem;">Welcome back, {{ session.user.name }}! 👋</h2>
             <p style="margin: 0 0 1rem; font-size: 0.88rem; color: #475569; line-height: 1.4; max-width: 80%;">
               Great work this week. You're consistently hitting your activity targets and keeping your records updated.
             </p>

@@ -1,6 +1,6 @@
-# DataVibe - Heart Disease Analytics Platform
+# CardioViz - Heart Disease Analytics Platform
 
-DataVibe is a Flask-based healthcare analytics demo for cardiovascular risk analysis. It includes seeded patient data, role-based dashboards, Tableau embed hooks, risk scoring, and SQL assets for a PostgreSQL-ready implementation.
+CardioViz is a Flask-based healthcare analytics demo for cardiovascular risk analysis. It includes seeded patient data, role-based dashboards, Tableau embed hooks, risk scoring, and SQL assets for a PostgreSQL-ready implementation.
 
 The project now includes the real dataset file at `data/Heart_new2.csv` and an importer that maps it into the application schema.
 

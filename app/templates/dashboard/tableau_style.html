@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Clinical Analytics - DataVibe{% endblock %}
+{% block title %}Clinical Analytics - CardioViz{% endblock %}
 {% block content %}
 <style>
   /* Page Layout & Container */
@@ -733,7 +733,7 @@
       </button>
 
       <div class="sidebar-brand-section" style="padding-left: 1rem; margin-bottom: 1.5rem; margin-top: 0.5rem;">
-        <span style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.5px;">DataVibe</span>
+        <span style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.5px;">CardioViz</span>
         <span style="font-size: 1.15rem; font-weight: 800; color: #3b82f6; display: block; font-family: Poppins, sans-serif; margin-top: 0.15rem; letter-spacing: -0.5px;">PRECISION CARE HUB</span>
       </div>
 
@@ -777,7 +777,7 @@
     <!-- 1. Header Section -->
     <div class="analytics-head">
       <div class="analytics-title">
-        <h2>Clinical Analytics Dashboard - Dr. Sharma</h2>
+        <h2>Clinical Analytics Dashboard - {{ session.user.name }}</h2>
         <div class="analytics-meta">
           <span id="last-updated-time"><i data-lucide="clock" style="width: 0.9rem; height: 0.9rem; display:inline-block; vertical-align:middle; margin-right:2px;"></i> Last updated: 2 mins ago</span>
           <a href="#" id="refresh-data-link"><i data-lucide="refresh-cw" style="width: 0.9rem; height: 0.9rem; display:inline-block; vertical-align:middle; margin-right:2px;"></i> Refresh Data</a>
@@ -1153,7 +1153,7 @@
   const exportBtn = document.getElementById("export-btn");
   if (exportBtn) {
     exportBtn.addEventListener("click", () => {
-      alert("Preparing Clinical analytics dataset...\nSuccessfully exported as DataVibe_Clinical_Report.pdf");
+      alert("Preparing Clinical analytics dataset...\nSuccessfully exported as CardioViz_Clinical_Report.pdf");
     });
   }
 

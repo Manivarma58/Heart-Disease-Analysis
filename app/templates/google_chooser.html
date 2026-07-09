@@ -1,0 +1,417 @@
+{% extends "base.html" %}
+{% block title %}Choose an Account - Google Sign-In{% endblock %}
+{% block content %}
+<style>
+  /* Dark theme reset for body container */
+  .google-auth-body {
+    min-height: calc(100vh - 74px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #1f1f1f;
+    font-family: 'Google Sans', 'Roboto', 'Inter', sans-serif;
+    padding: 2rem 1rem;
+  }
+
+  .google-card {
+    background: #131314;
+    border-radius: 28px;
+    width: 100%;
+    max-width: 1040px;
+    min-height: 480px;
+    padding: 2.5rem;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  @media (max-width: 768px) {
+    .google-card {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      max-width: 450px;
+      padding: 2rem;
+    }
+  }
+
+  /* Left Column Branding */
+  .left-col {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    justify-content: flex-start;
+  }
+
+  .google-header-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 3.5rem;
+  }
+
+  .google-logo {
+    width: 24px;
+    height: 24px;
+  }
+
+  .google-header-text {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #e3e3e3;
+  }
+
+  .google-title {
+    font-size: 2.25rem;
+    font-weight: 400;
+    color: #e3e3e3;
+    margin: 0 0 0.75rem 0;
+    letter-spacing: -0.5px;
+  }
+
+  .google-subtitle {
+    font-size: 1rem;
+    color: #c4c7c5;
+    margin: 0;
+  }
+
+  .google-subtitle .brand-link {
+    color: #a8c7fa;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  /* Right Column Accounts */
+  .right-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: left;
+  }
+
+  .accounts-list {
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .account-item {
+    display: flex;
+    align-items: center;
+    padding: 0.9rem 0;
+    cursor: pointer;
+    text-decoration: none;
+    border-bottom: 1px solid #444746;
+    transition: background 0.2s ease;
+  }
+
+  .account-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .account-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    overflow: hidden;
+  }
+
+  .avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Colors matching screenshots */
+  .avatar-varma1 {
+    background: #e2e2e2;
+  }
+  .avatar-varma2 {
+    background: #3c4043;
+    border: 1px solid #5f6368;
+  }
+  .avatar-varma3 {
+    background: #8b5cf6;
+    color: #ffffff;
+  }
+  .avatar-suresh {
+    background: #e11d48;
+    color: #ffffff;
+  }
+
+  .account-details {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+  }
+
+  .account-name {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #e3e3e3;
+  }
+
+  .account-email {
+    font-size: 0.78rem;
+    color: #c4c7c5;
+  }
+
+  .use-another-btn {
+    display: flex;
+    align-items: center;
+    padding: 0.9rem 0;
+    cursor: pointer;
+    text-decoration: none;
+    color: #a8c7fa;
+    font-size: 0.88rem;
+    font-weight: 500;
+  }
+
+  .use-another-icon-box {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    color: #a8c7fa;
+  }
+
+  .disclaimer-text {
+    font-size: 0.75rem;
+    color: #c4c7c5;
+    line-height: 1.5;
+    margin-top: auto;
+  }
+
+  .disclaimer-text a {
+    color: #a8c7fa;
+    text-decoration: none;
+  }
+
+  .disclaimer-text a:hover {
+    text-decoration: underline;
+  }
+
+  /* Footer Section */
+  .google-footer-wrapper {
+    width: 100%;
+    max-width: 1040px;
+    margin-top: 1rem;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: #c4c7c5;
+    font-family: Roboto, sans-serif;
+  }
+
+  @media (max-width: 768px) {
+    .google-footer-wrapper {
+      max-width: 450px;
+      flex-direction: column;
+      gap: 0.75rem;
+      align-items: center;
+    }
+  }
+
+  .footer-links a {
+    color: #c4c7c5;
+    text-decoration: none;
+    margin-left: 1.5rem;
+  }
+
+  .footer-links a:hover {
+    color: #ffffff;
+  }
+
+  /* Custom Dropdown select matching screen */
+  .lang-select {
+    background: transparent;
+    color: #c4c7c5;
+    border: none;
+    font-size: 0.72rem;
+    cursor: pointer;
+    outline: none;
+  }
+
+  /* Transition overlay spinner when logging in */
+  .spinner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(19, 19, 20, 0.95);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: 28px;
+  }
+
+  .spinner-logo {
+    width: 64px;
+    height: 64px;
+    animation: bounce 1.5s infinite ease-in-out;
+  }
+
+  .spinner-bar {
+    width: 160px;
+    height: 4px;
+    background: #2d2f31;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 1.5rem;
+  }
+
+  .spinner-progress {
+    width: 40%;
+    height: 100%;
+    background: #a8c7fa;
+    border-radius: 2px;
+    animation: loading-bar 1.5s infinite linear;
+  }
+
+  @keyframes loading-bar {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(250%); }
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+</style>
+
+<div class="google-auth-body">
+  <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+    <div class="google-card">
+      <!-- Spinner Overlay -->
+      <div class="spinner-overlay" id="spinner-overlay">
+        <img src="{{ url_for('static', filename='images/cardioviz_logo.png') }}" class="spinner-logo" alt="CardioViz Logo">
+        <h3 style="margin: 1.5rem 0 0.5rem; font-size: 1.15rem; color: #ffffff;">Signing in...</h3>
+        <span style="font-size: 0.8rem; color: #c4c7c5;" id="signing-text">Connecting to CardioViz</span>
+        <div class="spinner-bar">
+          <div class="spinner-progress"></div>
+        </div>
+      </div>
+
+      <!-- Left Column: Title Block -->
+      <div class="left-col">
+        <div class="google-header-brand">
+          <img class="google-logo" src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google">
+          <span class="google-header-text">Sign in with Google</span>
+        </div>
+        
+        <h1 class="google-title">Choose an account</h1>
+        <p class="google-subtitle">to continue to <a href="#" class="brand-link">CardioViz</a></p>
+      </div>
+
+      <!-- Right Column: Account Selector Block -->
+      <div class="right-col">
+        <div class="accounts-list" id="accounts-container">
+          <!-- Dynamically generated via JavaScript using browser localStorage -->
+        </div>
+
+        <div class="disclaimer-text">
+          Before using this app, you can review CardioViz's <a href="#">Privacy Policy</a> and <a href="#">Terms of Service</a>.
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer select & links -->
+    <div class="google-footer-wrapper">
+      <select class="lang-select">
+        <option>English (United States)</option>
+      </select>
+      <div class="footer-links">
+        <a href="#">Help</a>
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function showSpinner(name) {
+    const overlay = document.getElementById('spinner-overlay');
+    const textSpan = document.getElementById('signing-text');
+    if (overlay && textSpan) {
+      textSpan.textContent = `Authenticating ${name}...`;
+      overlay.style.display = 'flex';
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const container = document.getElementById("accounts-container");
+    let accounts = JSON.parse(localStorage.getItem('stored_google_accounts') || '[]');
+    
+    // Seed default credentials matching the browser profiles if localStorage is empty
+    if (accounts.length === 0) {
+      accounts = [
+        { email: 'manivarmakalapu@gmail.com', name: 'Mani Varma', persona: 'clinical', role: 'Cardiologist' },
+        { email: 'manivarmakalapu8@gmail.com', name: 'mani varma kalapu', persona: 'public_health', role: 'Health Official' },
+        { email: 'manivarmakalapu08@gmail.com', name: 'Mani Varma', persona: 'patient', role: 'Patient' },
+        { email: 'sureshbanavath2006@gmail.com', name: 'suresh Naik', persona: 'admin', role: 'Admin' }
+      ];
+      localStorage.setItem('stored_google_accounts', JSON.stringify(accounts));
+    }
+    
+    let html = "";
+    accounts.forEach(acc => {
+      let avatarHtml = "";
+      if (acc.email === 'manivarmakalapu@gmail.com') {
+        avatarHtml = `<div class="account-avatar avatar-varma1">
+          <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: #5f6368;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+        </div>`;
+      } else if (acc.email === 'manivarmakalapu8@gmail.com') {
+        avatarHtml = `<div class="account-avatar avatar-varma2">
+          <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; fill: #e3e3e3;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        </div>`;
+      } else {
+        let firstLetter = (acc.name || acc.email || "G").charAt(0).toUpperCase();
+        let avatarClass = "avatar-varma3";
+        if (acc.email === 'sureshbanavath2006@gmail.com') {
+          avatarClass = "avatar-suresh";
+        }
+        avatarHtml = `<div class="account-avatar ${avatarClass}">${firstLetter}</div>`;
+      }
+      
+      html += `
+        <a href="/social-login?email=${encodeURIComponent(acc.email)}" class="account-item" onclick="showSpinner('${acc.name}');">
+          ${avatarHtml}
+          <div class="account-details">
+            <span class="account-name">${acc.name}</span>
+            <span class="account-email">${acc.email}</span>
+          </div>
+        </a>
+      `;
+    });
+    
+    // Add "Use another account"
+    html += `
+      <a href="/register" class="use-another-btn">
+        <div class="use-another-icon-box">
+          <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; fill: currentColor;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+        </div>
+        <span>Use another account</span>
+      </a>
+    `;
+    
+    container.innerHTML = html;
+  });
+</script>
+{% endblock %}

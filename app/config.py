@@ -6,7 +6,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 class Config:
-    SECRET_KEY = os.getenv("SECRET_KEY", "dev-datavibe-change-me")
+    SECRET_KEY = os.getenv("SECRET_KEY", "dev-cardioviz-change-me")
     DATABASE_PATH = os.getenv("DATABASE_PATH", str(BASE_DIR / "datavibe.db"))
     TABLEAU_CLINICAL_URL = os.getenv("TABLEAU_CLINICAL_URL", "")
     TABLEAU_PUBLIC_HEALTH_URL = os.getenv("TABLEAU_PUBLIC_HEALTH_URL", "")

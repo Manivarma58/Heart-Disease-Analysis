@@ -1,6 +1,6 @@
 {% set hide_default_header = true %}
 {% extends "base.html" %}
-{% block title %}API Reference - DataVibe{% endblock %}
+{% block title %}API Reference - CardioViz{% endblock %}
 {% block content %}
 <style>
   /* Developer Portal Header styling */
@@ -426,13 +426,13 @@
       <div class="auth-banner-box">
         <h4><i data-lucide="shield-check" style="color:#10b981; width:1.1rem; height:1.1rem;"></i> Authentication</h4>
         <p>All API requests must include your API Key in the <code>Authorization</code> HTTP header. We use standard Bearer token authentication.</p>
-        <div class="code-token-block">Authorization: Bearer DATAVIBE_YOUR_SECRET_KEY</div>
+        <div class="code-token-block">Authorization: Bearer CARDIOVIZ_YOUR_SECRET_KEY</div>
       </div>
 
       <span style="font-size:0.65rem; font-weight:800; color:#94a3b8; text-transform:uppercase;">Base URL</span>
       <div class="base-url-row">
         <span style="background:#dbeafe; color:#1e40af; font-size:0.6rem; padding:0.15rem 0.4rem; border-radius:4px; font-weight:800; text-transform:uppercase;">PRODUCTION</span>
-        <span>https://api.datavibe.clinic/v2</span>
+        <span>https://api.cardioviz.clinic/v2</span>
         <i data-lucide="copy" style="margin-left:auto; cursor:pointer; width:0.95rem; height:0.95rem; color:#64748b;" onclick="alert('Copied Base URL')"></i>
       </div>
 
@@ -573,7 +573,7 @@
 
     <!-- Code Block representation -->
     <div class="console-code-block" id="console-code-editor">curl --request GET \
-  --url 'https://api.datavibe.clinic/v2/patients?limit=1' \
+  --url 'https://api.cardioviz.clinic/v2/patients?limit=1' \
   --header 'Authorization: Bearer API_KEY'</div>
 
     <!-- Try it out button -->
@@ -657,11 +657,11 @@
     const snippetElement = document.getElementById("console-code-editor");
     
     if (currentLang === 'curl') {
-      snippetElement.textContent = `curl --request GET \\\n  --url 'https://api.datavibe.clinic/v2/${endpoint}?limit=1' \\\n  --header 'Authorization: Bearer API_KEY'`;
+      snippetElement.textContent = `curl --request GET \\\n  --url 'https://api.cardioviz.clinic/v2/${endpoint}?limit=1' \\\n  --header 'Authorization: Bearer API_KEY'`;
     } else if (currentLang === 'python') {
-      snippetElement.textContent = `import requests\n\nurl = "https://api.datavibe.clinic/v2/${endpoint}"\nheaders = {\n    "Authorization": "Bearer API_KEY"\n}\nresponse = requests.get(url, headers=headers)\nprint(response.json())`;
+      snippetElement.textContent = `import requests\n\nurl = "https://api.cardioviz.clinic/v2/${endpoint}"\nheaders = {\n    "Authorization": "Bearer API_KEY"\n}\nresponse = requests.get(url, headers=headers)\nprint(response.json())`;
     } else if (currentLang === 'javascript') {
-      snippetElement.textContent = `fetch("https://api.datavibe.clinic/v2/${endpoint}", {\n  headers: {\n    "Authorization": "Bearer API_KEY"\n  }\n})\n.then(response => response.json())\n.then(data => console.log(data));`;
+      snippetElement.textContent = `fetch("https://api.cardioviz.clinic/v2/${endpoint}", {\n  headers: {\n    "Authorization": "Bearer API_KEY"\n  }\n})\n.then(response => response.json())\n.then(data => console.log(data));`;
     }
   }
 

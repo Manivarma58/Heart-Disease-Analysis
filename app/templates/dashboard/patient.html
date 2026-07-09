@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Patient Dashboard - DataVibe{% endblock %}
+{% block title %}Patient Dashboard - CardioViz{% endblock %}
 {% block content %}
 <style>
   /* Layout Grid Container */
@@ -514,7 +514,7 @@
       <div style="display: flex; align-items: center; gap: 0.75rem; padding-left: 0.5rem; margin-bottom: 1.5rem;">
         <img src="{{ url_for('static', filename='images/patient_avatar.png') }}" style="width: 2.8rem; height: 2.8rem; border-radius:50%; object-fit: cover;" alt="Anita profile">
         <div class="sidebar-brand-section">
-          <h4 style="margin: 0; font-size: 0.95rem; font-weight: 800; color: #1e293b;">Anita</h4>
+          <h4 style="margin: 0; font-size: 0.95rem; font-weight: 800; color: #1e293b;">{{ session.user.name }}</h4>
           <span style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Health Score: 85</span>
         </div>
       </div>
@@ -567,7 +567,7 @@
     <!-- 1. Header Section -->
     <div class="welcome-header">
       <div>
-        <h2>Welcome back, Anita! 👋</h2>
+        <h2>Welcome back, {{ session.user.name }}! 👋</h2>
         <div class="welcome-meta">
           <span><i data-lucide="clock" style="width: 0.9rem; height: 0.9rem; display:inline-block; vertical-align:middle;"></i> Last login: Today, 9:30 AM</span>
           <span>|</span>
@@ -910,7 +910,7 @@
           <p style="margin: 0.35rem 0 0.85rem; font-size: 0.72rem; color: rgba(255,255,255,0.85); line-height: 1.4; font-weight: 600;">
             Connect with 2,400+ members on similar heart health journeys. Share tips and get support.
           </p>
-          <button style="background:white; color:#4f46e5; border:0; font-weight:800; font-size: 0.75rem; border-radius:6px; padding:0.45rem 0.85rem; cursor:pointer;" onclick="alert('Redirecting to the DataVibe Patient Forums portal...')">Join Discussion</button>
+          <button style="background:white; color:#4f46e5; border:0; font-weight:800; font-size: 0.75rem; border-radius:6px; padding:0.45rem 0.85rem; cursor:pointer;" onclick="alert('Redirecting to the CardioViz Patient Forums portal...')">Join Discussion</button>
         </div>
 
       </div>
