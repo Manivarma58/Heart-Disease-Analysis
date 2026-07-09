@@ -1,0 +1,791 @@
+{% extends "base.html" %}
+{% block title %}User Settings - DataVibe{% endblock %}
+{% block content %}
+<style>
+  /* Layout Grid Container */
+  .dashboard-container {
+    display: grid;
+    grid-template-columns: 16rem 1fr;
+    min-height: calc(100vh - 70px);
+    background: #f8fafc;
+    transition: grid-template-columns 0.3s ease;
+  }
+  .dashboard-container.collapsed {
+    grid-template-columns: 4.8rem 1fr;
+  }
+
+  /* Sidebar Navigation */
+  .sidebar {
+    background: white;
+    border-right: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1.5rem 1rem;
+    overflow-y: auto;
+    transition: padding 0.3s ease;
+  }
+  .dashboard-container.collapsed .sidebar {
+    padding: 1.5rem 0.5rem;
+    align-items: center;
+  }
+
+  .sidebar-brand-section {
+    transition: opacity 0.2s;
+  }
+  .dashboard-container.collapsed .sidebar-brand-section {
+    opacity: 0;
+    display: none;
+  }
+
+  .sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 2rem;
+  }
+  .sidebar-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #64748b;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .sidebar-menu-item:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+  }
+  .sidebar-menu-item.active {
+    background: #eff6ff;
+    color: #3b82f6;
+    border-left-color: #3b82f6;
+    border-radius: 0 8px 8px 0;
+  }
+  .sidebar-menu-item i {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+  }
+  
+  .menu-text {
+    transition: opacity 0.2s;
+  }
+  .dashboard-container.collapsed .menu-text {
+    opacity: 0;
+    display: none;
+  }
+
+  .sidebar-toggle-btn {
+    align-self: flex-end;
+    background: transparent;
+    border: 0;
+    color: #64748b;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    transition: background 0.2s;
+  }
+  .sidebar-toggle-btn:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+  }
+
+  /* Workspace */
+  .workspace {
+    padding: 2rem clamp(1rem, 4vw, 2.5rem);
+    overflow-y: auto;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  /* Tab content switcher */
+  .tab-content {
+    display: none;
+  }
+  .tab-content.active {
+    display: block;
+  }
+
+  /* Top headers */
+  .settings-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+  .settings-topbar h2 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0;
+  }
+  .topbar-nav-tabs {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    font-size: 0.88rem;
+    font-weight: 700;
+  }
+  .topbar-nav-tabs a {
+    color: #64748b;
+    text-decoration: none;
+  }
+  .topbar-nav-tabs a.active {
+    color: #3b82f6;
+    border-bottom: 2px solid #3b82f6;
+    padding-bottom: 0.25rem;
+  }
+
+  /* Form & Split structures */
+  .settings-split-grid {
+    display: grid;
+    grid-template-columns: 2.3fr 1fr;
+    gap: 1.5rem;
+  }
+  @media (max-width: 900px) {
+    .settings-split-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .settings-panel-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.005);
+  }
+  .settings-panel-card h3 {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0 0 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .form-row-ph {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  @media (max-width: 600px) {
+    .form-row-ph {
+      grid-template-columns: 1fr;
+    }
+  }
+  .form-item-ph {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .form-item-ph label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .form-input-ph {
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0.55rem 0.85rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #334155;
+    outline: none;
+  }
+
+  .dropdown-select {
+    background: white;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0.55rem 0.85rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #334155;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .btn-save-settings {
+    background: #003366;
+    color: white;
+    font-weight: 750;
+    font-size: 0.88rem;
+    border: 0;
+    border-radius: 8px;
+    padding: 0.65rem 1.5rem;
+    align-self: flex-end;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-save-settings:hover {
+    background: #002244;
+  }
+
+  /* Right column avatar card */
+  .profile-pic-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.005);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .avatar-upload-wrap {
+    position: relative;
+    margin-bottom: 1rem;
+  }
+  .avatar-preview-img {
+    width: 6.5rem;
+    height: 6.5rem;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #f1f5f9;
+  }
+  .btn-upload-camera {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 50%;
+    background: #003366;
+    color: white;
+    border: 0;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+  }
+
+  /* Switch row options */
+  .toggle-switch-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  .toggle-switch-item:last-child {
+    border-bottom: 0;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+  .toggle-text-wrap h5 {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 750;
+    color: #1e293b;
+  }
+  .toggle-text-wrap p {
+    margin: 0.15rem 0 0;
+    font-size: 0.75rem;
+    color: #64748b;
+  }
+
+  /* Toggle Switch */
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 2.2rem;
+    height: 1.2rem;
+    flex-shrink: 0;
+  }
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #cbd5e1;
+    transition: .3s;
+    border-radius: 34px;
+  }
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 0.85rem;
+    width: 0.85rem;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+  }
+  input:checked + .slider {
+    background-color: #3b82f6;
+  }
+  input:checked + .slider:before {
+    transform: translateX(1rem);
+  }
+
+  /* Security active sessions table */
+  .sessions-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+  }
+  .sessions-table th {
+    text-align: left;
+    padding: 0.5rem;
+    color: #64748b;
+    border-bottom: 1px solid #cbd5e1;
+  }
+  .sessions-table td {
+    padding: 0.65rem 0.5rem;
+    border-bottom: 1px solid #f1f5f9;
+  }
+</style>
+
+<div class="dashboard-container" id="dashboard-container">
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <div>
+      <button class="sidebar-toggle-btn" id="sidebar-toggle">
+        <i data-lucide="chevrons-left" id="toggle-icon"></i>
+      </button>
+
+      <div class="sidebar-brand-section" style="padding-left: 1rem; margin-bottom: 1.5rem; margin-top: 0.5rem;">
+        <span style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.5px;">Pulse Analytics</span>
+        <span style="font-size: 1.15rem; font-weight: 800; color: #3b82f6; display: block; font-family: Poppins, sans-serif; margin-top: 0.15rem;">Cardiology Unit</span>
+      </div>
+
+      <nav class="sidebar-menu">
+        <a href="{{ url_for('dashboard.home') }}" class="sidebar-menu-item">
+          <i data-lucide="layout-grid"></i>
+          <span class="menu-text">Dashboard</span>
+        </a>
+        <a href="{{ url_for('clinical.clinical_dashboard') }}" class="sidebar-menu-item">
+          <i data-lucide="users"></i>
+          <span class="menu-text">Patients</span>
+        </a>
+        <a href="{{ url_for('dashboard.tableau_style_dashboard') }}" class="sidebar-menu-item">
+          <i data-lucide="line-chart"></i>
+          <span class="menu-text">Analytics</span>
+        </a>
+        <a href="{{ url_for('dashboard.heart_disease_story') }}" class="sidebar-menu-item">
+          <i data-lucide="file-text"></i>
+          <span class="menu-text">Reporting</span>
+        </a>
+        
+        <div style="width: 100%; height: 1px; background: #e2e8f0; margin: 1.25rem 0;"></div>
+        <span style="font-size: 0.58rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; padding-left: 1rem; display: block; margin-bottom: 0.5rem;" class="menu-text">USER ACCOUNT</span>
+
+        <a class="sidebar-tab sidebar-menu-item active" data-tab="profile" href="#">
+          <i data-lucide="user"></i>
+          <span class="menu-text">Profile</span>
+        </a>
+        <a class="sidebar-tab sidebar-menu-item" data-tab="notifications" href="#">
+          <i data-lucide="bell"></i>
+          <span class="menu-text">Notifications</span>
+        </a>
+        <a class="sidebar-tab sidebar-menu-item" data-tab="preferences" href="#">
+          <i data-lucide="settings"></i>
+          <span class="menu-text">Preferences</span>
+        </a>
+        <a class="sidebar-tab sidebar-menu-item" data-tab="security" href="#">
+          <i data-lucide="shield"></i>
+          <span class="menu-text">Security</span>
+        </a>
+        <a class="sidebar-tab sidebar-menu-item" data-tab="data-mgt" href="#">
+          <i data-lucide="database"></i>
+          <span class="menu-text">Data Management</span>
+        </a>
+      </nav>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="{{ url_for('dashboard.api_docs_page') }}" class="sidebar-menu-item" style="margin: 0;"><i data-lucide="book-open"></i> <span class="menu-text">Documentation</span></a>
+      <a href="#" class="sidebar-menu-item" style="margin: 0;"><i data-lucide="help-circle"></i> <span class="menu-text">Support</span></a>
+    </div>
+  </aside>
+
+  <!-- Workspace content -->
+  <main class="workspace">
+    
+    <!-- Header Section tabs -->
+    <div class="settings-topbar">
+      <h2>User Settings</h2>
+      <div class="topbar-nav-tabs">
+        <a href="#" style="color:#64748b; font-weight: 700; text-decoration: none;">Overview</a>
+        <a href="#" class="active">Configuration</a>
+        <a href="#" style="color:#64748b; font-weight: 700; text-decoration: none;">Audit Logs</a>
+      </div>
+    </div>
+
+    <!-- TABS PANELS CONTENT -->
+    
+    <!-- TAB 1: PROFILE TAB (ACTIVE BY DEFAULT) -->
+    <div id="tab-profile" class="tab-content active">
+      <div class="settings-split-grid">
+        <!-- Left: Form -->
+        <div style="display:flex; flex-direction:column; gap:1.25rem;">
+          <div class="settings-panel-card" style="display:flex; flex-direction:column;">
+            <h3><i data-lucide="user" style="color:#3b82f6;"></i> Identity & Professional Role</h3>
+            
+            <form onsubmit="event.preventDefault(); alert('Profile details successfully updated.')" style="display:flex; flex-direction:column;">
+              <div class="form-row-ph">
+                <div class="form-item-ph">
+                  <label>Full Name</label>
+                  <input type="text" class="form-input-ph" value="Dr. Sarah Jenkins" required id="pref-full-name">
+                </div>
+                <div class="form-item-ph">
+                  <label>Clinical Role</label>
+                  <input type="text" class="form-input-ph" value="Chief Cardiologist" required>
+                </div>
+              </div>
+
+              <div class="form-row-ph">
+                <div class="form-item-ph" style="grid-column: span 2;">
+                  <label>Organization</label>
+                  <input type="text" class="form-input-ph" value="City Heart Center - West Wing" required>
+                </div>
+              </div>
+
+              <div class="form-row-ph">
+                <div class="form-item-ph">
+                  <label>Primary Email</label>
+                  <input type="email" class="form-input-ph" value="s.jenkins@cityheart.org" required>
+                </div>
+                <div class="form-item-ph">
+                  <label>Contact Number</label>
+                  <input type="text" class="form-input-ph" value="+1(555)012-3456" required>
+                </div>
+              </div>
+
+              <button type="submit" class="btn-save-settings">Save Changes</button>
+            </form>
+          </div>
+
+          <div class="settings-panel-card">
+            <h3><i data-lucide="globe" style="color:#3b82f6;"></i> Regional Preferences</h3>
+            <div class="form-item-ph" style="max-width:25rem;">
+              <label>System Language</label>
+              <select class="dropdown-select">
+                <option value="en">English (US)</option>
+                <option value="es">Español</option>
+                <option value="de">Deutsch</option>
+              </select>
+              <small style="font-size:0.75rem; color:#94a3b8; margin-top:0.25rem; font-weight:600;">Default language for clinical reports and interface.</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Picture and verification card -->
+        <div>
+          <div class="profile-pic-card">
+            <div class="avatar-upload-wrap">
+              <img class="avatar-preview-img" src="{{ url_for('static', filename='images/doctor_avatar.png') }}" alt="Profile avatar preview">
+              <button class="btn-upload-camera" onclick="alert('Choose a profile image payload to upload...')"><i data-lucide="camera" style="width:1rem; height:1rem;"></i></button>
+            </div>
+            
+            <h4 style="margin: 0; font-size: 0.95rem; font-weight: 800; color: #1e293b;">Sarah Jenkins, MD</h4>
+            <span style="font-size: 0.72rem; color: #64748b; font-weight: 700; margin-top: 0.15rem; display: block;">ID: CARD-9921-X</span>
+            
+            <div style="margin-top: 1.25rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.75rem 1rem; width: 100%; text-align: left;">
+              <span style="font-size:0.72rem; font-weight:800; color:#3b82f6; display:flex; align-items:center; gap:0.35rem;"><i data-lucide="check-circle" style="width:0.9rem; height:0.9rem;"></i> Credential Verified</span>
+              <p style="margin: 0.25rem 0 0; font-size:0.7rem; color:#64748b; font-weight:600; line-height:1.35;">Board Certified in Cardiology. Last verification: Oct 2023.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: NOTIFICATIONS -->
+    <div id="tab-notifications" class="tab-content">
+      <div class="settings-panel-card" style="max-width:42rem; margin:0 auto;">
+        <h3><i data-lucide="bell" style="color:#ef4444;"></i> Notification Settings</h3>
+        <p style="font-size: 0.8rem; color:#64748b; margin: -0.5rem 0 1.25rem; font-weight:600;">Configure when and how you receive alerts and summaries.</p>
+        
+        <div style="display:flex; flex-direction:column;">
+          <div class="toggle-switch-item">
+            <div class="toggle-text-wrap">
+              <h5>Email Notifications</h5>
+              <p>Receive weekly patient health summary reviews and logs.</p>
+            </div>
+            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+          </div>
+
+          <div class="toggle-switch-item">
+            <div class="toggle-text-wrap">
+              <h5>SMS Alerts</h5>
+              <p>Send text message notifications for critical acuity shifts.</p>
+            </div>
+            <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+          </div>
+
+          <div class="toggle-switch-item">
+            <div class="toggle-text-wrap">
+              <h5>Dashboard Notifications</h5>
+              <p>Display real-time inline alerts feed inside the home panel.</p>
+            </div>
+            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+          </div>
+
+          <div class="toggle-switch-item">
+            <div class="toggle-text-wrap">
+              <h5>Appointment Reminders</h5>
+              <p>Send confirmations 24 hours prior to scheduled consults.</p>
+            </div>
+            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+          </div>
+
+          <div class="toggle-switch-item">
+            <div class="toggle-text-wrap">
+              <h5>Critical Alerts Broadcast</h5>
+              <p>Trigger high-priority audio alarms for emergency triage cases.</p>
+            </div>
+            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <button class="btn-save-settings" style="margin-top:1rem;" onclick="alert('Notification preferences updated.')">Save Preferences</button>
+      </div>
+    </div>
+
+    <!-- TAB 3: PREFERENCES -->
+    <div id="tab-preferences" class="tab-content">
+      <div class="settings-panel-card" style="max-width:42rem; margin:0 auto;">
+        <h3><i data-lucide="settings" style="color:#f59e0b;"></i> Dashboard Preferences</h3>
+        
+        <form onsubmit="event.preventDefault(); alert('Dashboard layout settings updated.')" style="display:flex; flex-direction:column; gap:1.25rem;">
+          <div class="form-row-ph">
+            <div class="form-item-ph">
+              <label>Default Landing Page</label>
+              <select class="dropdown-select">
+                <option value="clinical">Clinical Workspace Hub</option>
+                <option value="analytics">Analytics Deep-dive</option>
+                <option value="reports">Reporting Center</option>
+              </select>
+            </div>
+            <div class="form-item-ph">
+              <label>Font Size Index</label>
+              <select class="dropdown-select">
+                <option value="normal">Normal (Default)</option>
+                <option value="medium">Medium (+10%)</option>
+                <option value="large">Large (+20%)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row-ph">
+            <div class="form-item-ph">
+              <label>Default Time Zone</label>
+              <select class="dropdown-select">
+                <option value="ist">GMT+05:30 (IST)</option>
+                <option value="est">GMT-05:00 (EST)</option>
+                <option value="gmt">GMT+00:00 (GMT)</option>
+              </select>
+            </div>
+            <div class="form-item-ph">
+              <label>Date Format Preference</label>
+              <select class="dropdown-select">
+                <option value="ddmmyy">DD/MM/YYYY</option>
+                <option value="mmddyy">MM/DD/YYYY</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="toggle-switch-item" style="border-top:1px solid #f1f5f9; padding-top:1rem; border-bottom:0; margin-bottom:0;">
+            <div class="toggle-text-wrap">
+              <h5>Dark Mode Theme</h5>
+              <p>Switch interface palette to dark HSL tailored colors.</p>
+            </div>
+            <label class="switch"><input type="checkbox" onchange="alert('Switching styling themes...')"><span class="slider"></span></label>
+          </div>
+
+          <button type="submit" class="btn-save-settings">Save Preferences</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- TAB 4: SECURITY -->
+    <div id="tab-security" class="tab-content">
+      <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:1.5rem;">
+        
+        <!-- Password and 2FA -->
+        <div style="display:flex; flex-direction:column; gap:1.5rem;">
+          <div class="settings-panel-card">
+            <h3>Change Account Password</h3>
+            <form onsubmit="event.preventDefault(); alert('Security credentials updated successfully.'); this.reset();" style="display:flex; flex-direction:column; gap:1rem;">
+              <div class="form-item-ph">
+                <label>Current Password</label>
+                <input type="password" class="form-input-ph" required>
+              </div>
+              <div class="form-item-ph">
+                <label>New Password</label>
+                <input type="password" class="form-input-ph" required>
+              </div>
+              <div class="form-item-ph">
+                <label>Confirm Password</label>
+                <input type="password" class="form-input-ph" required>
+              </div>
+              <button type="submit" class="btn-save-settings">Update Password</button>
+            </form>
+          </div>
+
+          <div class="settings-panel-card">
+            <h3>Two-Factor Authentication</h3>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <h5 style="margin:0; font-size:0.85rem; font-weight:800; color:#1e293b;">Authenticator App (Google Authenticator)</h5>
+                <p style="margin:0.15rem 0 0; font-size:0.75rem; color:#64748b;">Adds an extra layer of access protection.</p>
+              </div>
+              <button class="btn-save-settings" style="background:#10b981;" onclick="alert('Starting 2FA QR code register generator setup wizard...')">Enable 2FA</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active Sessions -->
+        <div class="settings-panel-card" style="margin-bottom:0;">
+          <h3>Active Sessions & Activity</h3>
+          <p style="font-size:0.75rem; color:#64748b; margin:-0.5rem 0 1rem; font-weight:600;">Manage connected devices currently logged into your account.</p>
+          
+          <table class="sessions-table">
+            <thead>
+              <tr>
+                <th>Device / IP</th>
+                <th>Location</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Windows PC / Chrome</strong><br><small>192.168.1.45</small></td>
+                <td>Mumbai, IN</td>
+                <td style="color:#10b981; font-weight:700;">Active Session</td>
+              </tr>
+              <tr>
+                <td><strong>iPhone 14 / Safari</strong><br><small>192.168.1.102</small></td>
+                <td>Mumbai, IN</td>
+                <td><a href="#" style="color:#ef4444; font-weight:700; text-decoration:none;" onclick="alert('Terminated remote iPhone session.')">Revoke Access</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TAB 5: DATA MANAGEMENT -->
+    <div id="tab-data-mgt" class="tab-content">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+        
+        <!-- Data export/import -->
+        <div class="settings-panel-card" style="margin-bottom:0;">
+          <h3>Clinical Dataset Import / Export</h3>
+          
+          <div style="display:flex; flex-direction:column; gap:1.25rem; margin-top:0.5rem;">
+            <div style="border:1px dashed #cbd5e1; border-radius:8px; padding:1.5rem; text-align:center; background:#f8fafc; cursor:pointer;" onclick="alert('Choose CSV file local location to upload...')">
+              <i data-lucide="upload" style="color:#64748b; margin-bottom:0.35rem;"></i>
+              <span style="display:block; font-size:0.75rem; font-weight:700; color:#334155;">Upload CSV Patient Registry</span>
+            </div>
+            
+            <button class="btn-save-settings" style="width:100%; justify-content:center; display:flex; align-items:center; gap:0.5rem; background:#1e293b;" onclick="alert('Preparing data backup file download package...')">
+              <i data-lucide="download" style="width:1rem; height:1rem;"></i> Export System Data Backup
+            </button>
+          </div>
+
+          <div style="margin-top:1.5rem; border-top:1px solid #f1f5f9; padding-top:1rem;">
+            <span style="font-size:0.65rem; font-weight:800; color:#94a3b8; text-transform:uppercase;">Data Retention Limits</span>
+            <input type="range" min="1" max="10" value="5" style="width:100%; cursor:pointer; margin-top:0.5rem;" oninput="document.getElementById('retention-val').textContent = this.value + ' Years'">
+            <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-weight:700; color:#1e293b; margin-top:0.25rem;">
+              <span>Triage History Retention</span>
+              <span id="retention-val">5 Years</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Third-party API -->
+        <div class="settings-panel-card" style="margin-bottom:0; display:flex; flex-direction:column; justify-content:space-between;">
+          <div>
+            <h3>API Access Tokens & Integrations</h3>
+            <p style="font-size:0.75rem; color:#64748b; margin:-0.5rem 0 1rem; font-weight:600;">Create keys to connect external EHR and billing systems.</p>
+            
+            <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:0.75rem 1rem; font-family:monospace; font-size:0.75rem; display:flex; justify-content:space-between; align-items:center;">
+              <span id="api-key-text">••••••••••••••••••••••••</span>
+              <button style="background:transparent; border:0; color:#3b82f6; cursor:pointer; font-weight:800;" onclick="document.getElementById('api-key-text').textContent = 'db_live_9823kcs80219jcnv7213'; alert('API key visible. Keep it secure.')">SHOW</button>
+            </div>
+          </div>
+
+          <div style="margin-top:1.5rem;">
+            <span style="font-size:0.65rem; font-weight:800; color:#94a3b8; text-transform:uppercase;">Third-Party Connections</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem; font-size:0.8rem; font-weight:700;">
+              <span>Brightwood EHR Integrator</span>
+              <button style="border:1px solid #cbd5e1; background:white; color:#10b981; font-weight:800; padding:0.25rem 0.65rem; border-radius:6px; cursor:pointer;" onclick="alert('Connected to Brightwood EHR.')">Connected</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Sidebar toggle animation
+  const sidebarToggle = document.getElementById("sidebar-toggle");
+  const dbContainer = document.getElementById("dashboard-container");
+  const toggleIcon = document.getElementById("toggle-icon");
+  
+  if (sidebarToggle && dbContainer) {
+    sidebarToggle.addEventListener("click", () => {
+      dbContainer.classList.toggle("collapsed");
+      if (dbContainer.classList.contains("collapsed")) {
+        toggleIcon.setAttribute("data-lucide", "chevrons-right");
+      } else {
+        toggleIcon.setAttribute("data-lucide", "chevrons-left");
+      }
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    });
+  }
+
+  // Sidebar tab switcher logic
+  document.querySelectorAll(".sidebar-tab").forEach(tab => {
+    tab.addEventListener("click", (e) => {
+      e.preventDefault();
+      
+      document.querySelectorAll(".sidebar-tab").forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      
+      document.querySelectorAll(".tab-content").forEach(tc => tc.classList.remove("active"));
+      const targetTabId = `tab-${tab.dataset.tab}`;
+      const targetContent = document.getElementById(targetTabId);
+      if (targetContent) {
+        targetContent.classList.add("active");
+      }
+    });
+  });
+</script>
+{% endblock %}

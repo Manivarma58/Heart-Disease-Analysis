@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}DataVibe{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/datavibe.css') }}">
+  <style>
+    .topnav a.active {
+      border-bottom: 2px solid var(--primary);
+      font-weight: 700;
+      color: var(--primary);
+      padding-bottom: 4px;
+    }
+    .role-badge {
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      margin-top: 0.15rem;
+      display: inline-block;
+    }
+    .role-badge.clinical {
+      color: #1d4ed8;
+      background: #dbeafe;
+    }
+    .role-badge.public_health {
+      color: #1e293b;
+      background: #e2e8f0;
+    }
+    .role-badge.patient {
+      color: #0369a1;
+      background: #e0f2fe;
+    }
+  </style>
+</head>
+<body>
+  {% if session.get("user") and not hide_default_header %}
+  <header class="topbar dashboard-header" style="background: white; border-bottom: 1px solid #e2e8f0; padding: 0.5rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;">
+    <a class="brand" href="{{ url_for('dashboard.home') }}" aria-label="DataVibe home" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
+      <div style="background: #3b82f6; color: white; display: grid; place-items: center; width: 2.3rem; height: 2.3rem; border-radius: 8px;">
+        <i data-lucide="activity" style="width: 1.4rem; height: 1.4rem;"></i>
+      </div>
+      <span style="font-weight: 800; font-size: 1.3rem; color: #1e293b; font-family: Poppins, sans-serif; letter-spacing: -0.5px;">DataVibe</span>
+    </a>
+
+    <div class="header-search" style="flex: 1; max-width: 32rem; margin: 0 2rem; position: relative;">
+      <i data-lucide="search" class="search-icon" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #64748b; width: 1.1rem; height: 1.1rem; pointer-events: none;"></i>
+      <input type="text" 
+             placeholder="{% if session.user.persona == 'clinical' %}Search patients, reports, or diagnostics...{% elif session.user.persona == 'public_health' %}Search population data...{% else %}Search health records...{% endif %}" 
+             id="global-search" 
+             autocomplete="off"
+             style="width: 100%; min-height: 2.5rem; background: #f1f5f9; border: 0; border-radius: 99px; padding: 0.5rem 1rem 0.5rem 2.5rem; font-size: 0.88rem; color: #1e293b; outline: none; transition: background 0.2s;">
+      <div class="autocomplete-dropdown" id="global-search-results" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #cbd5e1; border-radius: 8px; margin-top: 0.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08); z-index: 200;"></div>
+    </div>
+
+    <div class="header-right" style="display: flex; align-items: center; gap: 1rem;">
+      <div class="notification-wrapper" style="position: relative;">
+        <button class="icon-btn" id="notification-trigger" aria-label="Notifications" style="background: transparent; border: 0; color: #64748b; cursor: pointer; display: grid; place-items: center; width: 2.2rem; height: 2.2rem; border-radius: 50%; transition: background 0.2s; position: relative;">
+          <i data-lucide="bell" style="width: 1.25rem; height: 1.25rem;"></i>
+          <span class="bell-badge" style="position: absolute; top: 2px; right: 2px; background: #ef4444; color: white; font-size: 0.65rem; font-weight: 700; border-radius: 50%; width: 1.1rem; height: 1.1rem; display: grid; place-items: center; border: 2px solid white;">
+            {% if session.user.persona == 'clinical' %}5
+            {% elif session.user.persona == 'public_health' %}3
+            {% else %}2{% endif %}
+          </span>
+        </button>
+        <div class="notification-dropdown" id="notification-menu" style="display: none; position: absolute; top: 100%; right: 0; width: 20rem; background: white; border: 1px solid #cbd5e1; border-radius: 8px; margin-top: 0.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08); z-index: 200;">
+          <div class="dropdown-header" style="padding: 0.75rem 1rem; border-bottom: 1px solid #e2e8f0; font-weight: 700; font-size: 0.85rem; color: #1e293b;">Alerts & Notifications</div>
+          <div class="notification-list" style="max-height: 15rem; overflow-y: auto;">
+            <div class="notification-item unread" style="padding: 0.75rem 1rem; border-bottom: 1px solid #e2e8f0; display: flex; gap: 0.75rem; align-items: flex-start; background: #f8fafc;">
+              <i data-lucide="alert-triangle" style="color: #ef4444; width: 1.2rem; height: 1.2rem; flex-shrink: 0; margin-top: 0.15rem;"></i>
+              <div>
+                <p style="margin: 0; font-size: 0.82rem; font-weight: 700; color: #1e293b;"><strong>Patient #0883 BP update</strong></p>
+                <small style="font-size: 0.72rem; color: #64748b;">Threshold alert: 142/95 mmHg</small>
+              </div>
+            </div>
+            <div class="notification-item unread" style="padding: 0.75rem 1rem; border-bottom: 1px solid #e2e8f0; display: flex; gap: 0.75rem; align-items: flex-start; background: #f8fafc;">
+              <i data-lucide="activity" style="color: #f59e0b; width: 1.2rem; height: 1.2rem; flex-shrink: 0; margin-top: 0.15rem;"></i>
+              <div>
+                <p style="margin: 0; font-size: 0.82rem; font-weight: 700; color: #1e293b;"><strong>Risk Analysis #1142</strong></p>
+                <small style="font-size: 0.72rem; color: #64748b;">AI model completed for Maria Santos</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <a href="{{ url_for('dashboard.settings_page') }}" class="icon-btn" aria-label="Settings" style="background: transparent; border: 0; color: #64748b; cursor: pointer; display: grid; place-items: center; width: 2.2rem; height: 2.2rem; border-radius: 50%; transition: background 0.2s; text-decoration: none;"><i data-lucide="settings" style="width: 1.25rem; height: 1.25rem;"></i></a>
+
+      <div style="width: 1px; height: 1.5rem; background: #cbd5e1; margin: 0 0.25rem;"></div>
+
+      <div class="profile-dropdown-wrapper" style="position: relative;">
+        <button class="profile-trigger" id="profile-trigger" style="background: transparent; border: 0; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; text-align: right; outline: none; padding: 0.25rem 0.5rem; border-radius: 8px;">
+          <div class="profile-info" style="display: flex; flex-direction: column; line-height: 1.2;">
+            <span class="profile-name" style="font-weight: 700; font-size: 0.88rem; color: #1e293b;">
+              {% if session.user.persona == 'clinical' %}Dr. Sharma
+              {% elif session.user.persona == 'public_health' %}Ramesh
+              {% else %}Anita Sharma{% endif %}
+            </span>
+            <span class="role-badge {% if session.user.persona == 'clinical' %}clinical{% elif session.user.persona == 'public_health' %}public_health{% else %}patient{% endif %}">
+              {% if session.user.persona == 'clinical' %}Cardiologist
+              {% elif session.user.persona == 'public_health' %}Administrator
+              {% else %}Patient{% endif %}
+            </span>
+          </div>
+          {% if session.user.persona == 'clinical' %}
+            <img class="profile-avatar" src="{{ url_for('static', filename='images/doctor_avatar.png') }}" alt="{{ session.user.name }}" style="width: 2.2rem; height: 2.2rem; border-radius: 50%; object-fit: cover;">
+          {% elif session.user.persona == 'public_health' %}
+            <img class="profile-avatar" src="{{ url_for('static', filename='images/public_health_avatar.png') }}" alt="{{ session.user.name }}" style="width: 2.2rem; height: 2.2rem; border-radius: 50%; object-fit: cover;">
+          {% else %}
+            <img class="profile-avatar" src="{{ url_for('static', filename='images/patient_avatar.png') }}" alt="{{ session.user.name }}" style="width: 2.2rem; height: 2.2rem; border-radius: 50%; object-fit: cover;">
+          {% endif %}
+          <i data-lucide="chevron-down" style="width: 1rem; height: 1rem; color: #64748b;"></i>
+        </button>
+        <div class="profile-menu" id="profile-menu" style="display: none; position: absolute; top: 100%; right: 0; width: 12rem; background: white; border: 1px solid #cbd5e1; border-radius: 8px; margin-top: 0.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08); z-index: 200; text-align: left;">
+          <a href="{{ url_for('dashboard.settings_page') }}" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem; font-size: 0.85rem; color: #334155; text-decoration: none; border-bottom: 1px solid #e2e8f0;"><i data-lucide="user" style="width: 1rem; height: 1rem;"></i> My Profile</a>
+          <a href="{{ url_for('dashboard.settings_page') }}" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem; font-size: 0.85rem; color: #334155; text-decoration: none; border-bottom: 1px solid #e2e8f0;"><i data-lucide="settings" style="width: 1rem; height: 1rem;"></i> Settings</a>
+          <a href="{{ url_for('auth.logout') }}" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem; font-size: 0.85rem; color: #ef4444; text-decoration: none;"><i data-lucide="log-out" style="width: 1rem; height: 1rem;"></i> Log Out</a>
+        </div>
+      </div>
+    </div>
+  </header>
+  {% else %}
+  <header class="topbar" style="background: white; border-bottom: 1px solid #e2e8f0; padding: 0.5rem 1.5rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;">
+    <a class="brand" href="{{ url_for('dashboard.index') }}" aria-label="DataVibe home" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
+      <div style="background: #3b82f6; color: white; display: grid; place-items: center; width: 2.3rem; height: 2.3rem; border-radius: 8px;">
+        <i data-lucide="activity" style="width: 1.4rem; height: 1.4rem;"></i>
+      </div>
+      <span style="font-weight: 800; font-size: 1.35rem; color: #1e293b; font-family: Poppins, sans-serif; letter-spacing: -0.5px;">DataVibe</span>
+    </a>
+    
+    <nav class="header-main-nav" style="display: flex; align-items: center; gap: 1.5rem; margin-left: 2.5rem; margin-right: auto;">
+      <a href="{{ url_for('auth.login') }}" style="font-weight: 600; color: #64748b; text-decoration: none; font-size: 0.92rem;">Clinical Analytics</a>
+      <a href="{{ url_for('auth.login') }}" style="font-weight: 600; color: #64748b; text-decoration: none; font-size: 0.92rem;">Public Health</a>
+      <a href="{{ url_for('auth.login') }}" style="font-weight: 600; color: #64748b; text-decoration: none; font-size: 0.92rem;">Patient Portal</a>
+    </nav>
+
+    <nav class="topnav" style="display: flex; align-items: center; gap: 0.75rem;">
+      <a href="{{ url_for('auth.login') }}" style="font-size: 0.88rem; font-weight: 700; color: #1e293b; text-decoration: none; padding: 0.5rem 1rem; transition: color 0.2s;">Login</a>
+      <a class="button primary" href="{{ url_for('auth.register') }}" style="border-radius: 99px; font-size: 0.88rem; font-weight: 700; padding: 0.5rem 1.25rem; border: none; color: white; background: #3b82f6; text-decoration: none; display: inline-block; transition: opacity 0.2s;">Sign Up</a>
+    </nav>
+  </header>
+  {% endif %}
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <section class="toast-stack" aria-live="polite">
+        {% for category, message in messages %}
+          <div class="toast {{ category }}">{{ message }}</div>
+        {% endfor %}
+      </section>
+    {% endif %}
+  {% endwith %}
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

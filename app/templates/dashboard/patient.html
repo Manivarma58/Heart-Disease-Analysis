@@ -1,0 +1,1028 @@
+{% extends "base.html" %}
+{% block title %}Patient Dashboard - DataVibe{% endblock %}
+{% block content %}
+<style>
+  /* Layout Grid Container */
+  .dashboard-container {
+    display: grid;
+    grid-template-columns: 16rem 1fr;
+    min-height: calc(100vh - 70px);
+    background: #f8fafc;
+    transition: grid-template-columns 0.3s ease;
+  }
+  .dashboard-container.collapsed {
+    grid-template-columns: 4.8rem 1fr;
+  }
+
+  /* Sidebar Navigation */
+  .sidebar {
+    background: white;
+    border-right: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1.5rem 1rem;
+    overflow-y: auto;
+    transition: padding 0.3s ease;
+  }
+  .dashboard-container.collapsed .sidebar {
+    padding: 1.5rem 0.5rem;
+    align-items: center;
+  }
+
+  .sidebar-brand-section {
+    transition: opacity 0.2s;
+  }
+  .dashboard-container.collapsed .sidebar-brand-section {
+    opacity: 0;
+    display: none;
+  }
+
+  .sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 2rem;
+  }
+  .sidebar-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #64748b;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+    text-decoration: none;
+  }
+  .sidebar-menu-item:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+  }
+  .sidebar-menu-item.active {
+    background: #eff6ff;
+    color: #3b82f6;
+    border-left-color: #3b82f6;
+    border-radius: 0 8px 8px 0;
+  }
+  .sidebar-menu-item i {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+  }
+  
+  .menu-text {
+    transition: opacity 0.2s;
+  }
+  .dashboard-container.collapsed .menu-text {
+    opacity: 0;
+    display: none;
+  }
+
+  .btn-log-entry {
+    background: black;
+    color: white;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 99px;
+    border: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    width: 100%;
+    margin-bottom: 1.25rem;
+    transition: all 0.2s;
+  }
+  .btn-log-entry:hover {
+    background: #1e293b;
+  }
+  .dashboard-container.collapsed .btn-log-entry {
+    width: 2.8rem;
+    height: 2.8rem;
+    padding: 0;
+    border-radius: 50%;
+  }
+  .dashboard-container.collapsed .btn-log-entry span {
+    display: none;
+  }
+
+  .sidebar-toggle-btn {
+    align-self: flex-end;
+    background: transparent;
+    border: 0;
+    color: #64748b;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    transition: background 0.2s;
+  }
+  .sidebar-toggle-btn:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+  }
+
+  /* Workspace */
+  .workspace {
+    padding: 2rem clamp(1rem, 4vw, 2.5rem);
+    overflow-y: auto;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  /* Top headers */
+  .welcome-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .welcome-header h2 {
+    font-size: 1.7rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0 0 0.35rem;
+  }
+  .welcome-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #64748b;
+    flex-wrap: wrap;
+  }
+  .health-score-pill {
+    color: #10b981;
+    font-weight: 750;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  /* KPI cards */
+  .metrics-grid-row {
+    display: grid;
+    grid-template-columns: 1.2fr repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  @media (max-width: 1100px) {
+    .metrics-grid-row {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .metrics-grid-row > div:first-child {
+      grid-column: span 2;
+    }
+  }
+  @media (max-width: 600px) {
+    .metrics-grid-row {
+      grid-template-columns: 1fr;
+    }
+    .metrics-grid-row > div:first-child {
+      grid-column: span 1;
+    }
+  }
+
+  /* Health score gauge card */
+  .gauge-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.005);
+    position: relative;
+  }
+  .heart-heartbeat-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: transparent;
+    border: 0;
+    color: #cbd5e1;
+    cursor: pointer;
+    font-size: 1.2rem;
+  }
+  .heart-heartbeat-btn:hover, .heart-heartbeat-btn.active {
+    color: #ef4444;
+  }
+  .score-gauge-svg {
+    width: 6.5rem;
+    height: 6.5rem;
+    transform: rotate(-90deg);
+    margin-top: 0.5rem;
+  }
+  .score-gauge-track {
+    fill: none;
+    stroke: #f1f5f9;
+    stroke-width: 8;
+  }
+  .score-gauge-fill {
+    fill: none;
+    stroke: #06b6d4;
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-dasharray: 251.2;
+    stroke-dashoffset: 55; /* ~78% score offset */
+  }
+  .score-gauge-text {
+    position: absolute;
+    top: 4.8rem;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #1e293b;
+  }
+
+  .kpi-box {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 1.15rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.005);
+    min-height: 8rem;
+  }
+  .kpi-box.elevated { border-top: 4px solid #ef4444; }
+  .kpi-box.normal { border-top: 4px solid #10b981; }
+  .kpi-box.watch { border-top: 4px solid #f59e0b; }
+  .kpi-box.critical { border-top: 4px solid #ef4444; }
+
+  .kpi-label-wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .kpi-sub-lbl {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #94a3b8;
+    text-transform: uppercase;
+  }
+  .kpi-unit-lbl {
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: #64748b;
+  }
+  .kpi-main-val {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: #1e293b;
+    line-height: 1.1;
+    margin: 0.25rem 0;
+  }
+  .kpi-status-badge {
+    align-self: flex-start;
+    font-size: 0.62rem;
+    font-weight: 800;
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+  .kpi-status-badge.elevated { background: #fffbeb; color: #b45309; }
+  .kpi-status-badge.normal { background: #ecfdf5; color: #047857; }
+  .kpi-status-badge.watch { background: #fffbeb; color: #b45309; }
+  .kpi-status-badge.critical { background: #fef2f2; color: #b91c1c; }
+
+  /* Vital progress layout */
+  .vitals-progress-panel {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.005);
+  }
+  .vitals-progress-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+  }
+  .vitals-progress-head h3 {
+    font-size: 1.02rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0;
+  }
+  .vitals-progress-tabs {
+    display: flex;
+    background: #f1f5f9;
+    border-radius: 6px;
+    padding: 2px;
+  }
+  .vitals-tab-btn {
+    border: 0;
+    background: transparent;
+    padding: 0.25rem 0.65rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #64748b;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  .vitals-tab-btn.active {
+    background: white;
+    color: #1e293b;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+
+  .charts-sub-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+  @media (max-width: 800px) {
+    .charts-sub-row {
+      grid-template-columns: 1fr;
+    }
+  }
+  .chart-sub-box {
+    display: flex;
+    flex-direction: column;
+  }
+  .chart-sub-box h4 {
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: #475569;
+    margin: 0 0 0.5rem;
+  }
+
+  /* Two column layout row */
+  .two-column-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  @media (max-width: 900px) {
+    .two-column-row {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Lifestyle factors checklist */
+  .lifestyle-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 0.65rem;
+    margin-bottom: 0.65rem;
+  }
+  .lifestyle-item:last-child {
+    border-bottom: 0;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+  .lifestyle-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .lifestyle-icon-wrap {
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 8px;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    display: grid;
+    place-items: center;
+    color: #64748b;
+  }
+
+  /* Wellness tasks checkboxes */
+  .wellness-task {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 0.85rem;
+  }
+  .wellness-checkbox {
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 50%;
+    border: 1.5px solid #cbd5e1;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .wellness-checkbox.checked {
+    background: #10b981;
+    border-color: #10b981;
+    color: white;
+  }
+  .wellness-task-desc h5 {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 750;
+    color: #1e293b;
+  }
+  .wellness-task-desc p {
+    margin: 0.15rem 0 0;
+    font-size: 0.75rem;
+    color: #64748b;
+  }
+
+  /* Recipe card */
+  .recipe-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    background: white;
+  }
+  .recipe-img {
+    height: 6rem;
+    width: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .recipe-body {
+    padding: 0.85rem;
+  }
+  .recipe-badge {
+    font-size: 0.6rem;
+    font-weight: 800;
+    background: #ecfdf5;
+    color: #10b981;
+    padding: 0.15rem 0.35rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    display: inline-block;
+    margin-bottom: 0.25rem;
+  }
+
+  /* Daily Management row list */
+  .daily-task-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 0.65rem 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Educational panel articles */
+  .edu-article {
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  .edu-article:last-child {
+    border-bottom: 0;
+    margin-bottom: 0;
+  }
+  .edu-tag {
+    font-size: 0.58rem;
+    font-weight: 800;
+    color: #3b82f6;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 0.15rem;
+  }
+  .edu-title {
+    font-size: 0.82rem;
+    font-weight: 750;
+    color: #1e293b;
+    margin: 0;
+    line-height: 1.3;
+  }
+</style>
+
+<div class="dashboard-container" id="dashboard-container">
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <div>
+      <div style="display: flex; align-items: center; gap: 0.75rem; padding-left: 0.5rem; margin-bottom: 1.5rem;">
+        <img src="{{ url_for('static', filename='images/patient_avatar.png') }}" style="width: 2.8rem; height: 2.8rem; border-radius:50%; object-fit: cover;" alt="Anita profile">
+        <div class="sidebar-brand-section">
+          <h4 style="margin: 0; font-size: 0.95rem; font-weight: 800; color: #1e293b;">Anita</h4>
+          <span style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Health Score: 85</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-menu">
+        <a href="{{ url_for('dashboard.home') }}" class="sidebar-menu-item">
+          <i data-lucide="layout-grid"></i>
+          <span class="menu-text">My Health Dashboard</span>
+        </a>
+        <a href="{{ url_for('patient.patient_dashboard') }}" class="sidebar-menu-item active">
+          <i data-lucide="heart"></i>
+          <span class="menu-text">Personal Health Hub</span>
+        </a>
+        <a href="#" class="sidebar-menu-item">
+          <i data-lucide="activity"></i>
+          <span class="menu-text">Progress Tracking</span>
+        </a>
+        <a href="#" class="sidebar-menu-item">
+          <i data-lucide="calendar"></i>
+          <span class="menu-text">Appointments</span>
+        </a>
+        <a href="#" class="sidebar-menu-item">
+          <i data-lucide="pill"></i>
+          <span class="menu-text">Medications</span>
+        </a>
+        <a href="#" class="sidebar-menu-item">
+          <i data-lucide="book-open"></i>
+          <span class="menu-text">Health Journal</span>
+        </a>
+        <a href="#" class="sidebar-menu-item">
+          <i data-lucide="award"></i>
+          <span class="menu-text">Health Education</span>
+        </a>
+      </nav>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="btn-log-entry" onclick="alert('Opening Daily Vitals log logger entry widget...')">
+        <i data-lucide="plus"></i>
+        <span>Log Daily Entry</span>
+      </button>
+      <a href="#" class="sidebar-menu-item" style="margin: 0;"><i data-lucide="help-circle"></i> <span class="menu-text">Help</span></a>
+      <a href="{{ url_for('auth.logout') }}" class="sidebar-menu-item" style="margin: 0; color: #ef4444; border-left-color: transparent;"><i data-lucide="log-out"></i> <span class="menu-text">Logout</span></a>
+    </div>
+  </aside>
+
+  <!-- Workspace content -->
+  <main class="workspace">
+    
+    <!-- 1. Header Section -->
+    <div class="welcome-header">
+      <div>
+        <h2>Welcome back, Anita! 👋</h2>
+        <div class="welcome-meta">
+          <span><i data-lucide="clock" style="width: 0.9rem; height: 0.9rem; display:inline-block; vertical-align:middle;"></i> Last login: Today, 9:30 AM</span>
+          <span>|</span>
+          <span class="health-score-pill"><i data-lucide="shield-check" style="width: 0.9rem; height: 0.9rem; display:inline-block; vertical-align:middle;"></i> Health score: 78/100 (Good)</span>
+        </div>
+        <p style="margin: 0.5rem 0 0; font-size: 0.85rem; font-weight: 700; color: #ef4444;"><i data-lucide="calendar" style="width: 1rem; height: 1rem; display:inline-block; vertical-align:middle;"></i> Next appointment: July 25, 2026</p>
+      </div>
+
+      <button class="btn-solid-dark" style="padding: 0.65rem 1.25rem; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.5rem;" onclick="alert('Preparing download payload for health records...')">
+        <i data-lucide="download" style="width: 1.1rem; height: 1.1rem;"></i> Download Health Report
+      </button>
+    </div>
+
+    <!-- 2. Health Score Card & Metrics Row -->
+    <div class="metrics-grid-row">
+      
+      <!-- Score Gauge card -->
+      <div class="gauge-card">
+        <button class="heart-heartbeat-btn active" title="Mark favorite status"><i data-lucide="heart" style="fill:#ef4444; color:#ef4444; width:1.15rem; height:1.15rem;"></i></button>
+        <span style="font-size:0.65rem; font-weight:800; color:#64748b; letter-spacing:0.5px; text-transform:uppercase;">TOTAL HEALTH WELLNESS</span>
+        
+        <div style="position:relative; display:flex; justify-content:center; align-items:center; width:100%;">
+          <svg class="score-gauge-svg" viewBox="0 0 100 100">
+            <circle class="score-gauge-track" cx="50" cy="50" r="40"></circle>
+            <circle class="score-gauge-fill" cx="50" cy="50" r="40"></circle>
+          </svg>
+          <div class="score-gauge-text">78<span style="display:block; font-size:0.65rem; color:#64748b; font-weight:700; text-transform:uppercase; margin-top:-2px;">Good</span></div>
+        </div>
+
+        <div style="margin-top: 0.5rem;">
+          <p style="margin:0; font-size: 0.78rem; font-weight:600; color:#64748b;">Risk level: <strong style="color:#a855f7;">Moderate</strong></p>
+          <p style="margin:0.15rem 0 0.5rem; font-size: 0.75rem; font-weight:600; color:#475569;">10-year risk prediction: <strong>{{ patient.framingham_score if patient else '8.5' }}%</strong></p>
+          <span class="kpi-badge green" style="background:#ecfdf5; color:#10b981; font-weight:800;">+3 pts since June</span>
+        </div>
+      </div>
+
+      <!-- BP Box -->
+      <div class="kpi-box elevated">
+        <div class="kpi-label-wrap">
+          <span class="kpi-sub-lbl">BP</span>
+          <span class="kpi-unit-lbl">mmHg</span>
+        </div>
+        <span class="kpi-main-val">125/82</span>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span class="kpi-status-badge elevated">Elevated</span>
+          <i data-lucide="trending-up" style="color:#ef4444; width:1rem; height:1rem;"></i>
+        </div>
+      </div>
+
+      <!-- Cholesterol Box -->
+      <div class="kpi-box normal">
+        <div class="kpi-label-wrap">
+          <span class="kpi-sub-lbl">Cholesterol</span>
+          <span class="kpi-unit-lbl">mg/dL</span>
+        </div>
+        <span class="kpi-main-val">195</span>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span class="kpi-status-badge normal">Normal</span>
+          <i data-lucide="trending-down" style="color:#10b981; width:1rem; height:1rem;"></i>
+        </div>
+      </div>
+
+      <!-- BMI Box -->
+      <div class="kpi-box watch">
+        <div class="kpi-label-wrap">
+          <span class="kpi-sub-lbl">BMI</span>
+          <span class="kpi-unit-lbl">Overweight</span>
+        </div>
+        <span class="kpi-main-val">27.4</span>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span class="kpi-status-badge watch">Watch</span>
+          <span style="color:#cbd5e1; font-weight:800;">—</span>
+        </div>
+      </div>
+
+      <!-- Blood Sugar Box -->
+      <div class="kpi-box critical">
+        <div class="kpi-label-wrap">
+          <span class="kpi-sub-lbl">Blood Sugar</span>
+          <span class="kpi-unit-lbl">mg/dL</span>
+        </div>
+        <span class="kpi-main-val">112</span>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span class="kpi-status-badge critical">Critical</span>
+          <i data-lucide="alert-circle" style="color:#ef4444; width:1rem; height:1rem;"></i>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 3. Progress Tracking Panel -->
+    <div class="vitals-progress-panel">
+      <div class="vitals-progress-head">
+        <h3>Vital Progress Tracking</h3>
+        <div class="vitals-progress-tabs">
+          <button class="vitals-tab-btn active">Weekly</button>
+          <button class="vitals-tab-btn">Monthly</button>
+        </div>
+      </div>
+
+      <div class="charts-sub-row">
+        <!-- Chart 1: Weight Trend -->
+        <div class="chart-sub-box">
+          <h4>Weight Trend</h4>
+          <div style="height: 6rem; position: relative;">
+            <canvas id="weightProgressChart"></canvas>
+          </div>
+          <span style="font-size: 0.72rem; font-weight: 700; color: #a855f7; margin-top: 0.5rem; text-align: center;">-2.4 lbs since Jan</span>
+        </div>
+
+        <!-- Chart 2: Steps -->
+        <div class="chart-sub-box">
+          <h4>Steps (7d Avg)</h4>
+          <div style="height: 6rem; position: relative;">
+            <canvas id="stepsProgressChart"></canvas>
+          </div>
+          <span style="font-size: 0.72rem; font-weight: 700; color: #06b6d4; margin-top: 0.5rem; text-align: center;">8,420 avg steps</span>
+        </div>
+
+        <!-- Chart 3: BP stability -->
+        <div class="chart-sub-box">
+          <h4>BP Stability</h4>
+          <div style="height: 6rem; position: relative;">
+            <canvas id="bpStabilityChart"></canvas>
+          </div>
+          <span style="font-size: 0.72rem; font-weight: 700; color: #3b82f6; margin-top: 0.5rem; text-align: center;">Steady Improvement</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Lifestyle & Personalized Actions columns -->
+    <div class="two-column-row">
+      
+      <!-- Left Panel: Lifestyle Insights -->
+      <div class="panel-card" style="min-height: auto;">
+        <div class="panel-header"><h3>Lifestyle Insights</h3></div>
+        
+        <div style="display:flex; flex-direction:column; gap:0.5rem; margin-top:0.5rem;">
+          
+          <!-- Lifestyle 1: Smoking -->
+          <div class="lifestyle-item">
+            <div class="lifestyle-left">
+              <div class="lifestyle-icon-wrap"><i data-lucide="ban" style="width:1.15rem; height:1.15rem;"></i></div>
+              <div>
+                <h5 style="margin:0; font-size: 0.82rem; font-weight:750; color:#1e293b;">Smoking</h5>
+                <span style="font-size:0.75rem; color:#64748b; font-weight:600;">Non-smoker</span>
+              </div>
+            </div>
+            <i data-lucide="check-circle-2" style="color:#10b981; fill:#ecfdf5; width:1.3rem; height:1.3rem;"></i>
+          </div>
+
+          <!-- Lifestyle 2: Physical Activity -->
+          <div class="lifestyle-item">
+            <div class="lifestyle-left">
+              <div class="lifestyle-icon-wrap"><i data-lucide="activity" style="width:1.15rem; height:1.15rem;"></i></div>
+              <div>
+                <h5 style="margin:0; font-size: 0.82rem; font-weight:750; color:#1e293b;">Physical Activity</h5>
+                <span style="font-size:0.75rem; color:#64748b; font-weight:600;">4 / 7 days this week</span>
+              </div>
+            </div>
+            <!-- Dot indicators representation -->
+            <div style="display:flex; gap:3px;">
+              <div style="width:8px; height:8px; border-radius:50%; background:#06b6d4;"></div>
+              <div style="width:8px; height:8px; border-radius:50%; background:#06b6d4;"></div>
+              <div style="width:8px; height:8px; border-radius:50%; background:#06b6d4;"></div>
+              <div style="width:8px; height:8px; border-radius:50%; background:#06b6d4;"></div>
+              <div style="width:8px; height:8px; border-radius:50%; background:#e2e8f0;"></div>
+              <div style="width:8px; height:8px; border-radius:50%; background:#e2e8f0;"></div>
+            </div>
+          </div>
+
+          <!-- Lifestyle 3: Sleep Quality -->
+          <div class="lifestyle-item">
+            <div class="lifestyle-left">
+              <div class="lifestyle-icon-wrap"><i data-lucide="moon" style="width:1.15rem; height:1.15rem;"></i></div>
+              <div>
+                <h5 style="margin:0; font-size: 0.82rem; font-weight:750; color:#1e293b;">Sleep Quality</h5>
+                <span style="font-size:0.75rem; color:#64748b; font-weight:600;">7.2h (Optimal)</span>
+              </div>
+            </div>
+            <a href="#" style="font-size:0.75rem; font-weight:750; color:#3b82f6; text-decoration:none;" onclick="alert('Launch sleep log entries diary...')">Log Sleep</a>
+          </div>
+
+          <!-- Lifestyle 4: Stress Levels -->
+          <div class="lifestyle-item">
+            <div class="lifestyle-left">
+              <div class="lifestyle-icon-wrap"><i data-lucide="meh" style="width:1.15rem; height:1.15rem;"></i></div>
+              <div>
+                <h5 style="margin:0; font-size: 0.82rem; font-weight:750; color:#1e293b;">Stress Levels</h5>
+                <span style="font-size:0.75rem; color:#64748b; font-weight:600;">Moderate (Reported)</span>
+              </div>
+            </div>
+            <span class="kpi-badge watch" style="background:#fffbeb; color:#d97706; font-weight:800; border-radius:4px; text-transform:uppercase; font-size:0.62rem; padding:0.15rem 0.35rem;">Watch</span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Right Panel: Wellness Actions -->
+      <div class="panel-card" style="min-height: auto;">
+        <div class="panel-header">
+          <h3>Personalized Wellness Actions</h3>
+          <small style="font-size:0.7rem; color:#94a3b8; font-weight:700;">Updated 12h ago</small>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1.1fr; gap: 1rem; margin-top: 0.5rem;">
+          <!-- Checkbox Actions list -->
+          <div>
+            <div class="wellness-task">
+              <div class="wellness-checkbox" onclick="this.classList.toggle('checked')"></div>
+              <div class="wellness-task-desc">
+                <h5>Daily Step Goal</h5>
+                <p>Target: 10,000 steps today. You're at 6,200.</p>
+              </div>
+            </div>
+            
+            <div class="wellness-task">
+              <div class="wellness-checkbox" onclick="this.classList.toggle('checked')"></div>
+              <div class="wellness-task-desc">
+                <h5>Sodium Reduction</h5>
+                <p>Limit intake to < 1,500mg. Check lunch logs.</p>
+              </div>
+            </div>
+
+            <div class="wellness-task">
+              <div class="wellness-checkbox checked" onclick="this.classList.toggle('checked')"><i data-lucide="check" style="width:0.7rem; height:0.7rem;"></i></div>
+              <div class="wellness-task-desc">
+                <h5>Morning Meditation</h5>
+                <p>10 minutes completed.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recipe block -->
+          <div class="recipe-card">
+            <img class="recipe-img" src="{{ url_for('static', filename='images/doctors_analyzing.png') }}" alt="Recipe representation salad image">
+            <div class="recipe-body">
+              <span class="recipe-badge">Heart Healthy</span>
+              <h5 style="margin:0 0 0.25rem; font-size: 0.8rem; font-weight:800; color:#1e293b;">Zesty Lemon Salmon Salad</h5>
+              <p style="margin:0 0 0.5rem; font-size:0.68rem; color:#64748b; line-height:1.3;">A nutrient-dense meal high in Omega-3s and fiber. Perfect for heart health.</p>
+              <a href="#" style="font-size: 0.72rem; font-weight:850; color:#3b82f6; text-decoration:none;" onclick="alert('Showing recipe instructions: Zesty Lemon Salmon Salad')">View Recipe →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 5. Appointment Management & Education blocks -->
+    <div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 1.5rem;">
+      <!-- Left: Appointment & Daily meds -->
+      <div class="panel-card" style="min-height: auto;">
+        <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 1.5rem;">
+          <!-- Next Appointment details -->
+          <div>
+            <span style="font-size: 0.65rem; font-weight:800; color:#94a3b8; letter-spacing:0.5px; display:block; margin-bottom:0.5rem;"><i data-lucide="calendar" style="width: 0.95rem; height: 0.95rem; display:inline-block; vertical-align:middle; margin-right:2px;"></i> NEXT APPOINTMENT</span>
+            
+            <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 1rem;">
+              <h4 style="margin:0; font-size: 0.92rem; font-weight:800; color:#1e293b;">Cardiology Follow-up</h4>
+              <p style="margin:0.25rem 0; font-size: 0.78rem; color:#64748b; font-weight:600;">Dr. Julian Vance,<br>Cardiology Center</p>
+              
+              <div style="background: #eff6ff; border-radius: 8px; padding: 0.5rem; margin-top: 0.75rem; text-align: center;">
+                <span style="display:block; font-size: 0.85rem; font-weight:800; color:#1e40af;">July 25, 2026</span>
+                <small style="font-size: 0.68rem; color:#3b82f6; font-weight:700;">10:45 AM</small>
+              </div>
+
+              <div style="display:flex; gap:0.5rem; margin-top:0.75rem;">
+                <button class="btn-outline-brand" style="flex:1; font-size: 0.72rem; padding: 0.45rem;" onclick="alert('Reschedule request sent to support queue.')">Reschedule</button>
+                <button class="btn-solid-dark" style="flex:1.2; font-size: 0.72rem; padding: 0.45rem; background:#8b5cf6;" onclick="alert('Appointment confirmation successfully logged.')">Confirm</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Daily Management list -->
+          <div>
+            <span style="font-size: 0.65rem; font-weight:800; color:#94a3b8; letter-spacing:0.5px; display:block; margin-bottom:0.5rem;">DAILY MANAGEMENT</span>
+            
+            <div class="daily-task-item">
+              <div style="display:flex; align-items:center; gap:0.5rem;">
+                <i data-lucide="pill" style="color:#3b82f6; width:1.1rem; height:1.1rem;"></i>
+                <div>
+                  <h5 style="margin: 0; font-size: 0.78rem; font-weight: 750; color:#1e293b;">Atorvastatin (20mg)</h5>
+                  <small style="color:#64748b; font-size:0.68rem; font-weight:600;">9:00 PM</small>
+                </div>
+              </div>
+              <button style="background:transparent; border:0; color:#94a3b8; cursor:pointer;" onclick="this.style.color='#10b981'; alert('Atorvastatin log marked taken.')"><i data-lucide="check-circle"></i></button>
+            </div>
+
+            <div class="daily-task-item" style="border-color:#10b981; background:#ecfdf5;">
+              <div style="display:flex; align-items:center; gap:0.5rem;">
+                <i data-lucide="pill" style="color:#10b981; width:1.1rem; height:1.1rem;"></i>
+                <div>
+                  <h5 style="margin: 0; font-size: 0.78rem; font-weight: 750; color:#047857;">Morning Multi-vitamin</h5>
+                  <small style="color:#059669; font-size:0.68rem; font-weight:600;">Taken</small>
+                </div>
+              </div>
+              <i data-lucide="check-circle" style="color:#10b981; fill:#ecfdf5;"></i>
+            </div>
+
+            <div class="daily-task-item">
+              <div style="display:flex; align-items:center; gap:0.5rem;">
+                <i data-lucide="file-text" style="color:#64748b; width:1.1rem; height:1.1rem;"></i>
+                <div>
+                  <h5 style="margin: 0; font-size: 0.78rem; font-weight: 750; color:#1e293b;">Last Blood Test</h5>
+                  <small style="color:#64748b; font-size:0.68rem; font-weight:600;">Completed</small>
+                </div>
+              </div>
+              <a href="#" style="font-size:0.68rem; font-weight:750; color:#3b82f6; text-decoration:none;" onclick="alert('Downloading last blood test PDF results...')">View Results</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Education / Community Forum stack -->
+      <div style="display:flex; flex-direction:column; gap:1.25rem;">
+        
+        <!-- Educational Center panel -->
+        <div class="panel-card" style="min-height: auto; padding: 1.1rem 1.25rem;">
+          <div class="panel-header" style="margin-bottom:0.75rem;"><h3>Educational Center</h3></div>
+          
+          <div class="edu-article">
+            <span class="edu-tag">Article</span>
+            <h5 class="edu-title">Benefits of Low-Impact Cardio for Heart Recovery</h5>
+            <small style="font-size: 0.65rem; color:#94a3b8; font-weight:600;">4 min read • Dr. Sarah Chen</small>
+          </div>
+
+          <div class="edu-article">
+            <span class="edu-tag" style="color:#a855f7;">Video</span>
+            <h5 class="edu-title">Mediterranean Diet: Common Myths Debunked</h5>
+            <small style="font-size: 0.65rem; color:#94a3b8; font-weight:600;">8 min watch • Nutrition Specialists</small>
+          </div>
+
+          <button class="btn-outline-brand" style="width:100%; font-size: 0.75rem; padding:0.45rem; margin-top:0.5rem;" onclick="alert('Loading health articles library database...')">Browse Library</button>
+        </div>
+
+        <!-- Community Forum block -->
+        <div style="background:#4f46e5; border-radius: 14px; padding: 1.15rem; color: white; position: relative; overflow: hidden;">
+          <div style="position:absolute; right:-1rem; bottom:-1rem; width:6rem; height:6rem; background:rgba(255,255,255,0.06); border-radius:50%;"></div>
+          <h4 style="margin: 0; font-size: 0.95rem; font-weight: 800; display:flex; align-items:center; gap:0.5rem;"><i data-lucide="users"></i> Community Forum</h4>
+          <p style="margin: 0.35rem 0 0.85rem; font-size: 0.72rem; color: rgba(255,255,255,0.85); line-height: 1.4; font-weight: 600;">
+            Connect with 2,400+ members on similar heart health journeys. Share tips and get support.
+          </p>
+          <button style="background:white; color:#4f46e5; border:0; font-weight:800; font-size: 0.75rem; border-radius:6px; padding:0.45rem 0.85rem; cursor:pointer;" onclick="alert('Redirecting to the DataVibe Patient Forums portal...')">Join Discussion</button>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<!-- Load Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  // Sidebar toggle animation
+  const sidebarToggle = document.getElementById("sidebar-toggle");
+  const dbContainer = document.getElementById("dashboard-container");
+  const toggleIcon = document.getElementById("toggle-icon");
+  
+  if (sidebarToggle && dbContainer) {
+    sidebarToggle.addEventListener("click", () => {
+      dbContainer.classList.toggle("collapsed");
+      if (dbContainer.classList.contains("collapsed")) {
+        toggleIcon.setAttribute("data-lucide", "chevrons-right");
+      } else {
+        toggleIcon.setAttribute("data-lucide", "chevrons-left");
+      }
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    });
+  }
+
+  // ----------------------------------------------------
+  // Chart.js Progress tracking graphs
+  // ----------------------------------------------------
+  document.addEventListener("DOMContentLoaded", () => {
+    // 1. Weight Progress Bar Chart
+    const weightCtx = document.getElementById("weightProgressChart").getContext("2d");
+    new Chart(weightCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        datasets: [{
+          data: [154, 153, 151, 151, 149.5, 148],
+          backgroundColor: '#c084fc',
+          borderRadius: 4,
+          barThickness: 14
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false } },
+          y: { grid: { color: '#f1f5f9' }, min: 140, max: 160 }
+        }
+      }
+    });
+
+    // 2. Steps Bar Chart
+    const stepsCtx = document.getElementById("stepsProgressChart").getContext("2d");
+    new Chart(stepsCtx, {
+      type: 'bar',
+      data: {
+        labels: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+        datasets: [{
+          data: [6400, 7800, 7200, 6800, 9200, 7650, 9800],
+          backgroundColor: '#22d3ee',
+          borderRadius: 4,
+          barThickness: 10
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false } },
+          y: { grid: { color: '#f1f5f9' } }
+        }
+      }
+    });
+
+    // 3. BP stability line chart
+    const bpStabilityCtx = document.getElementById("bpStabilityChart").getContext("2d");
+    new Chart(bpStabilityCtx, {
+      type: 'line',
+      data: {
+        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+        datasets: [{
+          data: [132, 129, 126, 125],
+          borderColor: '#0ea5e9',
+          backgroundColor: 'rgba(14, 165, 233, 0.05)',
+          fill: true,
+          tension: 0.4,
+          pointRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false } },
+          y: { grid: { color: '#f1f5f9' }, min: 120, max: 140 }
+        }
+      }
+    });
+
+  });
+</script>
+{% endblock %}

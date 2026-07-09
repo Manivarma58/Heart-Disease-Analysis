@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Admin - DataVibe{% endblock %}
+{% block content %}
+<section class="workspace admin-page">
+  <div class="workspace-head">
+    <div>
+      <p class="eyebrow">Admin workspace</p>
+      <h1>User management</h1>
+    </div>
+    <a class="button" href="{{ url_for('admin.data_upload') }}">Upload data</a>
+  </div>
+  <div class="kpi-row">
+    <article class="kpi"><span>Seeded patients</span><strong>{{ stats.patients }}</strong></article>
+    <article class="kpi moderate"><span>Active users</span><strong>{{ users|length }}</strong></article>
+  </div>
+  <section class="panel">
+    <table>
+      <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Persona</th></tr></thead>
+      <tbody>
+      {% for user in users %}
+        <tr><td>{{ user.name }}</td><td>{{ user.email }}</td><td>{{ user.role }}</td><td>{{ user.persona }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </section>
+</section>
+{% endblock %}

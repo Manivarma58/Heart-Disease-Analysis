@@ -1,0 +1,373 @@
+{% extends "base.html" %}
+{% block title %}Verify Identity - DataVibe{% endblock %}
+{% block content %}
+<style>
+  .tfa-page-body {
+    min-height: calc(100vh - 74px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #f8fafc;
+    padding: 3rem 1rem;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Header Branding */
+  .tfa-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .tfa-brand-icon {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 12px;
+    background: #3b82f6;
+    color: white;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 0.75rem;
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.25);
+  }
+  .tfa-header h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0;
+  }
+  .tfa-header p {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 0.25rem 0 0;
+    font-weight: 500;
+  }
+
+  /* Card */
+  .tfa-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #3b82f6; /* Left accent border */
+    border-radius: 12px;
+    width: min(100%, 28rem);
+    padding: 3rem 2.25rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  }
+  .tfa-card h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.35rem;
+  }
+  .tfa-card p.tfa-subtitle {
+    font-size: 0.88rem;
+    color: #64748b;
+    margin-top: 0;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+  }
+
+  /* 6 code input row */
+  .tfa-code-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.45rem;
+    margin-bottom: 1.5rem;
+  }
+  .tfa-input-slot {
+    width: 3.1rem;
+    height: 3.5rem;
+    background: white;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .tfa-input-slot:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  /* Settings row */
+  .tfa-settings-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.75rem;
+  }
+  .tfa-checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .tfa-checkbox-group input {
+    width: 1.1rem;
+    height: 1.1rem;
+    accent-color: #3b82f6;
+    cursor: pointer;
+  }
+  .tfa-checkbox-group label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+  }
+  .btn-resend {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #3b82f6;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+  }
+  .btn-resend:hover {
+    text-decoration: underline;
+  }
+
+  /* Action button */
+  .btn-verify {
+    width: 100%;
+    min-height: 3rem;
+    background: #3b82f6;
+    color: white;
+    border: 0;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.25);
+    transition: all 0.2s;
+    margin-bottom: 1.5rem;
+  }
+  .btn-verify:hover {
+    background: #2563eb;
+  }
+
+  /* Divider */
+  .tfa-divider {
+    border-top: 1px solid #e2e8f0;
+    margin: 1.5rem 0;
+  }
+
+  /* Alternate choices lists */
+  .alt-auth-option {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    transition: background-color 0.2s, border-color 0.2s;
+  }
+  .alt-auth-option:hover {
+    background-color: #f8fafc;
+    border-color: #cbd5e1;
+  }
+  .alt-icon-box {
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 6px;
+    background-color: #f1f5f9;
+    color: #475569;
+    display: grid;
+    place-items: center;
+  }
+  .alt-text-box {
+    display: flex;
+    flex-direction: column;
+  }
+  .alt-text-box span {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1e293b;
+  }
+  .alt-text-box small {
+    font-size: 0.72rem;
+    color: #64748b;
+    font-weight: 500;
+  }
+
+  /* Security support operations */
+  .btn-security-ops {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    margin: 2rem auto 0;
+    font-size: 0.76rem;
+    font-weight: 800;
+    color: #64748b;
+    text-transform: uppercase;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+  }
+  .btn-security-ops:hover {
+    color: #1e293b;
+  }
+
+  /* Footer aes info */
+  .tfa-footer-aes {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    margin-top: 3.5rem;
+    font-size: 0.75rem;
+    color: #64748b;
+    line-height: 1.5;
+    max-width: 28rem;
+  }
+  .tfa-footer-aes strong {
+    color: #1e293b;
+  }
+</style>
+
+<div class="tfa-page-body">
+  <!-- Branding Header -->
+  <div class="tfa-header">
+    <div class="tfa-brand-icon">
+      <i data-lucide="shield-check" style="width: 2.2rem; height: 2.2rem;"></i>
+    </div>
+    <h1>DataVibe</h1>
+    <p>Verify your identity to access clinical intelligence systems.</p>
+  </div>
+
+  <!-- Card -->
+  <div class="tfa-card">
+    <h2>Enter Verification Code</h2>
+    <p class="tfa-subtitle">We've sent a 6-digit code to <strong>{{ obfuscated_email }}</strong></p>
+
+    <form method="post" id="tfa-form" action="{{ url_for('auth.two_factor') }}">
+      <input type="hidden" name="code" id="tfa-code-combined">
+      
+      <div class="tfa-code-row">
+        <input class="tfa-input-slot" type="text" maxlength="1" required oninput="focusNext(this, 0)">
+        <input class="tfa-input-slot" type="text" maxlength="1" required oninput="focusNext(this, 1)">
+        <input class="tfa-input-slot" type="text" maxlength="1" required oninput="focusNext(this, 2)">
+        <input class="tfa-input-slot" type="text" maxlength="1" required oninput="focusNext(this, 3)">
+        <input class="tfa-input-slot" type="text" maxlength="1" required oninput="focusNext(this, 4)">
+        <input class="tfa-input-slot" type="text" maxlength="1" required oninput="focusNext(this, 5)">
+      </div>
+
+      <div class="tfa-settings-row">
+        <div class="tfa-checkbox-group">
+          <input type="checkbox" id="trust-device" name="trust_device">
+          <label for="trust-device">Trust this device for 30 days</label>
+        </div>
+        <a class="btn-resend" onclick="alert('Verification code re-sent to your registered email.'); return false;">Resend Code</a>
+      </div>
+
+      <button class="btn-verify" type="button" onclick="submitTfaForm();">
+        Verify Account <i data-lucide="arrow-right" style="width: 1.15rem; height: 1.15rem;"></i>
+      </button>
+    </form>
+
+    <div class="tfa-divider"></div>
+
+    <!-- Alternate methods list -->
+    <div class="alt-auth-option" onclick="autofillTfaCode('123456');">
+      <div class="alt-icon-box">
+        <i data-lucide="smartphone" style="width: 1.15rem; height: 1.15rem;"></i>
+      </div>
+      <div class="alt-text-box">
+        <span>Use an Authenticator App instead</span>
+        <small>Get a code from Google Authenticator</small>
+      </div>
+    </div>
+
+    <div class="alt-auth-option" onclick="autofillTfaCode('654321');">
+      <div class="alt-icon-box">
+        <i data-lucide="key-round" style="width: 1.15rem; height: 1.15rem;"></i>
+      </div>
+      <div class="alt-text-box">
+        <span>Use clinical backup codes</span>
+        <small>Enter one of your emergency recovery codes</small>
+      </div>
+    </div>
+
+    <!-- Contact support trigger -->
+    <a class="btn-security-ops" href="#" onclick="alert('Help request submitted to Security Operations. Support staff will contact you shortly.'); return false;">
+      <i data-lucide="help-circle" style="width: 1rem; height: 1rem;"></i>
+      Contact Security Operations
+    </a>
+  </div>
+
+  <!-- AES Footer disclaimer -->
+  <div class="tfa-footer-aes">
+    <i data-lucide="lock" style="width: 1.25rem; height: 1.25rem; color: #94a3b8; flex-shrink: 0; margin-top: 0.1rem;"></i>
+    <span>
+      This session is encrypted with 256-bit AES protection. If you didn't attempt to log in, please <strong>contact support immediately</strong>.
+    </span>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const slots = document.querySelectorAll(".tfa-input-slot");
+
+  // Focus next field logic
+  function focusNext(input, index) {
+    // strip non-numeric
+    input.value = input.value.replace(/[^0-9]/g, '');
+    if (input.value && index < 5) {
+      slots[index + 1].focus();
+    }
+  }
+
+  // Handle backspace shift focus and copy paste
+  slots.forEach((slot, i) => {
+    slot.addEventListener("keydown", (e) => {
+      if (e.key === "Backspace" && !slot.value && i > 0) {
+        slots[i - 1].focus();
+      }
+    });
+
+    slot.addEventListener("paste", (e) => {
+      e.preventDefault();
+      const text = e.clipboardData.getData("text").trim();
+      if (/^\d{6}$/.test(text)) {
+        const digits = text.split("");
+        slots.forEach((s, idx) => {
+          s.value = digits[idx];
+        });
+        submitTfaForm();
+      }
+    });
+  });
+
+  // Submit and combine code
+  function submitTfaForm() {
+    const codeVal = Array.from(slots).map(s => s.value).join("");
+    if (codeVal.length === 6) {
+      document.getElementById("tfa-code-combined").value = codeVal;
+      document.getElementById("tfa-form").submit();
+    } else {
+      alert("Please fill out the complete 6-digit verification code.");
+    }
+  }
+
+  // Autofill helpers for alternative click options
+  function autofillTfaCode(codeStr) {
+    const chars = codeStr.split("");
+    slots.forEach((s, idx) => {
+      s.value = chars[idx] || "";
+    });
+    submitTfaForm();
+  }
+</script>
+{% endblock %}
+

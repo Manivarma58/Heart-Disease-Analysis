@@ -1,0 +1,768 @@
+{% extends "base.html" %}
+{% block title %}Register - DataVibe{% endblock %}
+{% block content %}
+<style>
+  /* Header overrides for Register page */
+  .topbar {
+    display: none !important; /* Hide base header for custom clean header */
+  }
+
+  .reg-page-body {
+    min-height: 100vh;
+    background: #f8fafc;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Custom Clean Header */
+  .reg-header {
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 0.75rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .reg-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+  }
+  .reg-brand-mark {
+    background: #3b82f6;
+    color: white;
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 8px;
+  }
+  .reg-brand span {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 800;
+    font-size: 1.25rem;
+    color: #1e293b;
+  }
+  .reg-login-prompt {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.88rem;
+    color: #64748b;
+    font-weight: 600;
+  }
+  .btn-ghost-login {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.3rem;
+    padding: 0.5rem 1.25rem;
+    border: 1.5px solid #3b82f6;
+    border-radius: 6px;
+    background: transparent;
+    color: #3b82f6;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .btn-ghost-login:hover {
+    background: #3b82f6;
+    color: white;
+  }
+
+  /* Title / Intro */
+  .reg-intro {
+    text-align: center;
+    margin: 3.5rem auto 2.5rem;
+    max-width: 40rem;
+    padding: 0 1rem;
+  }
+  .reg-intro h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 0.5rem;
+  }
+  .reg-intro p {
+    font-size: 0.95rem;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  /* Layout Container */
+  .reg-layout {
+    display: grid;
+    grid-template-columns: 1fr 2.2fr;
+    gap: 3.5rem;
+    max-width: 58rem;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 1.5rem 5rem;
+  }
+
+  /* Left Column: Timeline Indicator */
+  .timeline-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding-top: 1.5rem;
+  }
+  .timeline-step {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .step-circle {
+    width: 2.3rem;
+    height: 2.3rem;
+    border-radius: 50%;
+    background: transparent;
+    border: 2px solid #cbd5e1;
+    color: #64748b;
+    font-weight: 700;
+    display: grid;
+    place-items: center;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+  }
+  .step-info {
+    display: flex;
+    flex-direction: column;
+  }
+  .step-info span.step-title {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #94a3b8;
+    text-transform: uppercase;
+  }
+  .step-info span.step-desc {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #64748b;
+  }
+
+  /* Active/Completed states */
+  .timeline-step.active .step-circle {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    color: white;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+  }
+  .timeline-step.active .step-info span.step-title {
+    color: #3b82f6;
+  }
+  .timeline-step.active .step-info span.step-desc {
+    color: #1e293b;
+  }
+  .timeline-step.completed .step-circle {
+    background: #10b981;
+    border-color: #10b981;
+    color: white;
+  }
+  .timeline-step.completed .step-info span.step-desc {
+    color: #64748b;
+    text-decoration: line-through;
+  }
+
+  /* Right Column: Card */
+  .reg-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #3b82f6; /* Left accent border */
+    border-radius: 12px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    padding: 3rem 2.5rem;
+    transition: transform 0.3s;
+  }
+
+  /* Form Step Content */
+  .form-step {
+    display: none;
+  }
+  .form-step.active {
+    display: block;
+    animation: fadeIn 0.4s ease-out;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .reg-card h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Fields spacing */
+  .field-group {
+    margin-bottom: 1.5rem;
+  }
+  .field-group label {
+    display: block;
+    font-size: 0.74rem;
+    font-weight: 800;
+    color: #1e293b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Input wrapper & styling */
+  .input-wrapper {
+    position: relative;
+  }
+  .input-wrapper i.input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    width: 1.15rem;
+    height: 1.15rem;
+    pointer-events: none;
+  }
+  .input-control {
+    width: 100%;
+    min-height: 3rem;
+    background: white;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0.75rem 1rem 0.75rem 2.75rem;
+    font-size: 0.9rem;
+    color: #1e293b;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .input-control:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  /* Select dropdown */
+  .select-control {
+    width: 100%;
+    min-height: 3rem;
+    background: white;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    color: #1e293b;
+    outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1rem;
+    cursor: pointer;
+  }
+  .select-control:focus {
+    border-color: #3b82f6;
+  }
+
+  /* Password Strength styling */
+  .strength-container {
+    margin-top: 0.5rem;
+  }
+  .strength-bars {
+    display: flex;
+    gap: 0.35rem;
+    margin-bottom: 0.4rem;
+  }
+  .strength-bar {
+    height: 4px;
+    flex: 1;
+    background-color: #e2e8f0;
+    border-radius: 2px;
+    transition: background-color 0.3s;
+  }
+  .strength-text {
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: #64748b;
+    display: block;
+    margin-top: 0.2rem;
+  }
+
+  /* Captcha Box */
+  .captcha-box {
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    user-select: none;
+  }
+  .captcha-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #334155;
+  }
+  .captcha-checkbox {
+    width: 1.45rem;
+    height: 1.45rem;
+    border: 2px solid #cbd5e1;
+    border-radius: 3px;
+    background: white;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: border-color 0.2s;
+  }
+  .captcha-checkbox.checked {
+    border-color: #10b981;
+  }
+  .captcha-checkbox.checked::after {
+    content: "✓";
+    color: #10b981;
+    font-weight: 900;
+    font-size: 1.1rem;
+  }
+  .captcha-logo {
+    text-align: right;
+    font-size: 0.65rem;
+    color: #64748b;
+    font-weight: 600;
+  }
+  .captcha-logo img {
+    width: 1.6rem;
+    display: block;
+    margin: 0 auto;
+  }
+
+  /* Terms and privacy */
+  .checkbox-group {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    margin-bottom: 1.75rem;
+  }
+  .checkbox-group input {
+    margin-top: 0.15rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    accent-color: #3b82f6;
+  }
+  .checkbox-group label {
+    font-size: 0.8rem;
+    color: #64748b;
+    line-height: 1.4;
+  }
+  .checkbox-group a {
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .checkbox-group a:hover {
+    text-decoration: underline;
+  }
+
+  /* Buttons */
+  .btn-next {
+    width: 100%;
+    min-height: 3rem;
+    background: #3b82f6;
+    color: white;
+    border: 0;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.25);
+    transition: all 0.2s;
+  }
+  .btn-next:hover {
+    background: #2563eb;
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.35);
+  }
+  .btn-back-step {
+    display: block;
+    text-align: center;
+    margin-top: 1.25rem;
+    font-size: 0.82rem;
+    color: #64748b;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .btn-back-step:hover {
+    color: #1e293b;
+    text-decoration: underline;
+  }
+
+  /* Footer */
+  .reg-footer {
+    margin-top: auto;
+    text-align: center;
+    padding: 2rem 1rem;
+    font-size: 0.72rem;
+    color: #94a3b8;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    border-top: 1px solid #e2e8f0;
+    background: white;
+  }
+</style>
+
+<div class="reg-page-body">
+  <!-- Custom Header -->
+  <header class="reg-header">
+    <a class="reg-brand" href="{{ url_for('dashboard.index') }}">
+      <div class="reg-brand-mark">
+        <i data-lucide="activity" style="width: 1.5rem; height: 1.5rem;"></i>
+      </div>
+      <span>DataVibe</span>
+    </a>
+    <div class="reg-login-prompt">
+      <span>Already have an account?</span>
+      <a class="btn-ghost-login" href="{{ url_for('auth.login') }}">Login</a>
+    </div>
+  </header>
+
+  <!-- Title section -->
+  <div class="reg-intro">
+    <h1>Join the Precision Pulse</h1>
+    <p>Access clinical-grade intelligence and optimize cardiovascular patient outcomes with DataVibe.</p>
+  </div>
+
+  <!-- Layout -->
+  <div class="reg-layout">
+    <!-- Left Indicator Timeline -->
+    <div class="timeline-sidebar">
+      <div class="timeline-step active" id="time-step-1">
+        <div class="step-circle" id="circle-1">1</div>
+        <div class="step-info">
+          <span class="step-title">ACCOUNT</span>
+          <span class="step-desc">Security Details</span>
+        </div>
+      </div>
+      <div class="timeline-step" id="time-step-2">
+        <div class="step-circle" id="circle-2">2</div>
+        <div class="step-info">
+          <span class="step-title">PROFILE</span>
+          <span class="step-desc">Personal Info</span>
+        </div>
+      </div>
+      <div class="timeline-step" id="time-step-3">
+        <div class="step-circle" id="circle-3">3</div>
+        <div class="step-info">
+          <span class="step-title">CLINICAL</span>
+          <span class="step-desc">Organization</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Form Card -->
+    <div class="reg-card">
+      <form method="post" id="register-wizard-form" action="{{ url_for('auth.register') }}">
+        
+        <!-- STEP 1: ACCOUNT DETAILS -->
+        <div class="form-step active" id="step-1-content">
+          <h2>Create Your Secure Account</h2>
+          
+          <div class="field-group">
+            <label for="email">Professional Email Address</label>
+            <div class="input-wrapper">
+              <i data-lucide="mail" class="input-icon"></i>
+              <input class="input-control" type="email" id="email" name="email" placeholder="dr.sharma@hospital.org" required>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="password">Password</label>
+            <div class="input-wrapper">
+              <i data-lucide="lock" class="input-icon"></i>
+              <input class="input-control" type="password" id="password" name="password" placeholder="••••••••" required oninput="evaluatePassword(this.value);">
+            </div>
+            <!-- Strength Indicator -->
+            <div class="strength-container">
+              <div class="strength-bars">
+                <div class="strength-bar" id="bar-1"></div>
+                <div class="strength-bar" id="bar-2"></div>
+                <div class="strength-bar" id="bar-3"></div>
+                <div class="strength-bar" id="bar-4"></div>
+              </div>
+              <span class="strength-text" id="strength-lbl">Enter a secure password</span>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="confirm_password">Confirm Password</label>
+            <div class="input-wrapper">
+              <i data-lucide="shield-check" class="input-icon"></i>
+              <input class="input-control" type="password" id="confirm_password" placeholder="••••••••" required>
+            </div>
+          </div>
+
+          <!-- Captcha Box -->
+          <div class="captcha-box">
+            <div class="captcha-left">
+              <div class="captcha-checkbox" id="captcha-check" onclick="toggleCaptchaCheck();"></div>
+              <span>I'm not a robot</span>
+            </div>
+            <div class="captcha-logo">
+              <img src="https://www.gstatic.com/recaptcha/api2/logo_48.png" alt="reCAPTCHA logo">
+              reCAPTCHA
+            </div>
+          </div>
+
+          <!-- Terms checkbox -->
+          <div class="checkbox-group">
+            <input type="checkbox" id="terms" required>
+            <label for="terms">
+              I agree to the <a href="#">Terms and Conditions</a> and BAA requirements for clinical data handling and secure HIPAA compliance.
+            </label>
+          </div>
+
+          <button class="btn-next" type="button" onclick="goToStep(2);">
+            Next Step <i data-lucide="arrow-right" style="width: 1.15rem; height: 1.15rem;"></i>
+          </button>
+        </div>
+
+        <!-- STEP 2: PROFILE DETAILS -->
+        <div class="form-step" id="step-2-content">
+          <h2>Personal Information</h2>
+
+          <div class="field-group">
+            <label for="name">Full Name</label>
+            <div class="input-wrapper">
+              <i data-lucide="user" class="input-icon"></i>
+              <input class="input-control" type="text" id="name" name="name" placeholder="Dr. Amit Sharma">
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="role">Role / Medical Specialty</label>
+            <select class="select-control" id="role" name="role" onchange="handleRoleChange();">
+              <option value="Cardiologist">Cardiologist (Clinical Persona)</option>
+              <option value="Healthcare Administrator">Healthcare Administrator (Public Health Persona)</option>
+              <option value="Patient Advocate">Patient Advocate (Personal Monitoring Persona)</option>
+              <option value="Patient">Patient (Personal Health Hub Persona)</option>
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label for="org">Clinical Organization / Hospital</label>
+            <div class="input-wrapper">
+              <i data-lucide="building" class="input-icon"></i>
+              <input class="input-control" type="text" id="org" placeholder="City General Cardiology Clinic">
+            </div>
+          </div>
+
+          <button class="btn-next" type="button" onclick="goToStep(3);">
+            Next Step <i data-lucide="arrow-right" style="width: 1.15rem; height: 1.15rem;"></i>
+          </button>
+          <span class="btn-back-step" onclick="goToStep(1);">Back to account credentials</span>
+        </div>
+
+        <!-- STEP 3: CLINICAL ORGANIZATION & VERIFICATION -->
+        <div class="form-step" id="step-3-content">
+          <h2>Security Verification</h2>
+          <p style="font-size: 0.88rem; color: #64748b; line-height: 1.5; margin-bottom: 2rem;">
+            To ensure secure HIPAA onboarding, please enter the temporary verification code sent to your professional email.
+          </p>
+
+          <div class="field-group">
+            <label for="verification_code">Temporary Verification Code</label>
+            <div class="input-wrapper">
+              <i data-lucide="shield-check" class="input-icon"></i>
+              <input class="input-control" type="text" id="verification_code" placeholder="DV-XXXXXX">
+            </div>
+          </div>
+
+          <p style="font-size: 0.8rem; color: #64748b; text-align: center; margin-bottom: 2rem;">
+            Didn't receive a verification code? <a href="#" onclick="alert('Demo code re-sent: DV-100200'); return false;" style="color:#3b82f6; font-weight: 700; text-decoration: none;">Resend Code</a>
+          </p>
+
+          <button class="btn-next" type="submit" id="submit-wizard-btn">
+            Complete Registration
+          </button>
+          <span class="btn-back-step" onclick="goToStep(2);">Back to profile details</span>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="reg-footer">
+    &copy; 2026 DATAVIBE CLINICAL INTELLIGENCE • SECURE HIPAA COMPLIANT REGISTRATION
+  </footer>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let currentStep = 1;
+  let captchaChecked = false;
+
+  function toggleCaptchaCheck() {
+    const box = document.getElementById("captcha-check");
+    captchaChecked = !captchaChecked;
+    box.classList.toggle("checked", captchaChecked);
+  }
+
+  // Password Strength Evaluator
+  function evaluatePassword(pass) {
+    const lbl = document.getElementById("strength-lbl");
+    const bars = [
+      document.getElementById("bar-1"),
+      document.getElementById("bar-2"),
+      document.getElementById("bar-3"),
+      document.getElementById("bar-4")
+    ];
+
+    // Reset bars
+    bars.forEach(b => {
+      b.style.backgroundColor = "#e2e8f0";
+    });
+
+    if (pass.length === 0) {
+      lbl.innerText = "Enter a secure password";
+      lbl.style.color = "#64748b";
+      return;
+    }
+
+    if (pass.length < 5) {
+      // Weak
+      bars[0].style.backgroundColor = "#ef4444"; // red
+      lbl.innerText = "Password strength: Weak";
+      lbl.style.color = "#ef4444";
+    } else if (pass.length < 9) {
+      // Medium
+      bars[0].style.backgroundColor = "#f97316"; // orange
+      bars[1].style.backgroundColor = "#f97316";
+      lbl.innerText = "Password strength: Medium";
+      lbl.style.color = "#f97316";
+    } else {
+      // Strong
+      bars.forEach(b => b.style.backgroundColor = "#10b981"); // green
+      lbl.innerText = "Password strength: Strong";
+      lbl.style.color = "#10b981";
+    }
+  }
+
+  // Multi-step Navigation
+  function goToStep(step) {
+    // Validation for Step 1
+    if (step === 2 && currentStep === 1) {
+      const email = document.getElementById("email").value.trim();
+      const pass = document.getElementById("password").value;
+      const confirm = document.getElementById("confirm_password").value;
+      const terms = document.getElementById("terms").checked;
+
+      if (!email || !pass || !confirm) {
+        alert("Please fill in all email and password fields.");
+        return;
+      }
+      if (pass !== confirm) {
+        alert("Passwords do not match.");
+        return;
+      }
+      if (!captchaChecked) {
+        alert("Please complete the CAPTCHA verify verification.");
+        return;
+      }
+      if (!terms) {
+        alert("You must agree to the Terms and Conditions to proceed.");
+        return;
+      }
+
+      // Transition timeline
+      document.getElementById("time-step-1").classList.remove("active");
+      document.getElementById("time-step-1").classList.add("completed");
+      document.getElementById("time-step-2").classList.add("active");
+    }
+
+    // Validation for Step 2
+    if (step === 3 && currentStep === 2) {
+      const name = document.getElementById("name").value.trim();
+      const role = document.getElementById("role").value;
+      const org = document.getElementById("org").value.trim();
+
+      if (!name || !org) {
+        alert("Please fill in your name and organization.");
+        return;
+      }
+
+      // Transition timeline
+      document.getElementById("time-step-2").classList.remove("active");
+      document.getElementById("time-step-2").classList.add("completed");
+      document.getElementById("time-step-3").classList.add("active");
+    }
+
+    // Going backwards
+    if (step === 1 && currentStep === 2) {
+      document.getElementById("time-step-2").classList.remove("active");
+      document.getElementById("time-step-1").classList.remove("completed");
+      document.getElementById("time-step-1").classList.add("active");
+    }
+    if (step === 2 && currentStep === 3) {
+      document.getElementById("time-step-3").classList.remove("active");
+      document.getElementById("time-step-2").classList.remove("completed");
+      document.getElementById("time-step-2").classList.add("active");
+    }
+
+    // Show/Hide steps contents
+    document.getElementById(`step-${currentStep}-content`).classList.remove("active");
+    document.getElementById(`step-${step}-content`).classList.add("active");
+    currentStep = step;
+  }
+
+  // Handle Form Submission loading feedback
+  const wizardForm = document.getElementById("register-wizard-form");
+  const submitWizardBtn = document.getElementById("submit-wizard-btn");
+
+  if (wizardForm && submitWizardBtn) {
+    wizardForm.addEventListener("submit", (e) => {
+      const verificationCode = document.getElementById("verification_code").value.trim();
+      if (!verificationCode) {
+        e.preventDefault();
+        alert("Please enter your email verification code to complete sign up.");
+        return;
+      }
+      submitWizardBtn.disabled = true;
+      submitWizardBtn.innerText = "Creating Account and Registering Key...";
+    });
+  }
+
+  // Dynamically update form labels/placeholders based on Patient vs Professional role
+  function handleRoleChange() {
+    const role = document.getElementById("role").value;
+    const orgLabel = document.querySelector('label[for="org"]');
+    const orgInput = document.getElementById("org");
+    const nameInput = document.getElementById("name");
+    
+    if (role === 'Patient') {
+      if (orgLabel) orgLabel.innerText = "Primary Clinic / General Practitioner";
+      if (orgInput) orgInput.placeholder = "City General Health Center";
+      if (nameInput) nameInput.placeholder = "Anita Sharma";
+    } else {
+      if (orgLabel) orgLabel.innerText = "Clinical Organization / Hospital";
+      if (orgInput) orgInput.placeholder = "City General Cardiology Clinic";
+      if (nameInput) nameInput.placeholder = "Dr. Amit Sharma";
+    }
+  }
+</script>
+{% endblock %}
+

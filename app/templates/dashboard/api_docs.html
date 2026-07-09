@@ -1,0 +1,712 @@
+{% set hide_default_header = true %}
+{% extends "base.html" %}
+{% block title %}API Reference - DataVibe{% endblock %}
+{% block content %}
+<style>
+  /* Developer Portal Header styling */
+  .api-header {
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 0.5rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .api-header-left {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  .api-header-brand {
+    font-weight: 800;
+    font-size: 1.15rem;
+    color: #0f172a;
+    text-decoration: none;
+    font-family: Poppins, sans-serif;
+    letter-spacing: -0.3px;
+  }
+  .api-header-nav {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+  .api-header-nav a {
+    color: #64748b;
+    text-decoration: none;
+  }
+  .api-header-nav a.active {
+    color: #0f172a;
+    border-bottom: 2px solid #0f172a;
+    padding-bottom: 0.15rem;
+  }
+  .api-header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .btn-console-login {
+    background: #0f172a;
+    color: white;
+    font-weight: 750;
+    font-size: 0.82rem;
+    border: 0;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  /* Layout Grid Container */
+  .api-docs-container {
+    display: grid;
+    grid-template-columns: 15rem 1.8fr 1.2fr;
+    min-height: calc(100vh - 55px);
+    background: white;
+  }
+  @media (max-width: 1100px) {
+    .api-docs-container {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Left Sidebar */
+  .api-sidebar {
+    background: #f8fafc;
+    border-right: 1px solid #e2e8f0;
+    padding: 1.5rem 1rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .api-sidebar-section {
+    margin-bottom: 1.5rem;
+  }
+  .api-sidebar-title {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+    padding-left: 0.5rem;
+  }
+  .api-sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #475569;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .api-sidebar-item:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+  }
+  .api-sidebar-item.active {
+    background: #eff6ff;
+    color: #3b82f6;
+  }
+  .btn-api-key {
+    background: #0f172a;
+    color: white;
+    font-weight: 750;
+    font-size: 0.78rem;
+    border: 0;
+    border-radius: 6px;
+    padding: 0.55rem 1rem;
+    width: 100%;
+    cursor: pointer;
+    margin-bottom: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+  }
+
+  /* Center Panel */
+  .api-content {
+    padding: 2rem 2.5rem;
+    overflow-y: auto;
+    border-right: 1px solid #e2e8f0;
+  }
+  .api-content h1 {
+    font-size: 1.8rem;
+    font-weight: 850;
+    color: #0f172a;
+    margin: 0 0 1rem;
+  }
+  .api-content p {
+    font-size: 0.9rem;
+    color: #475569;
+    line-height: 1.6;
+    margin: 0 0 1.5rem;
+  }
+
+  /* Auth banner box */
+  .auth-banner-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1.75rem;
+  }
+  .auth-banner-box h4 {
+    margin: 0 0 0.5rem;
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .auth-banner-box p {
+    font-size: 0.78rem;
+    color: #64748b;
+    margin: 0 0 0.75rem;
+  }
+  .code-token-block {
+    background: #0f172a;
+    color: #38bdf8;
+    font-family: monospace;
+    font-size: 0.78rem;
+    padding: 0.65rem 1rem;
+    border-radius: 6px;
+  }
+
+  /* Base URL block */
+  .base-url-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0.55rem 1rem;
+    margin-bottom: 2rem;
+    font-family: monospace;
+    font-size: 0.82rem;
+  }
+
+  /* Methods labels */
+  .api-method-badge {
+    font-size: 0.62rem;
+    font-weight: 900;
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    color: white;
+  }
+  .api-method-badge.get { background: #3b82f6; }
+  .api-method-badge.post { background: #10b981; }
+  .api-method-badge.put { background: #f59e0b; }
+  .api-method-badge.delete { background: #ef4444; }
+
+  /* Query Parameters table */
+  .params-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+  }
+  .params-table th {
+    text-align: left;
+    padding: 0.65rem;
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #64748b;
+    text-transform: uppercase;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .params-table td {
+    padding: 0.75rem 0.65rem;
+    font-size: 0.82rem;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  /* Schema blocks */
+  .schema-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  @media (max-width: 600px) {
+    .schema-container {
+      grid-template-columns: 1fr;
+    }
+  }
+  .schema-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+  }
+  .schema-card h5 {
+    margin: 0 0 0.25rem;
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: #0f172a;
+    font-family: monospace;
+  }
+  .schema-card span {
+    font-size: 0.68rem;
+    color: #64748b;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  .schema-card p {
+    font-size: 0.75rem;
+    color: #475569;
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  /* Right Panel Interactive Console */
+  .api-console {
+    background: #0f172a;
+    color: #f8fafc;
+    padding: 1.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+  .console-tab-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #334155;
+    padding-bottom: 0.5rem;
+  }
+  .console-tab-tabs {
+    display: flex;
+    gap: 1rem;
+  }
+  .console-tab-btn {
+    background: transparent;
+    border: 0;
+    color: #94a3b8;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    padding-bottom: 0.25rem;
+  }
+  .console-tab-btn.active {
+    color: #38bdf8;
+    border-bottom: 2px solid #38bdf8;
+  }
+
+  .console-code-block {
+    background: #1e293b;
+    border-radius: 8px;
+    padding: 1rem;
+    font-family: monospace;
+    font-size: 0.78rem;
+    color: #e2e8f0;
+    white-space: pre-wrap;
+    word-break: break-all;
+    line-height: 1.5;
+  }
+
+  .btn-try-api {
+    background: #3b82f6;
+    color: white;
+    font-weight: 800;
+    font-size: 0.82rem;
+    border: 0;
+    border-radius: 8px;
+    padding: 0.65rem;
+    cursor: pointer;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+  }
+  .btn-try-api:hover {
+    background: #2563eb;
+  }
+
+  .console-response-box {
+    background: #1e293b;
+    border-radius: 8px;
+    padding: 1rem;
+    font-family: monospace;
+    font-size: 0.75rem;
+    color: #38bdf8;
+    max-height: 22rem;
+    overflow-y: auto;
+    white-space: pre-wrap;
+  }
+
+  /* Tab content switcher */
+  .tab-content {
+    display: none;
+  }
+  .tab-content.active {
+    display: block;
+  }
+</style>
+
+<!-- Developer Header -->
+<header class="api-header">
+  <div class="api-header-left">
+    <a href="{{ url_for('dashboard.home') }}" class="api-header-brand">Clinical Intelligence API</a>
+    <nav class="api-header-nav">
+      <a href="#" onclick="alert('Guides database records loaded.')">Guides</a>
+      <a href="#" class="active">Reference</a>
+      <a href="#" onclick="alert('SDK kits loaded.')">SDKs</a>
+      <a href="#" onclick="alert('Support console loaded.')">Support</a>
+    </nav>
+  </div>
+  <div class="api-header-right">
+    <button class="icon-btn" style="background:transparent; border:0; color:#64748b; cursor:pointer;" onclick="alert('Changing language locale...')"><i data-lucide="globe" style="width:1.2rem; height:1.2rem;"></i></button>
+    <button class="icon-btn" style="background:transparent; border:0; color:#64748b; cursor:pointer;" onclick="alert('Toggle theme palette...')"><i data-lucide="moon" style="width:1.2rem; height:1.2rem;"></i></button>
+    <a href="{{ url_for('dashboard.home') }}" class="btn-console-login">Console Login</a>
+  </div>
+</header>
+
+<div class="api-docs-container">
+  <!-- Left Navigation Column -->
+  <aside class="api-sidebar">
+    <div>
+      <div style="padding-left:0.5rem; margin-bottom:1.5rem;">
+        <span style="font-size:0.75rem; font-weight:800; color:#3b82f6;">v2.4.0-stable</span>
+        <span style="font-size:0.65rem; color:#94a3b8; display:block; margin-top:0.15rem;">Last updated 2 days ago</span>
+      </div>
+
+      <div class="api-sidebar-section">
+        <a class="api-sidebar-item" href="#" onclick="alert('Programmatic introduction payload instructions loaded.')"><i data-lucide="info" style="width:1rem; height:1rem;"></i> Introduction</a>
+        <a class="api-sidebar-item" href="#" onclick="alert('Auth keys mapping details loaded.')"><i data-lucide="key" style="width:1rem; height:1rem;"></i> Authentication</a>
+        <a class="api-sidebar-item" href="#" onclick="alert('Endpoint rate limits constraints loaded.')"><i data-lucide="shield-alert" style="width:1rem; height:1rem;"></i> Rate Limits</a>
+      </div>
+
+      <div class="api-sidebar-section">
+        <div class="api-sidebar-title">Endpoints</div>
+        <a class="api-sidebar-item active" id="side-item-patients" onclick="switchApiTab('patients')">
+          <i data-lucide="user"></i> Patients
+        </a>
+        <a class="api-sidebar-item" id="side-item-risk" onclick="switchApiTab('risk')">
+          <i data-lucide="activity"></i> Risk Assessment
+        </a>
+        <a class="api-sidebar-item" id="side-item-dashboard" onclick="switchApiTab('dashboard')">
+          <i data-lucide="layout-grid"></i> Dashboard
+        </a>
+        <a class="api-sidebar-item" id="side-item-reports" onclick="switchApiTab('reports')">
+          <i data-lucide="file-text"></i> Reports
+        </a>
+      </div>
+    </div>
+
+    <div>
+      <button class="btn-api-key" onclick="alert('Generating new developer API token keys...')"><i data-lucide="plus"></i> Get API Key</button>
+      <a class="api-sidebar-item" href="#" style="padding-left:0.5rem;"><i data-lucide="activity" style="color:#10b981; width:1rem; height:1rem;"></i> Status Page</a>
+    </div>
+  </aside>
+
+  <!-- Center Content Reference Column -->
+  <main class="api-content">
+    
+    <!-- Tab 1: Patients -->
+    <div id="api-doc-patients" class="tab-content active">
+      <h1>Patient Data Access</h1>
+      <p>The Clinical Intelligence API provides programmatic access to anonymized patient records, diagnostic histories, and risk metrics. Use this endpoint to retrieve comprehensive profiles required for population health management and research analysis.</p>
+
+      <div class="auth-banner-box">
+        <h4><i data-lucide="shield-check" style="color:#10b981; width:1.1rem; height:1.1rem;"></i> Authentication</h4>
+        <p>All API requests must include your API Key in the <code>Authorization</code> HTTP header. We use standard Bearer token authentication.</p>
+        <div class="code-token-block">Authorization: Bearer DATAVIBE_YOUR_SECRET_KEY</div>
+      </div>
+
+      <span style="font-size:0.65rem; font-weight:800; color:#94a3b8; text-transform:uppercase;">Base URL</span>
+      <div class="base-url-row">
+        <span style="background:#dbeafe; color:#1e40af; font-size:0.6rem; padding:0.15rem 0.4rem; border-radius:4px; font-weight:800; text-transform:uppercase;">PRODUCTION</span>
+        <span>https://api.datavibe.clinic/v2</span>
+        <i data-lucide="copy" style="margin-left:auto; cursor:pointer; width:0.95rem; height:0.95rem; color:#64748b;" onclick="alert('Copied Base URL')"></i>
+      </div>
+
+      <!-- Endpoint specification -->
+      <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.75rem;">
+        <span class="api-method-badge get">GET</span>
+        <h3 style="margin:0; font-size:1.15rem; font-weight:800; color:#0f172a;">/api/patients</h3>
+      </div>
+      <p style="font-size:0.85rem; color:#475569; margin-bottom:1.5rem;">Retrieve a paginated list of patient records. Filters can be applied to narrow down specific patient cohorts based on clinical markers.</p>
+
+      <span style="font-size:0.65rem; font-weight:800; color:#94a3b8; text-transform:uppercase;">Query Parameters</span>
+      <table class="params-table">
+        <thead>
+          <tr>
+            <th>Parameter</th>
+            <th>Type</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code style="color:#b91c1c; font-weight:700;">limit</code></td>
+            <td style="color:#64748b; font-family:monospace;">integer</td>
+            <td>Number of records to return. Default is 20. Max 100.</td>
+          </tr>
+          <tr>
+            <td><code style="color:#b91c1c; font-weight:700;">offset</code></td>
+            <td style="color:#64748b; font-family:monospace;">integer</td>
+            <td>The starting index for pagination.</td>
+          </tr>
+          <tr>
+            <td><code style="color:#b91c1c; font-weight:700;">risk_score_gt</code></td>
+            <td style="color:#64748b; font-family:monospace;">float</td>
+            <td>Filter patients with a risk score greater than the provided value (0.0 to 1.0).</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Schema Object -->
+      <span style="font-size:0.65rem; font-weight:800; color:#94a3b8; text-transform:uppercase;">Patient Schema</span>
+      <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; padding:1.25rem; margin-top:0.5rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+          <h4 style="margin:0; font-size:0.88rem; font-weight:800; color:#0f172a; font-family:monospace;">PatientObject</h4>
+          <span style="font-size:0.62rem; background:#cbd5e1; padding:0.1rem 0.35rem; border-radius:4px; font-weight:850; font-family:monospace;">JSON</span>
+        </div>
+        
+        <div class="schema-container">
+          <div class="schema-card">
+            <h5>id</h5>
+            <span>string(uuid)</span>
+            <p>Unique identifier for the patient.</p>
+          </div>
+          <div class="schema-card">
+            <h5>clinical_status</h5>
+            <span>enum["active", "monitored", "discharged"]</span>
+            <p>Current status of the patient in the intelligence pipeline.</p>
+          </div>
+          <div class="schema-card">
+            <h5>last_assessment</h5>
+            <span>iso8601 date</span>
+            <p>Timestamp of the most recent clinical evaluation.</p>
+          </div>
+          <div class="schema-card">
+            <h5>vitals_summary</h5>
+            <span>object</span>
+            <p>Condensed object containing average BPM, SpO2, and temp.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: RISK ASSESSMENT -->
+    <div id="api-doc-risk" class="tab-content">
+      <h1>Risk Assessment Programmatic Endpoint</h1>
+      <p>Endpoints related to scoring patient cohorts using the Framingham Cardiovascular Risk metrics. Resolves 10-year risk percentages based on biometric measurements.</p>
+
+      <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.75rem;">
+        <span class="api-method-badge get">GET</span>
+        <h3 style="margin:0; font-size:1.15rem; font-weight:800; color:#0f172a;">/api/risk-assessment</h3>
+      </div>
+      <p style="font-size:0.85rem; color:#475569;">Queries the scoring engine database for predictive high-risk cohorts.</p>
+
+      <span style="font-size:0.65rem; font-weight:800; color:#94a3b8; text-transform:uppercase;">Query Parameters</span>
+      <table class="params-table">
+        <thead>
+          <tr>
+            <th>Parameter</th>
+            <th>Type</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code style="color:#b91c1c; font-weight:700;">category</code></td>
+            <td style="color:#64748b; font-family:monospace;">string</td>
+            <td>Risk categorization filter: "High", "Moderate", "Low".</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- TAB 3: DASHBOARD -->
+    <div id="api-doc-dashboard" class="tab-content">
+      <h1>Dashboard Data Stream</h1>
+      <p>Serves real-time aggregate parameters for public health and clinical analytics panels.</p>
+
+      <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.75rem;">
+        <span class="api-method-badge get">GET</span>
+        <h3 style="margin:0; font-size:1.15rem; font-weight:800; color:#0f172a;">/api/dashboard-data</h3>
+      </div>
+      <p style="font-size:0.85rem; color:#475569;">Returns totals, averages, regional distributions, and active alert objects.</p>
+    </div>
+
+    <!-- TAB 4: REPORTS -->
+    <div id="api-doc-reports" class="tab-content">
+      <h1>Reports Export Portal</h1>
+      <p>Enables scheduling and downloading generated clinical and policy summaries.</p>
+
+      <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.75rem;">
+        <span class="api-method-badge get">GET</span>
+        <h3 style="margin:0; font-size:1.15rem; font-weight:800; color:#0f172a;">/api/reports</h3>
+      </div>
+      <p style="font-size:0.85rem; color:#475569;">List recent PDF and CSV reports metadata.</p>
+    </div>
+  </main>
+
+  <!-- Right Interactive Testing Console Column -->
+  <aside class="api-console">
+    <!-- Top console tabs -->
+    <div class="console-tab-header">
+      <div class="console-tab-tabs">
+        <button class="console-tab-btn active" id="btn-lang-curl" onclick="changeConsoleLang('curl')">cURL</button>
+        <button class="console-tab-btn" id="btn-lang-python" onclick="changeConsoleLang('python')">Python</button>
+        <button class="console-tab-btn" id="btn-lang-js" onclick="changeConsoleLang('javascript')">JavaScript</button>
+      </div>
+      <i data-lucide="copy" style="width:0.95rem; height:0.95rem; color:#94a3b8; cursor:pointer;" onclick="alert('Copied Code Block')"></i>
+    </div>
+
+    <!-- Code Block representation -->
+    <div class="console-code-block" id="console-code-editor">curl --request GET \
+  --url 'https://api.datavibe.clinic/v2/patients?limit=1' \
+  --header 'Authorization: Bearer API_KEY'</div>
+
+    <!-- Try it out button -->
+    <button class="btn-try-api" onclick="executeInteractiveApiTest()"><i data-lucide="play" style="width:0.95rem; height:0.95rem;"></i> Try it out</button>
+
+    <!-- Response panel -->
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #334155; padding-bottom:0.25rem;">
+      <span style="font-size:0.65rem; font-weight:800; color:#94a3b8; text-transform:uppercase;">RESPONSE BODY</span>
+      <span style="font-size:0.62rem; background:#1e293b; color:#34d399; font-weight:900; padding:0.1rem 0.35rem; border-radius:4px;">200 OK</span>
+    </div>
+
+    <div class="console-response-box" id="console-response-viewer">{
+  "status": "success",
+  "data": [
+    {
+      "id": "dv_8829_x12",
+      "first_name": "Helena",
+      "risk_assessment": {
+        "score": 8.14,
+        "level": "low",
+        "last_updated": "2023-11-20T18:38Z"
+      },
+      "diagnoses": [
+        {
+          "code": "I10",
+          "name": "Essential hypertension"
+        }
+      ],
+      "vitals": {
+        "bpm": 72,
+        "spo2": 98
+      }
+    }
+  ],
+  "meta": {
+    "total_count": 1240,
+    "limit": 1
+  }
+}</div>
+  </aside>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Tab/Endpoint Switcher
+  function switchApiTab(tabId) {
+    // Deactivate all sidebar items
+    document.querySelectorAll(".api-sidebar-item").forEach(item => item.classList.remove("active"));
+    
+    // Activate target sidebar item
+    document.getElementById(`side-item-${tabId}`).classList.add("active");
+
+    // Hide all center blocks
+    document.querySelectorAll(".tab-content").forEach(tc => tc.classList.remove("active"));
+
+    // Show active center block
+    const targetBlock = document.getElementById(`api-doc-${tabId}`);
+    if (targetBlock) {
+      targetBlock.classList.add("active");
+    }
+
+    // Update code console content
+    updateConsoleSnippet(tabId);
+  }
+
+  // Interactive console snippets changer
+  let currentLang = 'curl';
+  let currentEndpoint = 'patients';
+
+  function changeConsoleLang(lang) {
+    document.querySelectorAll(".console-tab-btn").forEach(btn => btn.classList.remove("active"));
+    document.getElementById(`btn-lang-${lang}`).classList.add("active");
+    currentLang = lang;
+    updateConsoleSnippet(currentEndpoint);
+  }
+
+  function updateConsoleSnippet(endpoint) {
+    currentEndpoint = endpoint;
+    const snippetElement = document.getElementById("console-code-editor");
+    
+    if (currentLang === 'curl') {
+      snippetElement.textContent = `curl --request GET \\\n  --url 'https://api.datavibe.clinic/v2/${endpoint}?limit=1' \\\n  --header 'Authorization: Bearer API_KEY'`;
+    } else if (currentLang === 'python') {
+      snippetElement.textContent = `import requests\n\nurl = "https://api.datavibe.clinic/v2/${endpoint}"\nheaders = {\n    "Authorization": "Bearer API_KEY"\n}\nresponse = requests.get(url, headers=headers)\nprint(response.json())`;
+    } else if (currentLang === 'javascript') {
+      snippetElement.textContent = `fetch("https://api.datavibe.clinic/v2/${endpoint}", {\n  headers: {\n    "Authorization": "Bearer API_KEY"\n  }\n})\n.then(response => response.json())\n.then(data => console.log(data));`;
+    }
+  }
+
+  // Interactive tester simulation click
+  function executeInteractiveApiTest() {
+    const viewer = document.getElementById("console-response-viewer");
+    viewer.textContent = "Loading response from endpoint server data model...";
+
+    setTimeout(() => {
+      if (currentEndpoint === 'patients') {
+        viewer.textContent = JSON.stringify({
+          status: "success",
+          data: [{
+            id: "dv_8829_x12",
+            first_name: "Helena",
+            risk_assessment: { score: 8.14, level: "low", last_updated: "2023-11-20T18:38Z" },
+            diagnoses: [{ code: "I10", name: "Essential hypertension" }],
+            vitals: { bpm: 72, spo2: 98 }
+          }],
+          meta: { total_count: 1240, limit: 1 }
+        }, null, 2);
+      } else if (currentEndpoint === 'risk') {
+        viewer.textContent = JSON.stringify({
+          status: "success",
+          evaluations: [{
+            patient_id: "p_9012_a",
+            risk_score: 18.5,
+            classification: "High",
+            factors: ["age", "blood_pressure", "cholesterol"]
+          }]
+        }, null, 2);
+      } else if (currentEndpoint === 'dashboard') {
+        viewer.textContent = JSON.stringify({
+          status: "success",
+          metrics: { enrolled_patients: 2847, success_rate: 78.3, alert_count: 14 }
+        }, null, 2);
+      } else if (currentEndpoint === 'reports') {
+        viewer.textContent = JSON.stringify({
+          status: "success",
+          files: [
+            { name: "Annual_Quality_Review_2023.pdf", size_kb: 450, created_at: "2024-10-24T09:45:00Z" }
+          ]
+        }, null, 2);
+      }
+    }, 450);
+  }
+</script>
+{% endblock %}

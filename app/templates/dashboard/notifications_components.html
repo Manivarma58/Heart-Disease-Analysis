@@ -1,0 +1,552 @@
+{% extends "base.html" %}
+{% block title %}Alert Center - DataVibe{% endblock %}
+{% block content %}
+<style>
+  /* Layout Grid Container */
+  .dashboard-container {
+    display: grid;
+    grid-template-columns: 16rem 1fr;
+    min-height: calc(100vh - 70px);
+    background: #f8fafc;
+    transition: grid-template-columns 0.3s ease;
+  }
+  .dashboard-container.collapsed {
+    grid-template-columns: 4.8rem 1fr;
+  }
+
+  /* Sidebar Navigation */
+  .sidebar {
+    background: white;
+    border-right: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1.5rem 1rem;
+    overflow-y: auto;
+    transition: padding 0.3s ease;
+  }
+  .dashboard-container.collapsed .sidebar {
+    padding: 1.5rem 0.5rem;
+    align-items: center;
+  }
+
+  .sidebar-brand-section {
+    transition: opacity 0.2s;
+  }
+  .dashboard-container.collapsed .sidebar-brand-section {
+    opacity: 0;
+    display: none;
+  }
+
+  .sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 2rem;
+  }
+  .sidebar-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #64748b;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .sidebar-menu-item:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+  }
+  .sidebar-menu-item.active {
+    background: #eff6ff;
+    color: #3b82f6;
+    border-left-color: #3b82f6;
+    border-radius: 0 8px 8px 0;
+  }
+  .sidebar-menu-item i {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+  }
+  
+  .menu-text {
+    transition: opacity 0.2s;
+  }
+  .dashboard-container.collapsed .menu-text {
+    opacity: 0;
+    display: none;
+  }
+
+  .sidebar-toggle-btn {
+    align-self: flex-end;
+    background: transparent;
+    border: 0;
+    color: #64748b;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    transition: background 0.2s;
+  }
+  .sidebar-toggle-btn:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+  }
+
+  /* Workspace */
+  .workspace {
+    padding: 2rem clamp(1rem, 4vw, 2.5rem);
+    overflow-y: auto;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  /* Top full-width banner */
+  .system-banner-ds {
+    background: #0b3c5d;
+    color: white;
+    padding: 0.85rem 1.25rem;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.82rem;
+    margin-bottom: 2rem;
+  }
+  .system-banner-ds h4 {
+    margin: 0 0 0.15rem;
+    font-weight: 800;
+  }
+  .system-banner-ds p {
+    margin: 0;
+    opacity: 0.85;
+  }
+
+  /* Col Layouts */
+  .alert-suite-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1.3fr 1.3fr;
+    gap: 1.5rem;
+  }
+  @media (max-width: 1000px) {
+    .alert-suite-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Alerts Banners / Toast notifications */
+  .toast-wrapper-ds {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+  .toast-card-ds {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #3b82f6;
+    border-radius: 0 10px 10px 0;
+    padding: 0.85rem 1rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    position: relative;
+    display: flex;
+    gap: 0.75rem;
+  }
+  .toast-card-ds.success { border-left-color: #10b981; }
+  .toast-card-ds.warning { border-left-color: #f59e0b; }
+  .toast-card-ds.error { border-left-color: #ef4444; }
+
+  .toast-card-ds h5 {
+    margin: 0 0 0.15rem;
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: #1e293b;
+  }
+  .toast-card-ds p {
+    margin: 0;
+    font-size: 0.75rem;
+    color: #64748b;
+    line-height: 1.35;
+  }
+
+  /* Notification Center */
+  .notification-center-card {
+    background: white;
+    border: 1px solid #cbd5e1;
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.005);
+  }
+  .center-header-ds {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1.5px solid #e2e8f0;
+    padding-bottom: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .center-header-ds h3 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 850;
+    color: #0f172a;
+  }
+
+  /* Item list */
+  .center-item-list {
+    display: flex;
+    flex-direction: column;
+  }
+  .center-item-row {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.95rem 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .center-item-row:last-child {
+    border-bottom: 0;
+  }
+  .item-badge-wrap {
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+  .item-badge-wrap.critical { background: #fee2e2; color: #ef4444; }
+  .item-badge-wrap.success { background: #d1fae5; color: #10b981; }
+  .item-badge-wrap.info { background: #dbeafe; color: #3b82f6; }
+  .item-badge-wrap.user { background: #f1f5f9; color: #64748b; }
+
+  .center-item-content {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+  .center-item-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.15rem;
+  }
+  .center-item-top h4 {
+    margin: 0;
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: #1e293b;
+  }
+  .center-item-top span {
+    font-size: 0.65rem;
+    color: #94a3b8;
+    font-weight: 700;
+  }
+  .center-item-content p {
+    margin: 0 0 0.5rem;
+    font-size: 0.75rem;
+    color: #64748b;
+    line-height: 1.35;
+  }
+
+  /* Dialog Suite Card */
+  .dialog-card-ds {
+    background: white;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  .dialog-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+  .dialog-card-header i {
+    width: 1.15rem;
+    height: 1.15rem;
+  }
+  .dialog-card-header h4 {
+    margin: 0;
+    font-size: 0.88rem;
+    font-weight: 850;
+    color: #0f172a;
+  }
+  .dialog-card-ds p {
+    margin: 0 0 1.25rem;
+    font-size: 0.78rem;
+    color: #475569;
+    line-height: 1.4;
+  }
+  .dialog-actions-row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  /* Modal Buttons */
+  .btn-dialog {
+    border: 1px solid #cbd5e1;
+    background: white;
+    color: #475569;
+    border-radius: 6px;
+    padding: 0.45rem 1rem;
+    font-size: 0.78rem;
+    font-weight: 750;
+    cursor: pointer;
+  }
+  .btn-dialog.danger {
+    background: #b91c1c;
+    border-color: #b91c1c;
+    color: white;
+  }
+  .btn-dialog.warning {
+    background: #d97706;
+    border-color: #d97706;
+    color: white;
+  }
+  .btn-dialog.info {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: white;
+  }
+</style>
+
+<div class="dashboard-container" id="dashboard-container">
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <div>
+      <button class="sidebar-toggle-btn" id="sidebar-toggle">
+        <i data-lucide="chevrons-left" id="toggle-icon"></i>
+      </button>
+
+      <div class="sidebar-brand-section" style="padding-left: 1rem; margin-bottom: 1.5rem; margin-top: 0.5rem;">
+        <span style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.5px;">Alert Center</span>
+        <span style="font-size: 1.15rem; font-weight: 800; color: #3b82f6; display: block; font-family: Poppins, sans-serif; margin-top: 0.15rem;">Managing 14 Nodes</span>
+      </div>
+
+      <nav class="sidebar-menu">
+        <a href="{{ url_for('dashboard.home') }}" class="sidebar-menu-item">
+          <i data-lucide="layout-grid"></i>
+          <span class="menu-text">Dashboard</span>
+        </a>
+        <a href="{{ url_for('clinical.clinical_dashboard') }}" class="sidebar-menu-item">
+          <i data-lucide="users"></i>
+          <span class="menu-text">Patients</span>
+        </a>
+        <a href="{{ url_for('dashboard.tableau_style_dashboard') }}" class="sidebar-menu-item">
+          <i data-lucide="line-chart"></i>
+          <span class="menu-text">Analytics</span>
+        </a>
+        <a href="{{ url_for('dashboard.heart_disease_story') }}" class="sidebar-menu-item">
+          <i data-lucide="file-text"></i>
+          <span class="menu-text">Reporting</span>
+        </a>
+        <a href="{{ url_for('dashboard.notifications_components_page') }}" class="sidebar-menu-item active">
+          <i data-lucide="bell"></i>
+          <span class="menu-text">Alerts Hub</span>
+        </a>
+      </nav>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="{{ url_for('dashboard.settings_page') }}" class="sidebar-menu-item" style="margin: 0;"><i data-lucide="settings"></i> <span class="menu-text">Settings</span></a>
+      <a href="#" class="sidebar-menu-item" style="margin: 0;"><i data-lucide="help-circle"></i> <span class="menu-text">Support</span></a>
+    </div>
+  </aside>
+
+  <!-- Workspace content -->
+  <main class="workspace">
+    <!-- Top System Banner -->
+    <div class="system-banner-ds" id="top-maintenance-banner">
+      <div>
+        <h4>System Maintenance Scheduled</h4>
+        <p>Database optimization on Sunday, Oct 22 at 02:00 UTC.</p>
+      </div>
+      <button style="background:transparent; border:0; color:white; font-size:1.2rem; cursor:pointer;" onclick="document.getElementById('top-maintenance-banner').remove()">&times;</button>
+    </div>
+
+    <!-- Alert Suite layouts -->
+    <div class="alert-suite-grid">
+      <!-- Column 1: Toast notifications -->
+      <div class="toast-wrapper-ds">
+        <span style="font-size: 0.65rem; font-weight:800; color:#94a3b8; letter-spacing:0.5px; text-transform:uppercase; display:block; margin-bottom:0.25rem;">TOASTS & BANNERS</span>
+        
+        <div class="toast-card-ds success" id="toast-sync">
+          <i data-lucide="check-circle" style="color:#10b981; flex-shrink:0;"></i>
+          <div>
+            <h5>Sync Complete</h5>
+            <p>Biometric database successfully mapped.</p>
+          </div>
+          <button style="position:absolute; right:8px; top:8px; background:transparent; border:0; color:#cbd5e1; cursor:pointer;" onclick="document.getElementById('toast-sync').remove()">&times;</button>
+        </div>
+
+        <div class="toast-card-ds error" id="toast-conn">
+          <i data-lucide="alert-triangle" style="color:#ef4444; flex-shrink:0;"></i>
+          <div>
+            <h5>Connection Failed</h5>
+            <p>Local gateway node is offline. Consider archiving.</p>
+          </div>
+          <button style="position:absolute; right:8px; top:8px; background:transparent; border:0; color:#cbd5e1; cursor:pointer;" onclick="document.getElementById('toast-conn').remove()">&times;</button>
+        </div>
+      </div>
+
+      <!-- Column 2: Notification Center -->
+      <div>
+        <span style="font-size: 0.65rem; font-weight:800; color:#94a3b8; letter-spacing:0.5px; text-transform:uppercase; display:block; margin-bottom:0.25rem;">NOTIFICATION CENTER</span>
+        
+        <div class="notification-center-card">
+          <div class="center-header-ds">
+            <h3>Notifications</h3>
+            <div style="display:flex; gap:0.75rem; font-size:0.7rem; font-weight:800;">
+              <a href="#" style="color:#2563eb; text-decoration:none;" onclick="alert('All records updated to read status.')">Mark all as read</a>
+              <a href="#" style="color:#b91c1c; text-decoration:none;" onclick="document.getElementById('notify-center-items').innerHTML = '<div style=\'text-align:center; padding:2rem; color:#94a3b8; font-weight:700;\'>No notifications</div>'">Clear all</a>
+            </div>
+          </div>
+
+          <div class="center-item-list" id="notify-center-items">
+            <!-- Item 1 -->
+            <div class="center-item-row">
+              <div class="item-badge-wrap critical"><i data-lucide="alert-octagon"></i></div>
+              <div class="center-item-content">
+                <div class="center-item-top">
+                  <h4>Critical Alert</h4>
+                  <span>2m ago</span>
+                </div>
+                <p>Patient PAT-8821 Risk Spike detected in Vitals Monitor.</p>
+                <div style="display:flex; gap:0.5rem;">
+                  <button class="btn-new-report" style="padding:0.35rem 0.65rem; font-size:0.68rem; background:#b91c1c;" onclick="alert('Reviewing vitals metrics...')">Review Now</button>
+                  <button class="btn-export" style="padding:0.35rem 0.65rem; font-size:0.68rem; border-color:#cbd5e1;" onclick="this.parentElement.parentElement.parentElement.remove()">Dismiss</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Item 2 -->
+            <div class="center-item-row">
+              <div class="item-badge-wrap success"><i data-lucide="refresh-cw"></i></div>
+              <div class="center-item-content">
+                <div class="center-item-top">
+                  <h4>Sync Complete</h4>
+                  <span>1h ago</span>
+                </div>
+                <p>Biometric database successfully synced with centralized node 04.</p>
+              </div>
+            </div>
+
+            <!-- Item 3 -->
+            <div class="center-item-row">
+              <div class="item-badge-wrap info"><i data-lucide="file-text"></i></div>
+              <div class="center-item-content">
+                <div class="center-item-top">
+                  <h4>Weekly Report Ready</h4>
+                  <span>4h ago</span>
+                </div>
+                <p>The performance audit for Ward 7-B is now available for download.</p>
+              </div>
+            </div>
+
+            <!-- Item 4 -->
+            <div class="center-item-row">
+              <div class="item-badge-wrap user"><i data-lucide="user-plus"></i></div>
+              <div class="center-item-content">
+                <div class="center-item-top">
+                  <h4>User Joined</h4>
+                  <span>Yesterday</span>
+                </div>
+                <p>Dr. Sarah Chen has joined the Oncology protocol workspace.</p>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-export" style="width:100%; border:1.5px solid #cbd5e1; background:white; color:#3b82f6; font-size:0.78rem; font-weight:800; justify-content:center; display:flex; margin-top:1.25rem;" onclick="alert('Opening full notifications history logs...')">View All Notifications</button>
+        </div>
+      </div>
+
+      <!-- Column 3: Modal Dialog Suite -->
+      <div>
+        <span style="font-size: 0.65rem; font-weight:800; color:#94a3b8; letter-spacing:0.5px; text-transform:uppercase; display:block; margin-bottom:0.25rem;">MODAL DIALOG SUITE</span>
+        
+        <!-- Dialog 1 -->
+        <div class="dialog-card-ds">
+          <div class="dialog-card-header">
+            <i data-lucide="trash-2" style="color:#ef4444;"></i>
+            <h4>Delete Analysis?</h4>
+          </div>
+          <p>This action will permanently remove the "Quarterly Cardiac Trends" dataset. This cannot be undone.</p>
+          <div class="dialog-actions-row">
+            <button class="btn-dialog" onclick="alert('Action cancelled.')">Cancel</button>
+            <button class="btn-dialog danger" onclick="alert('Dataset permanently deleted.')">Delete</button>
+          </div>
+        </div>
+
+        <!-- Dialog 2 -->
+        <div class="dialog-card-ds">
+          <div class="dialog-card-header">
+            <i data-lucide="alert-triangle" style="color:#f59e0b;"></i>
+            <h4>Unsaved Changes</h4>
+          </div>
+          <p>You have unsaved changes in the Patient Intake form. If you leave now, your progress will be lost.</p>
+          <div class="dialog-actions-row">
+            <button class="btn-dialog" onclick="alert('Staying on form page.')">Stay</button>
+            <button class="btn-dialog warning" onclick="alert('Leaving page. Progress discarded.')">Leave</button>
+          </div>
+        </div>
+
+        <!-- Dialog 3 -->
+        <div class="dialog-card-ds">
+          <div class="dialog-card-header">
+            <i data-lucide="info" style="color:#2563eb;"></i>
+            <h4>System Update</h4>
+          </div>
+          <p>The clinical intelligence core has been updated to v4.2.0. Check the documentation for new AI diagnostic capabilities.</p>
+          <div class="dialog-actions-row">
+            <button class="btn-dialog info" style="width:100%;" onclick="alert('Welcome to v4.2.0!')">Got it</button>
+          </div>
+        </div>
+
+        <!-- Fullscreen dialog trigger -->
+        <div class="dialog-card-ds" style="background:#003366; color:white; border-color:#003366;">
+          <div style="display:flex; justify-content:space-between; align-items:center; font-weight:800; font-size:0.85rem;">
+            <span>Full-Screen Data Entry</span>
+            <i data-lucide="maximize" style="cursor:pointer;" onclick="alert('Expanding into full-screen diagnostic console...')"></i>
+          </div>
+          
+          <div style="border:1px dashed rgba(255,255,255,0.3); border-radius:6px; background:rgba(255,255,255,0.05); padding:1rem; text-align:center; font-size:0.65rem; font-weight:750; margin-top:0.75rem;">
+            Miniaturized Preview
+            <div style="height:3px; background:rgba(255,255,255,0.2); width:3rem; margin:0.35rem auto; border-radius:99px;"></div>
+            <div style="background:rgba(255,255,255,0.1); border-radius:4px; padding:0.65rem 0.5rem; margin-top:0.5rem;">Form Content Area</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Sidebar toggle animation
+  const sidebarToggle = document.getElementById("sidebar-toggle");
+  const dbContainer = document.getElementById("dashboard-container");
+  const toggleIcon = document.getElementById("toggle-icon");
+  
+  if (sidebarToggle && dbContainer) {
+    sidebarToggle.addEventListener("click", () => {
+      dbContainer.classList.toggle("collapsed");
+      if (dbContainer.classList.contains("collapsed")) {
+        toggleIcon.setAttribute("data-lucide", "chevrons-right");
+      } else {
+        toggleIcon.setAttribute("data-lucide", "chevrons-left");
+      }
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    });
+  }
+</script>
+{% endblock %}

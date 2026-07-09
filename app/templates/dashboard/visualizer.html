@@ -1,0 +1,801 @@
+{% extends "base.html" %}
+{% block title %}System Visualizer - DataVibe{% endblock %}
+{% block content %}
+<style>
+  /* Layout Grid Container */
+  .dashboard-container {
+    display: grid;
+    grid-template-columns: 16rem 1fr;
+    min-height: calc(100vh - 70px);
+    background: #f8fafc;
+    transition: grid-template-columns 0.3s ease;
+  }
+  .dashboard-container.collapsed {
+    grid-template-columns: 4.8rem 1fr;
+  }
+
+  /* Sidebar Navigation */
+  .sidebar {
+    background: white;
+    border-right: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1.5rem 1rem;
+    overflow-y: auto;
+    transition: padding 0.3s ease;
+  }
+  .dashboard-container.collapsed .sidebar {
+    padding: 1.5rem 0.5rem;
+    align-items: center;
+  }
+
+  .sidebar-brand-section {
+    transition: opacity 0.2s;
+  }
+  .dashboard-container.collapsed .sidebar-brand-section {
+    opacity: 0;
+    display: none;
+  }
+
+  .sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 2rem;
+  }
+  .sidebar-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #64748b;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .sidebar-menu-item:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+  }
+  .sidebar-menu-item.active {
+    background: #eff6ff;
+    color: #3b82f6;
+    border-left-color: #3b82f6;
+    border-radius: 0 8px 8px 0;
+  }
+  .sidebar-menu-item i {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+  }
+  
+  .menu-text {
+    transition: opacity 0.2s;
+  }
+  .dashboard-container.collapsed .menu-text {
+    opacity: 0;
+    display: none;
+  }
+
+  .sidebar-toggle-btn {
+    align-self: flex-end;
+    background: transparent;
+    border: 0;
+    color: #64748b;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    transition: background 0.2s;
+  }
+  .sidebar-toggle-btn:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+  }
+
+  /* Workspace */
+  .workspace {
+    padding: 2rem clamp(1rem, 4vw, 2.5rem);
+    overflow-y: auto;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  /* Header Section */
+  .workspace-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 1.25rem;
+  }
+  .workspace-head h1 {
+    font-size: 1.65rem;
+    font-weight: 850;
+    color: #0f172a;
+    margin: 0 0 0.25rem;
+  }
+  .workspace-head p {
+    font-size: 0.88rem;
+    color: #64748b;
+    margin: 0;
+    font-weight: 600;
+  }
+
+  /* Section Title styling */
+  .section-title-ph {
+    font-family: Poppins, sans-serif;
+    font-size: 0.85rem;
+    font-weight: 750;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin: 2.25rem 0 1rem;
+    border-left: 3px solid #3b82f6;
+    padding-left: 0.5rem;
+  }
+
+  /* Cards grid layouts */
+  .cards-row-three {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 1.25rem;
+  }
+  .cards-row-equal-three {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+  .cards-row-two {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+  @media (max-width: 900px) {
+    .cards-row-three, .cards-row-equal-three, .cards-row-two {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .viz-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.005);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 18rem;
+  }
+  .viz-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.85rem;
+  }
+  .viz-card-header h3 {
+    margin: 0;
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: #1e293b;
+  }
+
+  /* Heatmap grid layout */
+  .heatmap-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 0.5rem;
+  }
+  .heatmap-cell {
+    aspect-ratio: 1;
+    border-radius: 4px;
+    background: #eff6ff;
+  }
+  .heatmap-cell.level-1 { background: #dbeafe; }
+  .heatmap-cell.level-2 { background: #93c5fd; }
+  .heatmap-cell.level-3 { background: #3b82f6; }
+  .heatmap-cell.level-4 { background: #1d4ed8; }
+  .heatmap-cell.level-5 { background: #1e3a8a; }
+
+  /* Treemap blocks */
+  .treemap-container {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    grid-template-rows: 1.2fr 1fr;
+    gap: 6px;
+    height: 12rem;
+  }
+  .treemap-box {
+    border-radius: 8px;
+    padding: 0.75rem;
+    color: white;
+    font-weight: 750;
+    font-size: 0.72rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .treemap-box h4 {
+    margin: 0;
+    text-transform: uppercase;
+    font-size: 0.58rem;
+    letter-spacing: 0.5px;
+    opacity: 0.85;
+  }
+  .treemap-box span {
+    font-size: 1.15rem;
+    font-weight: 800;
+  }
+
+  /* Geographic map overlay */
+  .density-map-card {
+    height: 12rem;
+    background: radial-gradient(circle at 30% 40%, rgba(37, 99, 235, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 75% 70%, rgba(37, 99, 235, 0.2) 0%, transparent 35%);
+    background-color: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+  .map-grid-dots {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px);
+    background-size: 12px 12px;
+  }
+  .map-tooltip-box {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    background: white;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    font-size: 0.7rem;
+    font-weight: 750;
+    color: #1e293b;
+    line-height: 1.3;
+  }
+
+  /* Active patient registry table */
+  .registry-table-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.005);
+  }
+  .registry-search-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+  .registry-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .registry-table th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1.5px solid #cbd5e1;
+  }
+  .registry-table td {
+    padding: 0.95rem 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.85rem;
+    color: #334155;
+    font-weight: 600;
+  }
+  .registry-table tr:hover td {
+    background: #f8fafc;
+  }
+
+  .sparkline-bar-group {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 2.5px;
+    height: 1rem;
+    vertical-align: middle;
+  }
+  .spark-bar {
+    width: 3.5px;
+    background: #cbd5e1;
+    border-radius: 1px;
+  }
+  .spark-bar.active { background: #3b82f6; }
+  .spark-bar.high { background: #ef4444; }
+
+  /* Table badges */
+  .badge-mod-risk {
+    font-size: 0.65rem;
+    font-weight: 800;
+    background: #eff6ff;
+    color: #2563eb;
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  .badge-mod-risk.high {
+    background: #fee2e2;
+    color: #b91c1c;
+  }
+  .badge-mod-risk.low {
+    background: #ecfdf5;
+    color: #047857;
+  }
+</style>
+
+<div class="dashboard-container" id="dashboard-container">
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <div>
+      <button class="sidebar-toggle-btn" id="sidebar-toggle">
+        <i data-lucide="chevrons-left" id="toggle-icon"></i>
+      </button>
+
+      <div class="sidebar-brand-section" style="padding-left: 1rem; margin-bottom: 1.5rem; margin-top: 0.5rem;">
+        <span style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.5px;">Pulse Analytics</span>
+        <span style="font-size: 1.15rem; font-weight: 800; color: #3b82f6; display: block; font-family: Poppins, sans-serif; margin-top: 0.15rem;">Cardiology Unit</span>
+      </div>
+
+      <nav class="sidebar-menu">
+        <a href="{{ url_for('dashboard.home') }}" class="sidebar-menu-item">
+          <i data-lucide="layout-grid"></i>
+          <span class="menu-text">Dashboard</span>
+        </a>
+        <a href="{{ url_for('clinical.clinical_dashboard') }}" class="sidebar-menu-item">
+          <i data-lucide="users"></i>
+          <span class="menu-text">Patients</span>
+        </a>
+        <a href="{{ url_for('dashboard.tableau_style_dashboard') }}" class="sidebar-menu-item">
+          <i data-lucide="line-chart"></i>
+          <span class="menu-text">Analytics</span>
+        </a>
+        <a href="{{ url_for('dashboard.heart_disease_story') }}" class="sidebar-menu-item">
+          <i data-lucide="file-text"></i>
+          <span class="menu-text">Reporting</span>
+        </a>
+        <a href="{{ url_for('dashboard.visualizer_page') }}" class="sidebar-menu-item active">
+          <i data-lucide="package"></i>
+          <span class="menu-text">Visualizer</span>
+        </a>
+      </nav>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="{{ url_for('dashboard.settings_page') }}" class="sidebar-menu-item" style="margin: 0;"><i data-lucide="user"></i> <span class="menu-text">Profile Settings</span></a>
+      <a href="#" class="sidebar-menu-item" style="margin: 0;"><i data-lucide="help-circle"></i> <span class="menu-text">Support</span></a>
+    </div>
+  </aside>
+
+  <!-- Workspace content -->
+  <main class="workspace">
+    <div class="workspace-head">
+      <div>
+        <h1>System Visualizer</h1>
+        <p>High-precision longitudinal clinical data analysis. Visualizing institutional performance and patient registry metrics.</p>
+      </div>
+      
+      <div style="display:flex; align-items:center; gap:0.75rem;">
+        <button class="btn-export" onclick="alert('Exporting visuals compilation summary...')"><i data-lucide="download"></i> Export</button>
+        <button class="btn-new-report" style="background:#003366;" onclick="alert('Start building new query analytics metrics...')"><i data-lucide="plus"></i> New Query</button>
+      </div>
+    </div>
+
+    <!-- SECTION 1: PRIMARY CHARTS -->
+    <div class="section-title-ph">Primary Charts</div>
+    <div class="cards-row-three">
+      <!-- Card 1: Multi-series Line Chart -->
+      <div class="viz-card">
+        <div class="viz-card-header">
+          <h3>Patient Outcomes (90-Day Trend)</h3>
+          <div style="display:flex; gap:0.75rem; font-size:0.7rem; font-weight:750;">
+            <span style="color:#3b82f6;"><span style="display:inline-block; width:6px; height:6px; background:#3b82f6; border-radius:50%; margin-right:3px;"></span> Target</span>
+            <span style="color:#78350f;"><span style="display:inline-block; width:6px; height:6px; background:#78350f; border-radius:50%; margin-right:3px;"></span> Actual</span>
+          </div>
+        </div>
+        <div style="height: 12rem; position: relative;">
+          <canvas id="lineTrendChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Card 2: Vertical/Horizontal Bar Chart -->
+      <div class="viz-card">
+        <div class="viz-card-header">
+          <h3>Acuity Distribution</h3>
+        </div>
+        <div style="height: 12rem; position: relative;">
+          <canvas id="acuityBarChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Card 3: Gauge Chart -->
+      <div class="viz-card">
+        <div class="viz-card-header">
+          <h3>Risk Stratification</h3>
+        </div>
+        
+        <div style="text-align:center; padding:1rem 0;">
+          <div style="width: 7rem; height: 7rem; margin: 0 auto; position: relative; border-radius: 50%; border: 6px solid #eff6ff; border-top-color: #2563eb; display:grid; place-items:center;">
+            <div>
+              <span style="display:block; font-size:1.55rem; font-weight:900; color:#0f172a;">64%</span>
+              <span style="font-size:0.58rem; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">STABLE</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-weight:750; color:#475569; border-top:1px solid #f1f5f9; padding-top:0.75rem;">
+          <span>Elevated: 36%</span>
+          <span>Baseline: 64%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: ADVANCED ANALYTICS -->
+    <div class="section-title-ph">Advanced Analytics</div>
+    <div class="cards-row-equal-three">
+      <!-- Card 1: Heat Map -->
+      <div class="viz-card">
+        <div class="viz-card-header">
+          <h3>Clinic Capacity (Heat Map)</h3>
+          <span style="font-size:0.65rem; font-weight:800; color:#94a3b8; text-transform:uppercase;">MON - SUN</span>
+        </div>
+        <div>
+          <!-- Heatmap grid representation -->
+          <div class="heatmap-grid">
+            <div class="heatmap-cell level-1"></div><div class="heatmap-cell level-3"></div><div class="heatmap-cell level-5"></div><div class="heatmap-cell level-2"></div><div class="heatmap-cell level-4"></div><div class="heatmap-cell level-1"></div><div class="heatmap-cell level-3"></div>
+            <div class="heatmap-cell level-2"></div><div class="heatmap-cell level-4"></div><div class="heatmap-cell level-1"></div><div class="heatmap-cell level-3"></div><div class="heatmap-cell level-5"></div><div class="heatmap-cell level-2"></div><div class="heatmap-cell level-4"></div>
+            <div class="heatmap-cell level-3"></div><div class="heatmap-cell level-5"></div><div class="heatmap-cell level-2"></div><div class="heatmap-cell level-4"></div><div class="heatmap-cell level-1"></div><div class="heatmap-cell level-3"></div><div class="heatmap-cell level-5"></div>
+            <div class="heatmap-cell level-4"></div><div class="heatmap-cell level-1"></div><div class="heatmap-cell level-3"></div><div class="heatmap-cell level-5"></div><div class="heatmap-cell level-2"></div><div class="heatmap-cell level-4"></div><div class="heatmap-cell level-1"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.68rem; font-weight:750; color:#64748b; margin-top:0.75rem;">
+            <span>08:00</span>
+            <span>MON - SUN</span>
+            <span>20:00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: Scatter Plot -->
+      <div class="viz-card">
+        <div class="viz-card-header">
+          <h3>Risk vs. Age</h3>
+        </div>
+        <div style="height: 12rem; position: relative;">
+          <canvas id="scatterAgeChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Card 3: Gauge/System Health Card -->
+      <div class="viz-card">
+        <div class="viz-card-header">
+          <h3>System Health</h3>
+        </div>
+        
+        <div style="text-align:center; padding:1.25rem 0;">
+          <span style="font-size:2.2rem; font-weight:900; color:#0f172a; display:block; line-height:1.1;">94.2</span>
+          <span style="font-size:0.68rem; background:#ecfdf5; color:#047857; font-weight:850; padding:0.15rem 0.5rem; border-radius:99px; text-transform:uppercase; display:inline-block; margin-top:0.35rem; letter-spacing:0.5px;">OPTIMAL</span>
+        </div>
+
+        <div style="border-top:1px solid #f1f5f9; padding-top:0.75rem; font-size:0.72rem; color:#64748b; font-weight:600; line-height:1.4;">
+          Clinic response latency: <strong>48ms</strong>. Active threads processing clean queues.
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: GEOGRAPHIC & STRUCTURAL -->
+    <div class="section-title-ph">Geographic & Structural</div>
+    <div class="cards-row-two">
+      <!-- Card 1: Treemap -->
+      <div class="viz-card">
+        <div class="viz-card-header">
+          <h3>Resource Allocation</h3>
+        </div>
+        <div class="treemap-container">
+          <div class="treemap-box" style="background:#1d4ed8; grid-row: span 2;">
+            <h4>Cardiology</h4>
+            <span>42%</span>
+          </div>
+          <div class="treemap-box" style="background:#3b82f6;">
+            <h4>Oncology</h4>
+            <span>18%</span>
+          </div>
+          <div class="treemap-box" style="background:#93c5fd; color:#1e3a8a;">
+            <h4>Neuro</h4>
+            <span>12%</span>
+          </div>
+          <div class="treemap-box" style="background:#f1f5f9; color:#475569; grid-column: span 2;">
+            <h4 style="color:#64748b;">Others</h4>
+            <span>28%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: Density Map -->
+      <div class="viz-card">
+        <div class="viz-card-header">
+          <h3>Regional Patient Density</h3>
+        </div>
+        <div class="density-map-card">
+          <div class="map-grid-dots"></div>
+          
+          <div class="map-tooltip-box">
+            <span style="font-weight:800; display:block;">East Coast Cluster</span>
+            <small style="color:#64748b; font-weight:600;">8.4k Active Records</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 4: DATA TABLE COMPONENT -->
+    <div class="section-title-ph">Active Patient Registry</div>
+    
+    <div class="registry-table-card">
+      <div class="registry-search-row">
+        <div style="display:flex; align-items:center; background:#f1f5f9; border-radius:99px; padding:0.4rem 1rem; width:22rem; max-width:100%;">
+          <i data-lucide="search" style="color:#64748b; width:1.05rem; height:1.05rem; flex-shrink:0;"></i>
+          <input type="text" placeholder="Search registry..." style="border:0; background:transparent; outline:none; font-size:0.82rem; margin-left:0.5rem; width:100%; color:#334155; font-weight:600;">
+        </div>
+
+        <button class="btn-export" style="border:1.5px solid #cbd5e1; background:white; color:#475569; padding:0.45rem 1rem;" onclick="alert('Table CSV export initiated...')"><i data-lucide="download"></i> Export CSV</button>
+      </div>
+
+      <table class="registry-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Patient Name</th>
+            <th>Risk Score & Trend</th>
+            <th>Last Visit</th>
+            <th style="text-align:right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="color:#3b82f6; font-weight:750; font-family:monospace;">#PAT-8821</td>
+            <td>
+              <div style="display:flex; align-items:center; gap:0.5rem;">
+                <div style="width:2rem; height:2rem; border-radius:50%; background:#eff6ff; color:#3b82f6; display:grid; place-items:center; font-weight:800; font-size:0.75rem;">EK</div>
+                <div>
+                  <span style="display:block;">Elena Kostic</span>
+                  <small style="color:#94a3b8; font-weight:600;">Female, 62y</small>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="badge-mod-risk high">HIGH (8.4)</span>
+              <!-- Sparklines bar chart -->
+              <span class="sparkline-bar-group" style="margin-left:0.5rem;">
+                <span class="spark-bar active high" style="height:4px;"></span>
+                <span class="spark-bar active high" style="height:9px;"></span>
+                <span class="spark-bar active high" style="height:7px;"></span>
+                <span class="spark-bar active high" style="height:12px;"></span>
+                <span class="spark-bar active high" style="height:15px;"></span>
+              </span>
+            </td>
+            <td style="color:#64748b;">2023-11-14</td>
+            <td style="text-align:right;">
+              <button style="background:transparent; border:0; color:#3b82f6; cursor:pointer;" onclick="alert('View Elena Kostic profile modal details')"><i data-lucide="eye" style="width:1.05rem; height:1.05rem;"></i></button>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="color:#3b82f6; font-weight:750; font-family:monospace;">#PAT-8844</td>
+            <td>
+              <div style="display:flex; align-items:center; gap:0.5rem;">
+                <div style="width:2rem; height:2rem; border-radius:50%; background:#f1f5f9; color:#475569; display:grid; place-items:center; font-weight:800; font-size:0.75rem;">JD</div>
+                <div>
+                  <span style="display:block;">Jameson Duley</span>
+                  <small style="color:#94a3b8; font-weight:600;">Male, 45y</small>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="badge-mod-risk">MOD (4.1)</span>
+              <span class="sparkline-bar-group" style="margin-left:0.5rem;">
+                <span class="spark-bar active" style="height:12px;"></span>
+                <span class="spark-bar active" style="height:10px;"></span>
+                <span class="spark-bar active" style="height:8px;"></span>
+                <span class="spark-bar active" style="height:6px;"></span>
+                <span class="spark-bar active" style="height:5px;"></span>
+              </span>
+            </td>
+            <td style="color:#64748b;">2023-11-10</td>
+            <td style="text-align:right;">
+              <button style="background:transparent; border:0; color:#3b82f6; cursor:pointer;" onclick="alert('View Jameson Duley profile modal details')"><i data-lucide="eye" style="width:1.05rem; height:1.05rem;"></i></button>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="color:#3b82f6; font-weight:750; font-family:monospace;">#PAT-8901</td>
+            <td>
+              <div style="display:flex; align-items:center; gap:0.5rem;">
+                <div style="width:2rem; height:2rem; border-radius:50%; background:#f1f5f9; color:#475569; display:grid; place-items:center; font-weight:800; font-size:0.75rem;">MW</div>
+                <div>
+                  <span style="display:block;">Marcus Wong</span>
+                  <small style="color:#94a3b8; font-weight:600;">Male, 29y</small>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="badge-mod-risk low">LOW (1.2)</span>
+              <span class="sparkline-bar-group" style="margin-left:0.5rem;">
+                <span class="spark-bar active" style="height:2px; background:#10b981;"></span>
+                <span class="spark-bar active" style="height:2px; background:#10b981;"></span>
+                <span class="spark-bar active" style="height:3px; background:#10b981;"></span>
+                <span class="spark-bar active" style="height:2px; background:#10b981;"></span>
+                <span class="spark-bar active" style="height:2px; background:#10b981;"></span>
+              </span>
+            </td>
+            <td style="color:#64748b;">2023-11-15</td>
+            <td style="text-align:right;">
+              <button style="background:transparent; border:0; color:#3b82f6; cursor:pointer;" onclick="alert('View Marcus Wong profile modal details')"><i data-lucide="eye" style="width:1.05rem; height:1.05rem;"></i></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Pagination footer row -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.25rem;">
+        <span style="font-size:0.75rem; color:#64748b; font-weight:600;">Showing 1 to 3 of 2,450 results</span>
+        <div style="display:flex; gap:0.35rem; align-items:center;">
+          <button style="border:1px solid #cbd5e1; background:white; color:#64748b; padding:0.35rem 0.55rem; border-radius:6px; cursor:pointer; font-weight:800;">&lt;</button>
+          <button style="background:#2563eb; color:white; border:0; padding:0.35rem 0.65rem; border-radius:6px; font-weight:800; font-size:0.78rem;">1</button>
+          <button style="border:1px solid #cbd5e1; background:white; color:#64748b; padding:0.35rem 0.55rem; border-radius:6px; cursor:pointer; font-weight:800;">2</button>
+          <button style="border:1px solid #cbd5e1; background:white; color:#64748b; padding:0.35rem 0.55rem; border-radius:6px; cursor:pointer; font-weight:800;">3</button>
+          <span style="font-size:0.75rem; color:#94a3b8; font-weight:800; margin:0 0.25rem;">...</span>
+          <button style="border:1px solid #cbd5e1; background:white; color:#64748b; padding:0.35rem 0.55rem; border-radius:6px; cursor:pointer; font-weight:800;">245</button>
+          <button style="border:1px solid #cbd5e1; background:white; color:#64748b; padding:0.35rem 0.55rem; border-radius:6px; cursor:pointer; font-weight:800;">&gt;</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Load Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  // Sidebar toggle animation
+  const sidebarToggle = document.getElementById("sidebar-toggle");
+  const dbContainer = document.getElementById("dashboard-container");
+  const toggleIcon = document.getElementById("toggle-icon");
+  
+  if (sidebarToggle && dbContainer) {
+    sidebarToggle.addEventListener("click", () => {
+      dbContainer.classList.toggle("collapsed");
+      if (dbContainer.classList.contains("collapsed")) {
+        toggleIcon.setAttribute("data-lucide", "chevrons-right");
+      } else {
+        toggleIcon.setAttribute("data-lucide", "chevrons-left");
+      }
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    });
+  }
+
+  // Initializing charts on load
+  document.addEventListener("DOMContentLoaded", () => {
+    initLineTrendChart();
+    initAcuityBarChart();
+    initScatterAgeChart();
+  });
+
+  // Line Chart Outcomes Trend
+  function initLineTrendChart() {
+    const ctx = document.getElementById("lineTrendChart").getContext("2d");
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Aug 01', 'Aug 15', 'Sep 01', 'Sep 15', 'Oct 01', 'Oct 15', 'Nov 01'],
+        datasets: [
+          {
+            label: 'Target',
+            data: [15, 18, 14, 25, 23, 29, 27],
+            borderColor: '#3b82f6',
+            backgroundColor: 'transparent',
+            tension: 0.35,
+            borderWidth: 2
+          },
+          {
+            label: 'Actual',
+            data: [12, 16, 11, 21, 19, 26, 24],
+            borderColor: '#78350f',
+            backgroundColor: 'transparent',
+            tension: 0.35,
+            borderWidth: 2,
+            borderDash: [4, 4]
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false } },
+          y: { grid: { color: '#f1f5f9' } }
+        }
+      }
+    });
+  }
+
+  // Vertical Bar Chart Acuity
+  function initAcuityBarChart() {
+    const ctx = document.getElementById("acuityBarChart").getContext("2d");
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Low', 'Med', 'High', 'Crit'],
+        datasets: [{
+          data: [124, 248, 89, 23],
+          backgroundColor: ['#93c5fd', '#3b82f6', '#1d4ed8', '#1e3a8a'],
+          borderRadius: 6,
+          barThickness: 28
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false } },
+          y: { grid: { color: '#f1f5f9' } }
+        }
+      }
+    });
+  }
+
+  // Scatter Plot Risk vs Age
+  function initScatterAgeChart() {
+    const ctx = document.getElementById("scatterAgeChart").getContext("2d");
+    new Chart(ctx, {
+      type: 'scatter',
+      data: {
+        datasets: [{
+          data: [
+            { x: 22, y: 0.15 }, { x: 30, y: 0.28 }, { x: 45, y: 0.42 }, { x: 55, y: 0.58 }, 
+            { x: 60, y: 0.89 }, { x: 72, y: 0.51 }, { x: 80, y: 0.22 }, { x: 35, y: 0.35 },
+            { x: 50, y: 0.65 }, { x: 65, y: 0.75 }, { x: 78, y: 0.45 }
+          ],
+          backgroundColor: '#2563eb',
+          pointRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { title: { display: true, text: 'Age Cohorts (18Y - 85Y+)' }, grid: { display: false } },
+          y: { title: { display: true, text: 'Risk Score' }, grid: { color: '#f1f5f9' } }
+        }
+      }
+    });
+  }
+</script>
+{% endblock %}

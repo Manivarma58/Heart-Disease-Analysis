@@ -1,0 +1,444 @@
+{% extends "base.html" %}
+{% block title %}Design System: Navigation Components - DataVibe{% endblock %}
+{% block content %}
+<style>
+  /* Design system body styling overrides */
+  .design-system-shell {
+    background: #f1f5f9;
+    padding: 2.5rem clamp(1rem, 5vw, 4rem);
+    min-height: calc(100vh - 70px);
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Typography labels */
+  .section-label-ph {
+    font-family: Poppins, sans-serif;
+    font-size: 0.95rem;
+    font-weight: 750;
+    color: #475569;
+    margin: 0 0 1.25rem;
+    border-bottom: 1.5px solid #cbd5e1;
+    padding-bottom: 0.5rem;
+  }
+
+  /* Section 1: Breadcrumbs container */
+  .breadcrumbs-container {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 600;
+    margin-bottom: 2.5rem;
+  }
+  .breadcrumbs-container span.active {
+    color: #1e3a8a;
+    font-weight: 750;
+  }
+  .breadcrumbs-container i {
+    width: 0.9rem;
+    height: 0.9rem;
+  }
+
+  /* Section 2: Lateral Nav systems */
+  .nav-systems-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+    margin-bottom: 3.5rem;
+  }
+  @media (max-width: 800px) {
+    .nav-systems-row {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Sidebar expanded representation */
+  .preview-sidebar-expanded {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.5rem 1.25rem;
+    width: 15.5rem;
+    height: 28rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+  }
+  
+  .sidebar-user-block {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 1.25rem;
+  }
+  .sidebar-user-avatar {
+    width: 2.3rem;
+    height: 2.3rem;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  .sidebar-user-info h4 {
+    margin: 0;
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: #1e293b;
+  }
+  .sidebar-user-info span {
+    font-size: 0.7rem;
+    color: #64748b;
+    font-weight: 600;
+  }
+
+  .nav-menu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .nav-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 0.85rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #64748b;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .nav-menu-item:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+  }
+  .nav-menu-item.active {
+    background: #eff6ff;
+    color: #3b82f6;
+  }
+  .nav-menu-item i {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  /* Sidebar collapsed representation */
+  .preview-sidebar-collapsed {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.5rem 0.5rem;
+    width: 4rem;
+    height: 28rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+  }
+  .brand-badge-collapsed {
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 8px;
+    background: #2563eb;
+    color: white;
+    font-weight: 800;
+    font-size: 0.95rem;
+    display: grid;
+    place-items: center;
+    margin-bottom: 1.25rem;
+  }
+  .collapsed-icon-wrap {
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 8px;
+    color: #64748b;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 0.5rem;
+  }
+  .collapsed-icon-wrap:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+  }
+  .collapsed-icon-wrap.active {
+    background: #eff6ff;
+    color: #2563eb;
+  }
+  .collapsed-icon-wrap i {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  /* Section 3: Micro-interactions */
+  .micro-interactions-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1.8fr;
+    gap: 3.5rem;
+    margin-bottom: 5rem;
+  }
+  @media (max-width: 800px) {
+    .micro-interactions-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Rendered Dropdown Card */
+  .rendered-dropdown-box {
+    background: white;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 1.25rem;
+    width: 17rem;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    margin: 0 auto;
+  }
+  .dropdown-user-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 0.75rem;
+  }
+  .dropdown-user-avatar {
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  .dropdown-user-info h4 {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: #1e293b;
+  }
+  .dropdown-user-info p {
+    margin: 0.15rem 0 0;
+    font-size: 0.72rem;
+    color: #64748b;
+  }
+  
+  .dropdown-item-ph {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.55rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #475569;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .dropdown-item-ph:hover {
+    background: #f8fafc;
+    color: #1e293b;
+  }
+  .dropdown-item-ph i {
+    width: 0.95rem;
+    height: 0.95rem;
+    color: #64748b;
+  }
+
+  /* Design System Footer */
+  .ds-footer {
+    border-top: 1px solid #cbd5e1;
+    padding-top: 2rem;
+    margin-top: 4rem;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 2rem;
+  }
+  .ds-footer-brand h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 850;
+    color: #0f172a;
+  }
+  .ds-footer-brand p {
+    margin: 0.5rem 0 0;
+    font-size: 0.78rem;
+    color: #64748b;
+    max-width: 20rem;
+    line-height: 1.4;
+  }
+  .ds-footer-links {
+    display: flex;
+    gap: 4rem;
+  }
+  .ds-links-col h4 {
+    margin: 0 0 0.85rem;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .ds-links-col a {
+    display: block;
+    color: #475569;
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  .ds-links-col a:hover {
+    color: #2563eb;
+  }
+</style>
+
+<div class="design-system-shell">
+  
+  <!-- SECTION 1: BREADCRUMBS -->
+  <div class="section-label-ph">01 // Navigation Context</div>
+  <div class="breadcrumbs-container">
+    <span>Home</span>
+    <i data-lucide="chevron-right"></i>
+    <span>Dashboard</span>
+    <i data-lucide="chevron-right"></i>
+    <span>Clinical Analytics</span>
+    <i data-lucide="chevron-right"></i>
+    <span class="active">Patient Details</span>
+  </div>
+
+  <!-- SECTION 2: LATERAL NAVIGATION -->
+  <div class="section-label-ph">02 // Lateral Navigation Systems</div>
+  
+  <div class="nav-systems-row">
+    <!-- Sidebar A: Standard State -->
+    <div>
+      <span style="font-size: 0.72rem; font-weight:800; color:#94a3b8; display:block; margin-bottom:0.75rem; text-transform:uppercase;">Standard State (Expanded)</span>
+      
+      <div class="preview-sidebar-expanded">
+        <div>
+          <!-- User info -->
+          <div class="sidebar-user-block">
+            <img class="sidebar-user-avatar" src="{{ url_for('static', filename='images/doctor_avatar.png') }}" alt="User avatar">
+            <div class="sidebar-user-info">
+              <h4>Julian Vance</h4>
+              <span>Cardiologist</span>
+            </div>
+          </div>
+
+          <!-- Menu items -->
+          <nav class="nav-menu-list">
+            <a href="#" class="nav-menu-item active"><i data-lucide="layout-grid"></i> Dashboard</a>
+            <a href="#" class="nav-menu-item"><i data-lucide="users"></i> Patients</a>
+            <a href="#" class="nav-menu-item"><i data-lucide="line-chart"></i> Analytics</a>
+            <a href="#" class="nav-menu-item"><i data-lucide="file-text"></i> Reports</a>
+          </nav>
+        </div>
+
+        <div>
+          <a href="#" class="nav-menu-item" style="color:#64748b;"><i data-lucide="settings"></i> Settings</a>
+          <a href="#" class="nav-menu-item" style="color:#ef4444; margin-top:0.35rem;"><i data-lucide="log-out"></i> Logout</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar B: Compact State -->
+    <div>
+      <span style="font-size: 0.72rem; font-weight:800; color:#94a3b8; display:block; margin-bottom:0.75rem; text-transform:uppercase;">Compact State (Collapsed)</span>
+      
+      <div class="preview-sidebar-collapsed">
+        <div>
+          <!-- Short brand -->
+          <div class="brand-badge-collapsed">DV</div>
+
+          <!-- Icons -->
+          <div class="collapsed-icon-wrap active"><i data-lucide="layout-grid"></i></div>
+          <div class="collapsed-icon-wrap"><i data-lucide="users"></i></div>
+          <div class="collapsed-icon-wrap"><i data-lucide="line-chart"></i></div>
+          <div class="collapsed-icon-wrap"><i data-lucide="file-text"></i></div>
+        </div>
+
+        <div>
+          <div class="collapsed-icon-wrap" style="margin-bottom:0;"><i data-lucide="settings"></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: MICRO-INTERACTIONS -->
+  <div class="section-label-ph">03 // Account Micro-interactions</div>
+  
+  <div class="micro-interactions-grid">
+    <!-- Rendered Overlay Card -->
+    <div>
+      <div class="rendered-dropdown-box">
+        <div class="dropdown-user-header">
+          <img class="dropdown-user-avatar" src="{{ url_for('static', filename='images/doctor_avatar.png') }}" alt="User avatar dropdown">
+          <div class="dropdown-user-info">
+            <h4>Dr. Julian Vance</h4>
+            <p>julian.vance@datavibe.med</p>
+          </div>
+        </div>
+        
+        <a href="#" class="dropdown-item-ph"><i data-lucide="settings"></i> Profile Settings</a>
+        <a href="#" class="dropdown-item-ph"><i data-lucide="sliders"></i> Preferences</a>
+        <a href="#" class="dropdown-item-ph" style="border-bottom: 1px solid #f1f5f9; padding-bottom: 0.65rem; margin-bottom: 0.35rem;"><i data-lucide="help-circle"></i> Help Center</a>
+        <a href="#" class="dropdown-item-ph" style="color:#ef4444;"><i data-lucide="log-out"></i> Sign Out</a>
+      </div>
+      <p style="text-align:center; font-size:0.62rem; color:#94a3b8; font-weight:800; letter-spacing:0.5px; text-transform:uppercase; margin-top:0.75rem;">RENDERED OVERLAY EXAMPLE</p>
+    </div>
+
+    <!-- Description labels -->
+    <div style="display:flex; flex-direction:column; justify-content:center;">
+      <h2 style="font-family:Poppins, sans-serif; font-size:1.6rem; font-weight:800; color:#1e293b; margin:0 0 1rem;">Focused User Experience</h2>
+      <p style="font-size:0.88rem; color:#475569; line-height:1.6; margin:0 0 1.5rem;">The user menu leverages tonal layering to stand out from the main workspace. By using <code>Surface-Container-Lowest</code> as a base for interactive elements, we ensure the menu feels elevated without the need for aggressive drop shadows.</p>
+      
+      <div style="display:flex; flex-direction:column; gap:1rem;">
+        <div style="display:flex; align-items:flex-start; gap:0.5rem;">
+          <i data-lucide="check-circle" style="color:#2563eb; width:1.2rem; height:1.2rem; flex-shrink:0; margin-top:0.15rem;"></i>
+          <div>
+            <h5 style="margin:0; font-size:0.85rem; font-weight:800; color:#1e293b;">High Information Density</h5>
+            <p style="margin:0.15rem 0 0; font-size:0.78rem; color:#64748b;">Using 32px row heights for menu items to maximize visibility in complex workflows.</p>
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:flex-start; gap:0.5rem;">
+          <i data-lucide="check-circle" style="color:#2563eb; width:1.2rem; height:1.2rem; flex-shrink:0; margin-top:0.15rem;"></i>
+          <div>
+            <h5 style="margin:0; font-size:0.85rem; font-weight:800; color:#1e293b;">Accessible Shortcuts</h5>
+            <p style="margin:0.15rem 0 0; font-size:0.78rem; color:#64748b;">Clear mono-spaced indicators for power users to navigate clinical data faster.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Design System Footer -->
+  <footer class="ds-footer">
+    <div class="ds-footer-brand">
+      <h3>DataVibe Design System</h3>
+      <p>Engineering high-precision instruments for clinical data management and longitudinal analysis.</p>
+    </div>
+    <div class="ds-footer-links">
+      <div class="ds-links-col">
+        <h4>Resources</h4>
+        <a href="#">Components</a>
+        <a href="#">Style Guide</a>
+      </div>
+      <div class="ds-links-col">
+        <h4>Support</h4>
+        <a href="{{ url_for('dashboard.api_docs_page') }}">Documentation</a>
+        <a href="#">GitHub</a>
+      </div>
+    </div>
+  </footer>
+
+  <div style="text-align:center; font-size:0.72rem; color:#94a3b8; font-weight:700; margin-top:4rem;">
+    &copy; 2024 DATAVIBE MEDICAL TECHNOLOGIES // VERSION 4.2.0 - STABLE
+  </div>
+
+</div>
+{% endblock %}

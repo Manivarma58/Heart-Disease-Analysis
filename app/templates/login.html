@@ -1,0 +1,589 @@
+{% extends "base.html" %}
+{% block title %}Login - DataVibe{% endblock %}
+{% block content %}
+<style>
+  /* Base Body Styles */
+  .auth-body {
+    min-height: calc(100vh - 74px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #f8fafc;
+    position: relative;
+    overflow: hidden;
+    padding: 2rem 1rem;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Animated Heartbeat SVG in Background */
+  .heartbeat-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.08;
+  }
+  .heartbeat-line {
+    fill: none;
+    stroke: #3b82f6;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: pulse-line 8s linear infinite;
+  }
+  @keyframes pulse-line {
+    0% {
+      stroke-dashoffset: 1000;
+    }
+    50% {
+      stroke-dashoffset: 0;
+    }
+    100% {
+      stroke-dashoffset: -1000;
+    }
+  }
+
+  /* Logo Branding Header */
+  .auth-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+    z-index: 2;
+  }
+  .auth-brand-icon {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 12px;
+    background: #3b82f6;
+    color: white;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 0.75rem;
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.25);
+    animation: heartbeat 2s infinite ease-in-out;
+  }
+  @keyframes heartbeat {
+    0% { transform: scale(1); }
+    14% { transform: scale(1.1); }
+    28% { transform: scale(1); }
+    42% { transform: scale(1.1); }
+    70% { transform: scale(1); }
+  }
+  .auth-header h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0;
+  }
+  .auth-header p {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #64748b;
+    text-transform: uppercase;
+    margin: 0.25rem 0 0;
+  }
+
+  /* Premium Card */
+  .auth-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    width: min(100%, 28rem);
+    padding: 2.75rem 2.25rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    position: relative;
+    z-index: 2;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .auth-card h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.35rem;
+  }
+  .auth-card p.auth-subtitle {
+    font-size: 0.88rem;
+    color: #64748b;
+    margin-top: 0;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+  }
+
+  /* Input fields styling */
+  .field-group {
+    margin-bottom: 1.25rem;
+  }
+  .field-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.45rem;
+  }
+  .field-header label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #1e293b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .field-header a {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #3b82f6;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .field-header a:hover {
+    color: #2563eb;
+  }
+
+  .input-wrapper {
+    position: relative;
+  }
+  .input-wrapper i.input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    width: 1.15rem;
+    height: 1.15rem;
+    pointer-events: none;
+    transition: color 0.2s;
+  }
+  .input-wrapper i.eye-icon {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    width: 1.15rem;
+    height: 1.15rem;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .input-wrapper i.eye-icon:hover {
+    color: #475569;
+  }
+  .input-control {
+    width: 100%;
+    min-height: 3rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 0.75rem 1rem 0.75rem 2.75rem;
+    font-size: 0.9rem;
+    color: #1e293b;
+    outline: none;
+    transition: border-color 0.2s, background-color 0.2s;
+  }
+  .input-control::placeholder {
+    color: #94a3b8;
+  }
+  .input-control:focus {
+    border-color: #3b82f6;
+    background-color: white;
+  }
+  .input-control:focus + i.input-icon {
+    color: #3b82f6;
+  }
+
+  /* Remember checkbox */
+  .checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1.5rem;
+  }
+  .checkbox-group input[type="checkbox"] {
+    width: 1.15rem;
+    height: 1.15rem;
+    accent-color: #3b82f6;
+    cursor: pointer;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+  }
+  .checkbox-group label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  /* Submit Button with Loading State */
+  .btn-submit {
+    width: 100%;
+    min-height: 3rem;
+    background: #000000;
+    color: #ffffff;
+    border: 0;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: background-color 0.2s, transform 0.1s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  .btn-submit:hover {
+    background-color: #1a1a1a;
+  }
+  .btn-submit:active {
+    transform: scale(0.99);
+  }
+  .btn-submit:disabled {
+    background-color: #475569;
+    cursor: not-allowed;
+  }
+
+  /* Spinner */
+  .spinner {
+    display: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Divider */
+  .social-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    margin: 1.75rem 0;
+    text-transform: uppercase;
+  }
+  .social-divider::before, .social-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .social-divider:not(:empty)::before { margin-right: .75em; }
+  .social-divider:not(:empty)::after { margin-left: .75em; }
+
+  /* Social Grid */
+  .social-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+  .social-btn {
+    min-height: 2.85rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #334155;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+  }
+  .social-btn:hover {
+    background-color: #f8fafc;
+    border-color: #cbd5e1;
+  }
+  .social-btn img {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  /* Demo Credentials Section */
+  .demo-accordion {
+    margin-top: 1.25rem;
+    border: 1px dashed #3b82f6;
+    border-radius: 8px;
+    background-color: #eff6ff;
+    padding: 0.5rem 0.85rem;
+    font-size: 0.78rem;
+  }
+  .demo-accordion-trigger {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #1d4ed8;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .demo-credentials {
+    display: none;
+    margin-top: 0.5rem;
+    border-top: 1px solid #dbeafe;
+    padding-top: 0.5rem;
+  }
+  .demo-credentials span {
+    display: block;
+    padding: 0.2rem 0;
+    color: #1e3a8a;
+    font-family: monospace;
+    cursor: pointer;
+  }
+  .demo-credentials span:hover {
+    text-decoration: underline;
+  }
+
+  /* Redirect */
+  .auth-redirect {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 600;
+  }
+  .auth-redirect a {
+    color: #3b82f6;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .auth-redirect a:hover {
+    text-decoration: underline;
+  }
+
+  /* Footer Links */
+  .auth-footer {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 3.5rem;
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: #64748b;
+    z-index: 2;
+    position: relative;
+    letter-spacing: 0.5px;
+  }
+  .auth-footer a {
+    text-decoration: none;
+    color: #64748b;
+    transition: color 0.2s;
+  }
+  .auth-footer a:hover {
+    color: #1e293b;
+  }
+
+  /* Auth tabs switcher style */
+  .auth-tabs {
+    display: flex;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+  }
+  .auth-tab {
+    flex: 1;
+    padding: 0.6rem 0.5rem;
+    text-align: center;
+    font-weight: 750;
+    font-size: 0.85rem;
+    color: #64748b;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .auth-tab.active {
+    color: #3b82f6;
+    border-bottom-color: #3b82f6;
+  }
+</style>
+
+<div class="auth-body">
+  <!-- Heartbeat animated SVG background -->
+  <svg class="heartbeat-bg" viewBox="0 0 1000 400" preserveAspectRatio="none">
+    <path class="heartbeat-line" d="M 0,200 L 300,200 L 320,180 L 340,240 L 360,120 L 380,260 L 400,190 L 420,210 L 440,200 L 1000,200" />
+  </svg>
+
+  <!-- Header -->
+  <div class="auth-header">
+    <div class="auth-brand-icon">
+      <i data-lucide="activity" style="width: 2.2rem; height: 2.2rem;"></i>
+    </div>
+    <h1>DataVibe</h1>
+    <p>Clinical Intelligence System</p>
+  </div>
+
+  <!-- Card -->
+  <div class="auth-card">
+    <h2>Welcome back</h2>
+    <p class="auth-subtitle" id="auth-subtitle-text">Access patient diagnostics and clinical reports.</p>
+
+    <!-- Dynamic Portal Tabs Switcher -->
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tab-provider" onclick="switchPortal('provider')">Doctor / Admin Portal</div>
+      <div class="auth-tab" id="tab-patient" onclick="switchPortal('patient')">Patient Portal</div>
+    </div>
+
+    <form method="post" id="login-form">
+      <div class="field-group">
+        <div class="field-header">
+          <label for="login_id" id="login-id-label">Provider Email or Phone</label>
+        </div>
+        <div class="input-wrapper">
+          <i data-lucide="user" class="input-icon" id="login-icon"></i>
+          <input name="login_id" id="login_id" class="input-control" type="text" placeholder="doctor@datavibe.local or +1 (555) 000-0921" required>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-header">
+          <label for="password">Password or OTP</label>
+          <a href="{{ url_for('auth.reset_password') }}">Forgot password?</a>
+        </div>
+        <div class="input-wrapper">
+          <i data-lucide="lock" class="input-icon"></i>
+          <input name="password" id="password" class="input-control" type="password" placeholder="••••••••" required>
+          <i data-lucide="eye" class="eye-icon" id="password-toggle"></i>
+        </div>
+      </div>
+
+      <div class="checkbox-group">
+        <input type="checkbox" id="remember-me" name="remember">
+        <label for="remember-me">Stay logged in for 30 days</label>
+      </div>
+
+      <button class="btn-submit" type="submit" id="submit-btn">
+        <span class="spinner" id="btn-spinner"></span>
+        <span id="btn-text">Login to Intelligence Portal</span>
+      </button>
+    </form>
+
+    <div class="social-divider">or continue with</div>
+
+    <div class="social-row">
+      <a class="social-btn" id="google-btn" href="{{ url_for('auth.social_login', role='provider') }}">
+        <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google logo">
+        Google
+      </a>
+      <div class="social-btn" onclick="autofillPhoneLogin()">
+        <i data-lucide="phone" style="width: 1.1rem; height: 1.1rem; color: #10b981;"></i>
+        Phone Number
+      </div>
+    </div>
+
+    <p class="auth-redirect">Don't have an account? <a href="{{ url_for('auth.register') }}">Register</a></p>
+  </div>
+
+  <!-- Footer -->
+  <div class="auth-footer">
+    <a href="#">SECURITY PROTOCOL</a>
+    <a href="#">PRIVACY</a>
+    <a href="#">HELP CENTER</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Password Visibility Toggle
+  const toggleBtn = document.getElementById("password-toggle");
+  const passInput = document.getElementById("password");
+  
+  if (toggleBtn && passInput) {
+    toggleBtn.addEventListener("click", () => {
+      const isPass = passInput.getAttribute("type") === "password";
+      passInput.setAttribute("type", isPass ? "text" : "password");
+      toggleBtn.setAttribute("data-lucide", isPass ? "eye-off" : "eye");
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    });
+  }
+
+  // Switch between Doctor/Admin and Patient portals
+  function switchPortal(portal) {
+    const tabProvider = document.getElementById("tab-provider");
+    const tabPatient = document.getElementById("tab-patient");
+    const subtitle = document.getElementById("auth-subtitle-text");
+    const label = document.getElementById("login-id-label");
+    const input = document.getElementById("login_id");
+    const icon = document.getElementById("login-icon");
+    const googleBtn = document.getElementById("google-btn");
+    
+    if (portal === 'provider') {
+      tabProvider.classList.add("active");
+      tabPatient.classList.remove("active");
+      subtitle.innerText = "Access patient diagnostics and clinical reports.";
+      label.innerText = "Provider Email or Phone";
+      input.placeholder = "doctor@datavibe.local or +1 (555) 000-0921";
+      icon.setAttribute("data-lucide", "user");
+      if (googleBtn) {
+        googleBtn.href = "/social-login?role=provider";
+      }
+    } else {
+      tabProvider.classList.remove("active");
+      tabPatient.classList.add("active");
+      subtitle.innerText = "Access your personal health score and wellness dials.";
+      label.innerText = "Patient Email or Phone";
+      input.placeholder = "anita@datavibe.local or +1 (555) 000-0883";
+      icon.setAttribute("data-lucide", "heart");
+      if (googleBtn) {
+        googleBtn.href = "/social-login?role=patient";
+      }
+    }
+    
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
+  }
+
+  // Autofill dynamic phone login triggers switch
+  function autofillPhoneLogin() {
+    const activeTab = document.getElementById("tab-provider").classList.contains("active") ? "provider" : "patient";
+    if (activeTab === 'provider') {
+      autofillLogin('+1 (555) 000-0921', 'provider');
+    } else {
+      autofillLogin('+1 (555) 000-0883', 'patient');
+    }
+  }
+
+  // Loading animation on form submission
+  const loginForm = document.getElementById("login-form");
+  const submitBtn = document.getElementById("submit-btn");
+  const btnSpinner = document.getElementById("btn-spinner");
+  const btnText = document.getElementById("btn-text");
+
+  if (loginForm && submitBtn) {
+    loginForm.addEventListener("submit", () => {
+      submitBtn.disabled = true;
+      btnSpinner.style.display = "inline-block";
+      btnText.innerText = "Connecting to Secure Node...";
+    });
+  }
+
+
+
+  // Autofill helper
+  function autofillLogin(val, portal) {
+    switchPortal(portal);
+    document.getElementById("login_id").value = val;
+    document.getElementById("password").value = "datavibe123";
+  }
+</script>
+{% endblock %}
+

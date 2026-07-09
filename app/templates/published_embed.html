@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} - DataVibe{% endblock %}
+{% block content %}
+<section class="public-section embed-page">
+  <div class="section-head center">
+    <p class="eyebrow">{{ eyebrow }}</p>
+    <h1>{{ title }}</h1>
+    <p>{{ tableau.message }}</p>
+  </div>
+  <div class="embed-shell">
+    {% if tableau.configured %}
+      <div class="tableau-embed" data-tableau-url="{{ tableau.url }}"></div>
+    {% else %}
+      <div class="embed-placeholder">
+        <i data-lucide="bar-chart-3"></i>
+        <h2>Published Tableau URL pending</h2>
+        <p>Set the relevant Tableau URL in `.env`, then refresh this page to load the interactive workbook.</p>
+        <a class="button" href="{{ fallback_url }}">{{ fallback_label }}</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/tableau_embed.js') }}"></script>{% endblock %}

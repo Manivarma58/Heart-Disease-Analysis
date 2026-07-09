@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}Interactive Charts - DataVibe{% endblock %}
+{% block content %}
+<section class="dashboard-shell">
+  <aside class="sidebar">
+    <a href="{{ url_for('public_health.public_health_dashboard') }}"><i data-lucide="map"></i> Regional Health</a>
+    <a class="active" href="{{ url_for('public_health.visualizations_dashboard') }}"><i data-lucide="bar-chart-3"></i> Interactive Charts</a>
+    <a href="#"><i data-lucide="landmark"></i> Policy Impact</a>
+    <a href="#"><i data-lucide="wallet-cards"></i> Resources</a>
+    <a href="#"><i data-lucide="presentation"></i> Reports</a>
+  </aside>
+  <section class="workspace">
+    <div class="workspace-head">
+      <div>
+        <p class="eyebrow">Policy workspace</p>
+        <h1>Interactive Health Insights</h1>
+      </div>
+      <span class="user-pill green">Population Study (4,494 records)</span>
+    </div>
+    
+    <div class="split" style="margin-bottom: 24px; gap: 24px;">
+      <div class="panel" style="flex: 1;">
+        <h2>About the Visualizations</h2>
+        <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; margin-top: 8px;">
+          These 10 interactive charts visualize cardiovascular risk profiles across lifestyle, clinical, and demographic factors. Toggle the legends or hover over data points to inspect raw case counts and disease rates.
+        </p>
+      </div>
+    </div>
+    
+    <div class="viz-grid">
+      <article class="panel viz-card">
+        <h3>1. Gender vs Heart Disease</h3>
+        <p class="viz-subtitle">Comparison of heart disease cases and rates by sex</p>
+        <div class="chart-container"><canvas id="chart-gender-hd"></canvas></div>
+      </article>
+      
+      <article class="panel viz-card">
+        <h3>2. Age vs Heart Disease</h3>
+        <p class="viz-subtitle">Heart disease prevalence trend by age category</p>
+        <div class="chart-container"><canvas id="chart-age-hd"></canvas></div>
+      </article>
+
+      <article class="panel viz-card">
+        <h3>3. Diabetic vs Stroke</h3>
+        <p class="viz-subtitle">Stroke cases and rates by diabetic status</p>
+        <div class="chart-container"><canvas id="chart-diabetic-stroke"></canvas></div>
+      </article>
+
+      <article class="panel viz-card">
+        <h3>4. Impact of Smoking & Alcohol</h3>
+        <p class="viz-subtitle">Heart disease rates by tobacco and alcohol use</p>
+        <div class="chart-container"><canvas id="chart-smoking-alcohol"></canvas></div>
+      </article>
+
+      <article class="panel viz-card">
+        <h3>5. Other Diseases vs Stroke</h3>
+        <p class="viz-subtitle">Stroke prevalence among patients with asthma, kidney disease, or skin cancer</p>
+        <div class="chart-container"><canvas id="chart-other-diseases"></canvas></div>
+      </article>
+
+      <article class="panel viz-card">
+        <h3>6. Race-wise Heart Disease</h3>
+        <p class="viz-subtitle">Heart disease prevalence by race/ethnicity</p>
+        <div class="chart-container"><canvas id="chart-race-hd"></canvas></div>
+      </article>
+
+      <article class="panel viz-card">
+        <h3>7. General Health vs Heart Disease</h3>
+        <p class="viz-subtitle">Heart disease rates across self-reported health statuses</p>
+        <div class="chart-container"><canvas id="chart-gen-health"></canvas></div>
+      </article>
+
+      <article class="panel viz-card">
+        <h3>8. Physical Activity vs Heart Disease</h3>
+        <p class="viz-subtitle">Heart disease prevalence based on regular exercise</p>
+        <div class="chart-container"><canvas id="chart-activity-hd"></canvas></div>
+      </article>
+
+      <article class="panel viz-card">
+        <h3>9. Age & BMI vs Diabetic</h3>
+        <p class="viz-subtitle">Midpoint age vs Body Mass Index (sampled patients)</p>
+        <div class="chart-container"><canvas id="chart-age-bmi-diabetic"></canvas></div>
+      </article>
+
+      <article class="panel viz-card">
+        <h3>10. Stroke Cohort Overlap</h3>
+        <p class="viz-subtitle">Stroke rate among heart disease and/or diabetic cohorts</p>
+        <div class="chart-container"><canvas id="chart-stroke-overlap"></canvas></div>
+      </article>
+    </div>
+  </section>
+</section>
+
+<style>
+.viz-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 24px;
+}
+.viz-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 380px;
+}
+.viz-card h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--text);
+}
+.viz-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 4px 0 16px 0;
+}
+.chart-container {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  height: 250px;
+}
+@media (max-width: 768px) {
+  .viz-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/visualizations.js') }}"></script>
+{% endblock %}

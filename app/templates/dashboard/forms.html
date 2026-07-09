@@ -1,0 +1,850 @@
+{% extends "base.html" %}
+{% block title %}Form System - DataVibe{% endblock %}
+{% block content %}
+<style>
+  /* Layout Grid Container */
+  .dashboard-container {
+    display: grid;
+    grid-template-columns: 16rem 1fr;
+    min-height: calc(100vh - 70px);
+    background: #f8fafc;
+    transition: grid-template-columns 0.3s ease;
+  }
+  .dashboard-container.collapsed {
+    grid-template-columns: 4.8rem 1fr;
+  }
+
+  /* Sidebar Navigation */
+  .sidebar {
+    background: white;
+    border-right: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1.5rem 1rem;
+    overflow-y: auto;
+    transition: padding 0.3s ease;
+  }
+  .dashboard-container.collapsed .sidebar {
+    padding: 1.5rem 0.5rem;
+    align-items: center;
+  }
+
+  .sidebar-brand-section {
+    transition: opacity 0.2s;
+  }
+  .dashboard-container.collapsed .sidebar-brand-section {
+    opacity: 0;
+    display: none;
+  }
+
+  .sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 2rem;
+  }
+  .sidebar-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #64748b;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .sidebar-menu-item:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+  }
+  .sidebar-menu-item.active {
+    background: #eff6ff;
+    color: #3b82f6;
+    border-left-color: #3b82f6;
+    border-radius: 0 8px 8px 0;
+  }
+  .sidebar-menu-item i {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+  }
+  
+  .menu-text {
+    transition: opacity 0.2s;
+  }
+  .dashboard-container.collapsed .menu-text {
+    opacity: 0;
+    display: none;
+  }
+
+  .sidebar-toggle-btn {
+    align-self: flex-end;
+    background: transparent;
+    border: 0;
+    color: #64748b;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    transition: background 0.2s;
+  }
+  .sidebar-toggle-btn:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+  }
+
+  /* Workspace */
+  .workspace {
+    padding: 2rem clamp(1rem, 4vw, 2.5rem);
+    overflow-y: auto;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  /* Header Section */
+  .workspace-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 1.25rem;
+  }
+  .workspace-head h1 {
+    font-size: 1.65rem;
+    font-weight: 850;
+    color: #0f172a;
+    margin: 0 0 0.25rem;
+  }
+  .workspace-head p {
+    font-size: 0.88rem;
+    color: #64748b;
+    margin: 0;
+    font-weight: 600;
+  }
+
+  /* Section Title styling */
+  .section-title-ph {
+    font-family: Poppins, sans-serif;
+    font-size: 0.85rem;
+    font-weight: 750;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin: 2.25rem 0 1rem;
+    border-left: 3px solid #3b82f6;
+    padding-left: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* Grid Layouts */
+  .forms-grid-three {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  @media (max-width: 900px) {
+    .forms-grid-three {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .form-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.005);
+  }
+  .form-card-title {
+    font-size: 0.68rem;
+    font-weight: 800;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  /* Input fields validation layout representation */
+  .input-group-ds {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 1rem;
+  }
+  .input-group-ds:last-child {
+    margin-bottom: 0;
+  }
+  .input-group-ds label {
+    font-size: 0.72rem;
+    font-weight: 750;
+    color: #475569;
+  }
+  .input-ds {
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0.55rem 0.85rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #334155;
+    outline: none;
+    transition: all 0.2s;
+  }
+  .input-ds:focus {
+    border-color: #3b82f6;
+  }
+  .input-ds.active-focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2.5px rgba(37,99,235,0.15);
+  }
+  .input-ds.error-val {
+    border-color: #ef4444;
+    background: #fff5f5;
+  }
+  .error-feedback-text {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #ef4444;
+    margin-top: 0.15rem;
+  }
+
+  /* Dosage counter block */
+  .dosage-counter {
+    display: flex;
+    align-items: center;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    overflow: hidden;
+    width: fit-content;
+  }
+  .dosage-btn {
+    border: 0;
+    background: #f8fafc;
+    width: 2.2rem;
+    height: 2.2rem;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #64748b;
+  }
+  .dosage-btn:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+  }
+  .dosage-val {
+    width: 2.5rem;
+    text-align: center;
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: #1e293b;
+  }
+
+  /* Records Upload Zone */
+  .upload-dropzone {
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    background: #f8fafc;
+    padding: 2.25rem 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .upload-dropzone:hover {
+    border-color: #3b82f6;
+  }
+  .upload-dropzone i {
+    width: 2rem;
+    height: 2rem;
+    color: #3b82f6;
+    margin-bottom: 0.75rem;
+  }
+  .upload-dropzone h4 {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #1e293b;
+    line-height: 1.35;
+  }
+  .upload-dropzone p {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    margin: 0.25rem 0 1rem;
+    font-weight: 600;
+  }
+
+  /* Dynamic Rich Text Editor block */
+  .editor-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+  .editor-toolbar {
+    background: #f8fafc;
+    border-bottom: 1px solid #cbd5e1;
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .editor-tool-btn {
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    color: #475569;
+    padding: 0.25rem;
+    border-radius: 4px;
+    display: grid;
+    place-items: center;
+  }
+  .editor-tool-btn:hover {
+    background: #e2e8f0;
+  }
+  .editor-tool-btn i {
+    width: 0.95rem;
+    height: 0.95rem;
+  }
+  .editor-textarea {
+    width: 100%;
+    min-height: 7rem;
+    border: 0;
+    padding: 1rem;
+    font-size: 0.88rem;
+    color: #334155;
+    outline: none;
+    font-family: inherit;
+    resize: vertical;
+  }
+
+  /* Multi-step form wizard */
+  .step-wizard-header {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border: 1px solid #e2e8f0;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+  .wizard-step-node {
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-right: 1px solid #e2e8f0;
+    background: #f8fafc;
+    color: #64748b;
+    text-decoration: none;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+  .wizard-step-node:last-child {
+    border-right: 0;
+  }
+  .wizard-step-node.active {
+    background: white;
+    color: #0f172a;
+  }
+  .wizard-step-num {
+    width: 1.35rem;
+    height: 1.35rem;
+    border-radius: 50%;
+    background: #cbd5e1;
+    color: #475569;
+    display: grid;
+    place-items: center;
+    font-size: 0.7rem;
+    font-weight: 800;
+  }
+  .wizard-step-node.active .wizard-step-num {
+    background: #2563eb;
+    color: white;
+  }
+
+  /* Dynamic list inputs rows */
+  .med-item-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 2.5rem;
+    gap: 1rem;
+    padding: 0.85rem 1rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    align-items: center;
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+  .btn-delete-row {
+    background: transparent;
+    border: 0;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: color 0.2s;
+    display: grid;
+    place-items: center;
+  }
+  .btn-delete-row:hover {
+    color: #ef4444;
+  }
+
+  /* Multi-select Tags styling */
+  .symptom-tag-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: #dbeafe;
+    color: #1e40af;
+    font-size: 0.72rem;
+    font-weight: 750;
+    padding: 0.25rem 0.55rem;
+    border-radius: 6px;
+    margin-right: 0.35rem;
+    margin-bottom: 0.35rem;
+  }
+  .symptom-tag-box button {
+    background: transparent;
+    border: 0;
+    color: #3b82f6;
+    cursor: pointer;
+    font-weight: 900;
+  }
+
+  /* Slider range track */
+  .range-slider-ds {
+    width: 100%;
+    cursor: pointer;
+    accent-color: #2563eb;
+  }
+</style>
+
+<div class="dashboard-container" id="dashboard-container">
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <div>
+      <button class="sidebar-toggle-btn" id="sidebar-toggle">
+        <i data-lucide="chevrons-left" id="toggle-icon"></i>
+      </button>
+
+      <div class="sidebar-brand-section" style="padding-left: 1rem; margin-bottom: 1.5rem; margin-top: 0.5rem;">
+        <span style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.5px;">Library Navigator</span>
+        <span style="font-size: 1.15rem; font-weight: 800; color: #3b82f6; display: block; font-family: Poppins, sans-serif; margin-top: 0.15rem;">Form System</span>
+      </div>
+
+      <nav class="sidebar-menu">
+        <a href="{{ url_for('dashboard.home') }}" class="sidebar-menu-item">
+          <i data-lucide="layout-grid"></i>
+          <span class="menu-text">Dashboard</span>
+        </a>
+        <a href="{{ url_for('clinical.clinical_dashboard') }}" class="sidebar-menu-item">
+          <i data-lucide="users"></i>
+          <span class="menu-text">Patients</span>
+        </a>
+        <a href="{{ url_for('dashboard.tableau_style_dashboard') }}" class="sidebar-menu-item">
+          <i data-lucide="line-chart"></i>
+          <span class="menu-text">Analytics</span>
+        </a>
+        <a href="{{ url_for('dashboard.heart_disease_story') }}" class="sidebar-menu-item">
+          <i data-lucide="file-text"></i>
+          <span class="menu-text">Reporting</span>
+        </a>
+        <a href="{{ url_for('dashboard.forms_page') }}" class="sidebar-menu-item active">
+          <i data-lucide="layout"></i>
+          <span class="menu-text">Form Elements</span>
+        </a>
+      </nav>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="{{ url_for('dashboard.settings_page') }}" class="sidebar-menu-item" style="margin: 0;"><i data-lucide="settings"></i> <span class="menu-text">Settings</span></a>
+      <a href="#" class="sidebar-menu-item" style="margin: 0;"><i data-lucide="help-circle"></i> <span class="menu-text">Support</span></a>
+    </div>
+  </aside>
+
+  <!-- Workspace content -->
+  <main class="workspace">
+    <div class="workspace-head">
+      <div>
+        <h1>Form System</h1>
+        <p>A high-density component library designed for medical data entry, longitudinal clinical notes, and complex workflow builders.</p>
+      </div>
+
+      <div style="font-size:0.75rem; background:#eff6ff; border:1px solid #bfdbfe; color:#1e40af; font-weight:800; padding:0.45rem 1rem; border-radius:8px; display:flex; align-items:center; gap:0.45rem;">
+        <i data-lucide="check-circle" style="width:0.95rem; height:0.95rem;"></i> Auto-saving enabled
+      </div>
+    </div>
+
+    <!-- SECTION 1: STANDARD INPUTS -->
+    <div class="section-title-ph"><i data-lucide="edit-3"></i> Standard Inputs</div>
+    
+    <div class="forms-grid-three">
+      <!-- Card 1: Text Input States -->
+      <div class="form-card">
+        <span class="form-card-title">Text Input States</span>
+        <div class="input-group-ds">
+          <label>First Name (Default)</label>
+          <input type="text" class="input-ds" value="John">
+        </div>
+        <div class="input-group-ds">
+          <label>Last Name (Active/Focus)</label>
+          <input type="text" class="input-ds active-focus" value="Doe">
+        </div>
+        <div class="input-group-ds">
+          <label style="color:#ef4444;">Employee ID (Validation Error)</label>
+          <input type="text" class="input-ds error-val" value="99-ABC">
+          <span class="error-feedback-text">Format must be XXX-000</span>
+        </div>
+      </div>
+
+      <!-- Card 2: Specialized Formats -->
+      <div class="form-card">
+        <span class="form-card-title">Specialized Formats</span>
+        <div class="input-group-ds">
+          <label>Email Address</label>
+          <div style="position:relative;">
+            <i data-lucide="mail" style="position:absolute; left:0.75rem; top:50%; transform:translateY(-50%); width:0.95rem; height:0.95rem; color:#94a3b8;"></i>
+            <input type="email" class="input-ds" style="padding-left:2.2rem; width:100%;" value="dr.doe@datavibe.med">
+          </div>
+        </div>
+
+        <div class="input-group-ds">
+          <label>Password</label>
+          <div style="position:relative;">
+            <input type="password" class="input-ds" id="demo-pw-input" style="width:100%; padding-right:2.2rem;" value="supersecret">
+            <button style="position:absolute; right:0.75rem; top:50%; transform:translateY(-50%); background:transparent; border:0; color:#64748b; cursor:pointer;" onclick="toggleDemoPassword()"><i data-lucide="eye-off" id="demo-pw-icon" style="width:0.95rem; height:0.95rem;"></i></button>
+          </div>
+        </div>
+
+        <div class="input-group-ds">
+          <label>Dosage Count (Number)</label>
+          <div class="dosage-counter">
+            <button class="dosage-btn" onclick="adjustDosage(-1)">&minus;</button>
+            <span class="dosage-val" id="dosage-display-val">25</span>
+            <button class="dosage-btn" onclick="adjustDosage(1)">&plus;</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3: File Upload -->
+      <div class="form-card" style="padding: 0;">
+        <div class="upload-dropzone" onclick="alert('Open local file dialogue upload payload...')">
+          <i data-lucide="upload-cloud"></i>
+          <h4>Drag & drop DICOM or PDF files</h4>
+          <p>Maximum file size: 500MB</p>
+          <button class="btn-export" style="border:1.5px solid #cbd5e1; background:white; color:#334155;">Select Files</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rich Text Editor block -->
+    <div class="editor-card">
+      <div class="editor-toolbar">
+        <button class="editor-tool-btn" onclick="alert('Format bold text')"><i data-lucide="bold"></i></button>
+        <button class="editor-tool-btn" onclick="alert('Format italic text')"><i data-lucide="italic"></i></button>
+        <button class="editor-tool-btn" onclick="alert('Format underline text')"><i data-lucide="underline"></i></button>
+        <div style="width:1px; height:1.2rem; background:#cbd5e1; margin:0 0.25rem;"></div>
+        <button class="editor-tool-btn" onclick="alert('Bullet checklist')"><i data-lucide="list"></i></button>
+        <button class="editor-tool-btn" onclick="alert('Insert code identifier')"><i data-lucide="user-check"></i></button>
+      </div>
+      <textarea class="editor-textarea" placeholder="Enter patient assessment notes..."></textarea>
+    </div>
+
+    <!-- SECTION 2: SELECTION & CONTROLS -->
+    <div class="section-title-ph"><i data-lucide="sliders"></i> Selection & Controls</div>
+    
+    <div class="forms-grid-three" style="margin-bottom:2.5rem;">
+      <!-- Dropdown with search -->
+      <div class="form-card">
+        <span class="form-card-title">Diagnosis Search</span>
+        <div style="position:relative; margin-bottom:0.75rem;">
+          <i data-lucide="search" style="position:absolute; left:0.75rem; top:50%; transform:translateY(-50%); width:0.95rem; height:0.95rem; color:#94a3b8;"></i>
+          <input type="text" class="input-ds" style="width:100%; padding-left:2.2rem; font-size:0.8rem;" placeholder="Search ICD-10 Codes..." oninput="filterIcdResults(this.value)">
+        </div>
+        
+        <div id="icd-results-list" style="display:flex; flex-direction:column; gap:0.25rem;">
+          <div class="med-item-row" style="grid-template-columns: 1fr auto; padding:0.5rem 0.75rem; margin-bottom:0; font-size:0.75rem;">
+            <span>E11.9 - Type 2 Diabetes</span>
+            <span style="color:#2563eb; background:#eff6ff; font-size:0.6rem; padding:0.1rem 0.35rem; border-radius:4px; font-weight:800;">Common</span>
+          </div>
+          <div class="med-item-row" style="grid-template-columns: 1fr auto; padding:0.5rem 0.75rem; margin-bottom:0; font-size:0.75rem;">
+            <span>I10 - Essential Hypertension</span>
+            <span style="color:#2563eb; background:#eff6ff; font-size:0.6rem; padding:0.1rem 0.35rem; border-radius:4px; font-weight:800;">Common</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Multi-select symptoms -->
+      <div class="form-card">
+        <span class="form-card-title">Symptom Tracking</span>
+        <div style="margin-bottom:0.75rem;" id="selected-symptoms-tags">
+          <div class="symptom-tag-box">Fever <button onclick="removeSymptomTag(this)">&times;</button></div>
+          <div class="symptom-tag-box">Fatigue <button onclick="removeSymptomTag(this)">&times;</button></div>
+          <div class="symptom-tag-box">Joint Pain <button onclick="removeSymptomTag(this)">&times;</button></div>
+        </div>
+
+        <div style="border-top:1px solid #f1f5f9; padding-top:0.75rem;">
+          <span style="font-size:0.65rem; font-weight:800; color:#94a3b8; display:block; margin-bottom:0.5rem;">AVAILABLE SYMPTOMS</span>
+          <div style="display:flex; gap:0.35rem; flex-wrap:wrap;">
+            <button class="btn-export" style="font-size:0.7rem; padding:0.3rem 0.6rem;" onclick="addSymptomTag('Nausea')">Nausea</button>
+            <button class="btn-export" style="font-size:0.7rem; padding:0.3rem 0.6rem;" onclick="addSymptomTag('Dizziness')">Dizziness</button>
+            <button class="btn-export" style="font-size:0.7rem; padding:0.3rem 0.6rem;" onclick="addSymptomTag('Cough')">Cough</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toggles and range sliders -->
+      <div class="form-card">
+        <span class="form-card-title">Toggles & Logic</span>
+        
+        <div class="toggle-switch-item">
+          <span style="font-size:0.8rem; font-weight:700; color:#334155;">Emergency Alert Status</span>
+          <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+        </div>
+
+        <div class="toggle-switch-item" style="margin-bottom:1rem;">
+          <span style="font-size:0.8rem; font-weight:700; color:#334155;">Publish to Portal</span>
+          <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+        </div>
+
+        <div class="input-group-ds">
+          <div style="display:flex; justify-content:space-between; font-size:0.72rem; font-weight:750; color:#475569;">
+            <span>Pain Scale (NPRS)</span>
+            <span style="color:#2563eb;" id="nprs-display-val">5</span>
+          </div>
+          <input type="range" min="0" max="10" value="5" class="range-slider-ds" oninput="document.getElementById('nprs-display-val').textContent = this.value">
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: ADVANCED FORM WORKFLOWS -->
+    <div class="section-title-ph"><i data-lucide="git-branch"></i> Advanced Form Workflows</div>
+    
+    <div style="display:grid; grid-template-columns: 2.2fr 1fr; gap: 1.5rem;">
+      <!-- Multi-step wizard and Dynamic forms -->
+      <div class="form-card" style="display:flex; flex-direction:column; justify-content:space-between;">
+        <div>
+          <!-- Wizard nodes -->
+          <div class="step-wizard-header">
+            <div class="wizard-step-node active">
+              <span class="wizard-step-num">1</span> Patient Info
+            </div>
+            <div class="wizard-step-node">
+              <span class="wizard-step-num">2</span> Medical History
+            </div>
+            <div class="wizard-step-node">
+              <span class="wizard-step-num">3</span> Risk Analysis
+            </div>
+            <div class="wizard-step-node">
+              <span class="wizard-step-num">4</span> Review
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <h3 style="margin:0; font-size:0.88rem; font-weight:800; color:#1e293b;">Current Medications</h3>
+            <button style="border:0; background:transparent; color:#2563eb; font-size:0.78rem; font-weight:800; cursor:pointer;" onclick="addNewMedicationRow()"><i data-lucide="plus-circle" style="width:0.9rem; height:0.9rem; display:inline-block; vertical-align:middle;"></i> Add Medication</button>
+          </div>
+
+          <!-- Dynamic input rows -->
+          <div id="dynamic-medications-list">
+            <div class="med-item-row">
+              <span>Metformin</span>
+              <span>500mg</span>
+              <span>Twice Daily</span>
+              <button class="btn-delete-row" onclick="this.parentElement.remove()"><i data-lucide="trash-2" style="width:1rem; height:1rem;"></i></button>
+            </div>
+            <div class="med-item-row">
+              <span>Lisinopril</span>
+              <span>10mg</span>
+              <span>Once Daily</span>
+              <button class="btn-delete-row" onclick="this.parentElement.remove()"><i data-lucide="trash-2" style="width:1rem; height:1rem;"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:0.75rem; border-top:1px solid #f1f5f9; padding-top:1.25rem; margin-top:2rem;">
+          <button class="btn-export" style="border:1.5px solid #cbd5e1; background:white; color:#475569;" onclick="alert('Draft progress saved.')">Save as Draft</button>
+          <button class="btn-new-report" style="background:#003366; display:flex; align-items:center; gap:0.35rem;" onclick="alert('Proceeding to Step 2...')">Next Step <i data-lucide="arrow-right" style="width:0.95rem; height:0.95rem;"></i></button>
+        </div>
+      </div>
+
+      <!-- Sidebar Progress & Pending Checklist -->
+      <div style="display:flex; flex-direction:column; gap:1.25rem;">
+        <!-- Progress panel -->
+        <div class="form-card">
+          <h4 style="margin:0; font-size:0.85rem; font-weight:800; color:#1e293b;">Form Progress</h4>
+          
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.75rem; font-weight:750; font-size:0.8rem; color:#475569;">
+            <span>85% Complete</span>
+            <span style="color:#2563eb;">12/14 Fields</span>
+          </div>
+
+          <!-- Progress bar -->
+          <div style="width:100%; height:6px; background:#e2e8f0; border-radius:99px; overflow:hidden; margin:0.5rem 0 1.25rem;">
+            <div style="width:85%; height:100%; background:#2563eb; border-radius:99px;"></div>
+          </div>
+
+          <span style="font-size:0.58rem; font-weight:800; color:#94a3b8; text-transform:uppercase; display:block; margin-bottom:0.5rem;">PENDING ITEMS</span>
+          <div style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1.25rem;">
+            <div style="display:flex; gap:0.5rem; align-items:flex-start;">
+              <i data-lucide="alert-circle" style="color:#ef4444; width:1.05rem; height:1.05rem; flex-shrink:0;"></i>
+              <div>
+                <span style="display:block; font-size:0.78rem; font-weight:750; color:#1e293b;">Allergy List</span>
+                <small style="color:#ef4444; font-size:0.65rem; font-weight:600;">Required for validation</small>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:0.5rem; align-items:flex-start;">
+              <i data-lucide="help-circle" style="color:#94a3b8; width:1.05rem; height:1.05rem; flex-shrink:0;"></i>
+              <div>
+                <span style="display:block; font-size:0.78rem; font-weight:750; color:#1e293b;">Emergency Contact</span>
+                <small style="color:#64748b; font-size:0.65rem; font-weight:600;">Optional but recommended</small>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-export" style="width:100%; border:1.5px solid #cbd5e1; background:white; color:#334155; justify-content:center; display:flex; gap:0.35rem;" onclick="alert('Opening final summary layout page...')">
+            <i data-lucide="eye" style="width:1rem; height:1rem;"></i> Preview Final Report
+          </button>
+        </div>
+
+        <!-- Syncing latency -->
+        <div style="background:white; border:1px solid #e2e8f0; border-radius:12px; padding:0.75rem 1.25rem; box-shadow:0 4px 15px rgba(0,0,0,0.005); display:flex; justify-content:space-between; align-items:center; font-size:0.78rem; font-weight:750; color:#475569;">
+          <span style="display:flex; align-items:center; gap:0.5rem;"><i data-lucide="refresh-cw" style="width:0.95rem; height:0.95rem; color:#10b981; animation: spin 2s linear infinite;"></i> Syncing...</span>
+          <span>0.4ms latency</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page Footer -->
+    <div style="border-top:1px solid #cbd5e1; padding-top:1.5rem; margin-top:4rem; display:flex; justify-content:space-between; flex-wrap:wrap; font-size:0.78rem; font-weight:700; color:#64748b;">
+      <div>
+        <strong>DataVibe</strong> Design System v2.4.1
+      </div>
+      <div style="display:flex; gap:1.5rem;">
+        <a href="#" style="color:#475569; text-decoration:none;">Accessibility</a>
+        <a href="#" style="color:#475569; text-decoration:none;">Component Status</a>
+        <a href="#" style="color:#475569; text-decoration:none;">Changelog</a>
+      </div>
+      <div>
+        &copy; 2024 Clinical Intelligence Group
+      </div>
+    </div>
+
+  </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Sidebar toggle animation
+  const sidebarToggle = document.getElementById("sidebar-toggle");
+  const dbContainer = document.getElementById("dashboard-container");
+  const toggleIcon = document.getElementById("toggle-icon");
+  
+  if (sidebarToggle && dbContainer) {
+    sidebarToggle.addEventListener("click", () => {
+      dbContainer.classList.toggle("collapsed");
+      if (dbContainer.classList.contains("collapsed")) {
+        toggleIcon.setAttribute("data-lucide", "chevrons-right");
+      } else {
+        toggleIcon.setAttribute("data-lucide", "chevrons-left");
+      }
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    });
+  }
+
+  // Toggle Password show/hide
+  function toggleDemoPassword() {
+    const pwInput = document.getElementById("demo-pw-input");
+    const pwIcon = document.getElementById("demo-pw-icon");
+    if (pwInput.type === "password") {
+      pwInput.type = "text";
+      pwIcon.setAttribute("data-lucide", "eye");
+    } else {
+      pwInput.type = "password";
+      pwIcon.setAttribute("data-lucide", "eye-off");
+    }
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
+  }
+
+  // Adjust Dosage Number
+  function adjustDosage(amount) {
+    const display = document.getElementById("dosage-display-val");
+    let current = parseInt(display.textContent);
+    current = Math.max(1, current + amount);
+    display.textContent = current;
+  }
+
+  // Filter Diagnosis dropdown with search
+  function filterIcdResults(query) {
+    const list = document.getElementById("icd-results-list");
+    const items = list.getElementsByTagName("div");
+    
+    for (let i = 0; i < items.length; i++) {
+      const text = items[i].textContent.toLowerCase();
+      if (text.includes(query.toLowerCase())) {
+        items[i].style.display = "grid";
+      } else {
+        items[i].style.display = "none";
+      }
+    }
+  }
+
+  // Remove symptom tags
+  function removeSymptomTag(button) {
+    button.parentElement.remove();
+  }
+
+  // Add symptom tag
+  function addSymptomTag(name) {
+    const container = document.getElementById("selected-symptoms-tags");
+    
+    // Check if tag already exists
+    const textNodes = Array.from(container.getElementsByClassName("symptom-tag-box")).map(node => node.textContent.replace('×', '').trim());
+    if (textNodes.includes(name)) return;
+
+    const newTag = document.createElement("div");
+    newTag.className = "symptom-tag-box";
+    newTag.innerHTML = `${name} <button onclick="removeSymptomTag(this)">&times;</button>`;
+    container.appendChild(newTag);
+  }
+
+  // Add Medication dynamically
+  function addNewMedicationRow() {
+    const list = document.getElementById("dynamic-medications-list");
+    const newRow = document.createElement("div");
+    newRow.className = "med-item-row";
+    newRow.innerHTML = `
+      <span>Aspirin</span>
+      <span>75mg</span>
+      <span>Once Daily</span>
+      <button class="btn-delete-row" onclick="this.parentElement.remove()"><i data-lucide="trash-2" style="width:1rem; height:1rem;"></i></button>
+    `;
+    list.appendChild(newRow);
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,924 @@
+{% extends "base.html" %}
+{% block title %}DataVibe - Fighting Heart Disease Through Data{% endblock %}
+{% block content %}
+<style>
+  /* Base styles */
+  .landing-page {
+    font-family: 'Inter', sans-serif;
+    color: #1e293b;
+    background: #ffffff;
+    overflow-x: hidden;
+  }
+
+  /* SVG Heartbeat Wave Animation */
+  .heartbeat-container {
+    position: relative;
+    width: 100%;
+    height: 120px;
+    background: #f8fafc;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+  }
+  .heartbeat-svg {
+    width: 100%;
+    height: 100%;
+  }
+  .heartbeat-line {
+    fill: none;
+    stroke: url(#wave-gradient);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: drawWave 4s linear infinite;
+  }
+
+  @keyframes drawWave {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  /* Hero Section */
+  .hero-section {
+    padding: 5rem clamp(1rem, 5vw, 3rem) 4rem;
+    text-align: center;
+    background: #f8fafc;
+    position: relative;
+  }
+  .hero-badge {
+    background: #eff6ff;
+    color: #3b82f6;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.35rem 0.85rem;
+    border-radius: 99px;
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .hero-section h1 {
+    font-size: clamp(2rem, 5vw, 3.8rem);
+    font-weight: 800;
+    color: #1e293b;
+    line-height: 1.15;
+    max-width: 52rem;
+    margin: 0 auto 1.25rem;
+  }
+  .hero-section p {
+    font-size: 1.15rem;
+    color: #64748b;
+    max-width: 44rem;
+    margin: 0 auto 2.5rem;
+    line-height: 1.6;
+  }
+  .hero-ctas {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 4.5rem;
+    flex-wrap: wrap;
+  }
+  .btn-primary-round {
+    background: #3b82f6;
+    color: white;
+    font-weight: 700;
+    font-size: 0.95rem;
+    padding: 0.8rem 2rem;
+    border-radius: 99px;
+    border: 0;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(59, 130, 246, 0.15);
+    text-decoration: none;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .btn-primary-round:hover {
+    background: #2563eb;
+  }
+  .btn-primary-round:active {
+    transform: scale(0.98);
+  }
+  .btn-ghost-round {
+    background: white;
+    color: #475569;
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 0.8rem 2rem;
+    border-radius: 99px;
+    border: 1px solid #cbd5e1;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+  .btn-ghost-round:hover {
+    background: #f8fafc;
+  }
+
+  /* Hero Stats counters */
+  .hero-stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    max-width: 60rem;
+    margin: 0 auto;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 2.5rem;
+  }
+  @media (max-width: 768px) {
+    .hero-stats-row {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  .hero-stat-item {
+    text-align: left;
+  }
+  .hero-stat-item strong {
+    display: block;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+  }
+  .hero-stat-item span {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #64748b;
+  }
+
+  /* Persona cards section */
+  .personas-section {
+    padding: 5rem clamp(1rem, 5vw, 2.5rem);
+    background: white;
+    text-align: center;
+  }
+  .section-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+  }
+  .section-subtitle {
+    font-size: 0.95rem;
+    color: #64748b;
+    max-width: 38rem;
+    margin: 0 auto 3.5rem;
+    line-height: 1.5;
+  }
+
+  .personas-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    max-width: 74rem;
+    margin: 0 auto;
+  }
+  @media (max-width: 1024px) {
+    .personas-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .persona-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 2rem 1.5rem;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s, box-shadow 0.2s;
+    min-height: 24rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.005);
+  }
+  .persona-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.02);
+  }
+  .persona-card.clinical { border-left: 4px solid #3b82f6; }
+  .persona-card.public-health { border-left: 4px solid #8b5cf6; }
+  .persona-card.patient { border-left: 4px solid #3b82f6; }
+
+  .persona-icon-wrap {
+    width: 2.8rem;
+    height: 2.8rem;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    margin-bottom: 1.5rem;
+  }
+  .persona-icon-wrap.blue { background: #eff6ff; color: #3b82f6; }
+  .persona-icon-wrap.purple { background: #f5f3ff; color: #8b5cf6; }
+
+  .persona-card h3 {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0 0 0.75rem;
+  }
+  .persona-card p {
+    font-size: 0.88rem;
+    color: #64748b;
+    line-height: 1.5;
+    margin: 0 0 1.5rem;
+    flex: 1;
+  }
+  .persona-metrics-badge {
+    background: #f1f5f9;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.5px;
+  }
+  .btn-persona-action {
+    border: 1px solid #cbd5e1;
+    background: white;
+    font-weight: 700;
+    font-size: 0.88rem;
+    padding: 0.7rem 1.25rem;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: block;
+  }
+  .persona-card.clinical .btn-persona-action { color: #3b82f6; border-color: #3b82f6; }
+  .persona-card.clinical .btn-persona-action:hover { background: #eff6ff; }
+  .persona-card.public-health .btn-persona-action { color: #8b5cf6; border-color: #8b5cf6; }
+  .persona-card.public-health .btn-persona-action:hover { background: #f5f3ff; }
+  .persona-card.patient .btn-persona-action { color: #3b82f6; border-color: #3b82f6; }
+  .persona-card.patient .btn-persona-action:hover { background: #eff6ff; }
+
+  /* Risk factors section */
+  .risk-factors-section {
+    padding: 5rem clamp(1rem, 5vw, 2.5rem);
+    background: #f8fafc;
+  }
+  .risk-factors-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 4rem;
+    max-width: 74rem;
+    margin: 0 auto;
+    align-items: center;
+  }
+  @media (max-width: 900px) {
+    .risk-factors-grid {
+      grid-template-columns: 1fr;
+      gap: 3rem;
+    }
+  }
+
+  .risk-chart-area h2 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0 0 0.5rem;
+  }
+  .risk-chart-area p {
+    font-size: 0.92rem;
+    color: #64748b;
+    line-height: 1.5;
+    margin: 0 0 2.5rem;
+  }
+
+  .risk-bars-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .risk-bar-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .risk-bar-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1e293b;
+  }
+  .risk-bar-track {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .risk-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+  }
+  .risk-bar-fill.blue-light { background: #3b82f6; }
+  .risk-bar-fill.blue-dark { background: #1e3a8a; }
+  .risk-bar-fill.purple { background: #8b5cf6; }
+  .risk-bar-fill.gray { background: #64748b; }
+
+  /* Map and doctors circle container */
+  .risk-image-circle-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .circular-frame {
+    width: 24rem;
+    height: 24rem;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 8px solid white;
+    box-shadow: 0 15px 45px rgba(0,0,0,0.06);
+    position: relative;
+  }
+  .circular-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .circular-badge-overlay {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    width: 15rem;
+    text-align: center;
+    border: 1px solid #e2e8f0;
+  }
+  .circular-badge-overlay i {
+    color: #ef4444;
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-bottom: 0.25rem;
+  }
+  .circular-badge-overlay h4 {
+    margin: 0;
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: #1e293b;
+  }
+  .circular-badge-overlay p {
+    margin: 0.2rem 0 0;
+    font-size: 0.72rem;
+    color: #64748b;
+    line-height: 1.3;
+  }
+
+  /* India's Heart burden section */
+  .burden-section {
+    background: #0f172a;
+    color: white;
+    padding: 5rem clamp(1rem, 5vw, 2.5rem);
+    text-align: center;
+  }
+  .burden-section h2 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: white;
+    margin: 0 0 3.5rem;
+  }
+  .burden-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    max-width: 74rem;
+    margin: 0 auto;
+  }
+  @media (max-width: 768px) {
+    .burden-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .burden-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 2.5rem 1.5rem;
+  }
+  .burden-card strong {
+    display: block;
+    font-size: 3rem;
+    font-weight: 800;
+    color: #3b82f6;
+    margin-bottom: 0.5rem;
+  }
+  .burden-card h3 {
+    font-size: 1rem;
+    font-weight: 800;
+    color: white;
+    margin: 0 0 0.75rem;
+  }
+  .burden-card p {
+    font-size: 0.82rem;
+    color: #94a3b8;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* Workflow/How it works */
+  .workflow-section {
+    padding: 5rem clamp(1rem, 5vw, 2.5rem);
+    background: #f8fafc;
+    text-align: center;
+  }
+  .workflow-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    max-width: 68rem;
+    margin: 0 auto;
+  }
+  @media (max-width: 768px) {
+    .workflow-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .workflow-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .workflow-num {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: transparent;
+    border: 2px solid #3b82f6;
+    color: #3b82f6;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .workflow-step h3 {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0 0 0.5rem;
+  }
+  .workflow-step p {
+    font-size: 0.82rem;
+    color: #64748b;
+    line-height: 1.5;
+    margin: 0;
+    max-width: 18rem;
+  }
+
+  /* Testimonials */
+  .testimonials-section {
+    padding: 5rem clamp(1rem, 5vw, 2.5rem);
+    background: white;
+    text-align: center;
+  }
+  .testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    max-width: 74rem;
+    margin: 0 auto;
+  }
+  @media (max-width: 1024px) {
+    .testimonials-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .testimonial-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 2rem 1.5rem;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 18rem;
+  }
+  .testimonial-user {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+  .testimonial-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  .testimonial-info h4 {
+    margin: 0 0 0.15rem;
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: #1e293b;
+  }
+  .testimonial-info span {
+    font-size: 0.72rem;
+    color: #64748b;
+    font-weight: 600;
+  }
+  .testimonial-quote {
+    font-size: 0.85rem;
+    color: #475569;
+    line-height: 1.5;
+    font-style: italic;
+    margin: 0 0 1.5rem;
+    flex: 1;
+  }
+  .testimonial-link {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #3b82f6;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Footer */
+  .landing-footer {
+    background: #f1f5f9;
+    padding: 4rem clamp(1rem, 5vw, 2.5rem) 2rem;
+    border-top: 1px solid #e2e8f0;
+  }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 1.2fr repeat(3, 1fr);
+    gap: 3rem;
+    max-width: 74rem;
+    margin: 0 auto 3rem;
+  }
+  @media (max-width: 900px) {
+    .footer-grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+  }
+  .footer-col h3 {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0 0 1.25rem;
+  }
+  .footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .footer-links a {
+    font-size: 0.8rem;
+    color: #64748b;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover {
+    color: #1e293b;
+  }
+  .footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #cbd5e1;
+    padding-top: 1.5rem;
+    max-width: 74rem;
+    margin: 0 auto;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: 0.75rem;
+    color: #94a3b8;
+    font-weight: 600;
+  }
+</style>
+
+<div class="landing-page">
+  <!-- SVG Heartbeat wave Header Decoration -->
+  <div class="heartbeat-container">
+    <svg class="heartbeat-svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="wave-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#6C63FF" />
+          <stop offset="100%" stop-color="#00D2FF" />
+        </linearGradient>
+      </defs>
+      <path class="heartbeat-line" d="M0,60 L200,60 L220,60 L230,20 L240,100 L250,50 L260,70 L270,60 L450,60 L470,20 L480,95 L490,45 L500,75 L510,60 L750,60 L770,10 L785,110 L795,50 L805,70 L815,60 L1000,60 L1020,30 L1030,90 L1040,40 L1050,70 L1060,60 L1200,60" />
+    </svg>
+  </div>
+
+  <!-- 1. Hero Section -->
+  <section class="hero-section">
+    <span class="hero-badge">Fighting Heart Disease through data</span>
+    <h1>DataVibe - Fighting Heart Disease Through Data</h1>
+    <p>Advanced Analytics Platform for Cardiovascular Health. Empowering cardiologists, administrators, and patients with real-time clinical intelligence.</p>
+    
+    <div class="hero-ctas">
+      <a href="{{ url_for('auth.login') }}" class="btn-primary-round">Explore Heart Health Insights</a>
+      <a href="#" class="btn-ghost-round" onclick="alert('Opening research publications...')">View Research & Papers</a>
+    </div>
+
+    <!-- Stats row -->
+    <div class="hero-stats-row">
+      <div class="hero-stat-item">
+        <strong>10,000+</strong>
+        <span>Patients Analyzed</span>
+      </div>
+      <div class="hero-stat-item">
+        <strong>24</strong>
+        <span>Clinical Risk Factors</span>
+      </div>
+      <div class="hero-stat-item">
+        <strong>94%</strong>
+        <span>Detection Accuracy</span>
+      </div>
+      <div class="hero-stat-item">
+        <strong>3</strong>
+        <span>Personas Served</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Three Persona Cards Section -->
+  <section class="personas-section">
+    <h2 class="section-title">Tailored Clinical Intelligence</h2>
+    <p class="section-subtitle">Different perspectives, one common goal: reducing cardiac mortality through predictive modeling and patient empowerment.</p>
+    
+    <div class="personas-grid">
+      <!-- Card 1: Clinical (Dr. Sharma) -->
+      <div class="persona-card clinical">
+        <div>
+          <div class="persona-icon-wrap blue">
+            <i data-lucide="stethoscope" style="width: 1.4rem; height: 1.4rem;"></i>
+          </div>
+          <h3>Dr. Sharma's Clinical Risk Analysis</h3>
+          <p>Identify high-risk middle-aged patients through comprehensive lifestyle factor analysis and diagnostic data.</p>
+        </div>
+        <div>
+          <div class="persona-metrics-badge">
+            METRICS / 847 Patients | 156 High-Risk
+          </div>
+          <a href="{{ url_for('auth.login') }}" class="btn-persona-action">Access Clinical Dashboard</a>
+        </div>
+      </div>
+
+      <!-- Card 2: Public Health (Ramesh) -->
+      <div class="persona-card public-health">
+        <div>
+          <div class="persona-icon-wrap purple">
+            <i data-lucide="building" style="width: 1.4rem; height: 1.4rem;"></i>
+          </div>
+          <h3>Ramesh's Population Health Policy</h3>
+          <p>Study regional trends, urban vs rural disparities, and the visual impact of health policies on public health.</p>
+        </div>
+        <div>
+          <div class="persona-metrics-badge">
+            METRICS / 12 Regions | 4 Recommendations
+          </div>
+          <a href="{{ url_for('auth.login') }}" class="btn-persona-action">Access Public Health Dashboard</a>
+        </div>
+      </div>
+
+      <!-- Card 3: Patient (Anita) -->
+      <div class="persona-card patient">
+        <div>
+          <div class="persona-icon-wrap blue">
+            <i data-lucide="heart" style="width: 1.4rem; height: 1.4rem;"></i>
+          </div>
+          <h3>Anita's Personal Health Monitoring</h3>
+          <p>Track your personal risk factors, daily habits, and monitor your health progress in real-time.</p>
+        </div>
+        <div>
+          <div class="persona-metrics-badge">
+            METRICS / 78% Health Score | 5 Factors
+          </div>
+          <a href="{{ url_for('auth.login') }}" class="btn-persona-action">Access Patient Dashboard</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Key Risk Factors Section -->
+  <section class="risk-factors-section">
+    <div class="risk-factors-grid">
+      <!-- Left side: Bar chart -->
+      <div class="risk-chart-area">
+        <h2>Analyzing Critical Risk Factors</h2>
+        <p>Our platform specifically isolates cardiovascular pathology. These are the top predictors of cardiovascular incidents in our current dataset.</p>
+        
+        <div class="risk-bars-stack">
+          <div class="risk-bar-row">
+            <div class="risk-bar-labels">
+              <span>High Cholesterol</span>
+              <span>67%</span>
+            </div>
+            <div class="risk-bar-track">
+              <div class="risk-bar-fill blue-light" style="width: 67%;"></div>
+            </div>
+          </div>
+          <div class="risk-bar-row">
+            <div class="risk-bar-labels">
+              <span>Smoking</span>
+              <span>58%</span>
+            </div>
+            <div class="risk-bar-track">
+              <div class="risk-bar-fill blue-dark" style="width: 58%;"></div>
+            </div>
+          </div>
+          <div class="risk-bar-row">
+            <div class="risk-bar-labels">
+              <span>High BMI</span>
+              <span>52%</span>
+            </div>
+            <div class="risk-bar-track">
+              <div class="risk-bar-fill purple" style="width: 52%;"></div>
+            </div>
+          </div>
+          <div class="risk-bar-row">
+            <div class="risk-bar-labels">
+              <span>Sedentary Lifestyle</span>
+              <span>48%</span>
+            </div>
+            <div class="risk-bar-track">
+              <div class="risk-bar-fill gray" style="width: 48%;"></div>
+            </div>
+          </div>
+        </div>
+        
+        <a href="#" style="font-size: 0.88rem; font-weight: 700; color: #3b82f6; text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem;">
+          View Full Dataset &rarr;
+        </a>
+      </div>
+
+      <!-- Right side: circle card -->
+      <div class="risk-image-circle-container">
+        <div class="circular-frame">
+          <img src="{{ url_for('static', filename='images/doctors_analyzing.png') }}" alt="Doctors analyzing cardiac diagnostics">
+        </div>
+        <div class="circular-badge-overlay">
+          <i data-lucide="heart" style="fill: rgba(239, 68, 68, 0.1);"></i>
+          <h4>Continuous Monitoring</h4>
+          <p>DataVibe interfaces with medical-grade data to ensure early detection.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Real-Time Statistics burden section -->
+  <section class="burden-section">
+    <h2>The Reality: India's Heart Disease Burden</h2>
+    <div class="burden-grid">
+      <div class="burden-card">
+        <strong>30%</strong>
+        <h3>Total Mortality</h3>
+        <p>Heart disease accounts for 30% of all mortality in urban environments.</p>
+      </div>
+      <div class="burden-card">
+        <strong>64M</strong>
+        <h3>Heart Patients</h3>
+        <p>Estimated database of active cases in the country, rising yearly.</p>
+      </div>
+      <div class="burden-card">
+        <strong>2.8M</strong>
+        <h3>Annual Deaths</h3>
+        <p>Nearly three million lives lost annually to cardiovascular events.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. How It Works -->
+  <section class="workflow-section">
+    <h2 class="section-title">A Simple Workflow for Complex Data</h2>
+    <p class="section-subtitle">Connecting datasets to clinic outcomes in three easy steps.</p>
+    
+    <div class="workflow-grid">
+      <div class="workflow-step">
+        <div class="workflow-num">1</div>
+        <h3>Upload Health Data</h3>
+        <p>Seamlessly integrate demographic, clinical, and lifestyle data through our HIPAA-compliant intake.</p>
+      </div>
+      <div class="workflow-step">
+        <div class="workflow-num">2</div>
+        <h3>AI Risk Analysis</h3>
+        <p>Our core engine identifies hidden patterns and correlations with clinical-grade safety and accuracy.</p>
+      </div>
+      <div class="workflow-step">
+        <div class="workflow-num">3</div>
+        <h3>Actionable Insights</h3>
+        <p>Receive personalized care plans or high-level policy recommendations based on longitudinal data.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. Success Stories Testimonials -->
+  <section class="testimonials-section">
+    <h2 class="section-title">Impacting Real Lives</h2>
+    <p class="section-subtitle">How DataVibe helps doctors, analysts, and patients save hearts.</p>
+    
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div>
+          <div class="testimonial-user">
+            <img class="testimonial-avatar" src="{{ url_for('static', filename='images/doctor_avatar.png') }}" alt="Dr. Sharma">
+            <div class="testimonial-info">
+              <h4>Dr. Sharma</h4>
+              <span>Cardiologist, Apollo Heart</span>
+            </div>
+          </div>
+          <p class="testimonial-quote">"DataVibe's clinical dashboard allowed me to prioritize high-risk patients who might have otherwise been missed. We've seen a measurable improvement in patient care adherence."</p>
+        </div>
+        <a href="#" class="testimonial-link" onclick="alert('Viewing Dr. Sharma clinical research notes...')">VALUED IN CLINICAL INTERVENTIONS</a>
+      </div>
+
+      <div class="testimonial-card">
+        <div>
+          <div class="testimonial-user">
+            <img class="testimonial-avatar" src="{{ url_for('static', filename='images/public_health_avatar.png') }}" alt="Ramesh">
+            <div class="testimonial-info">
+              <h4>Ramesh I.</h4>
+              <span>Public Health Administrator</span>
+            </div>
+          </div>
+          <p class="testimonial-quote">"Mapping 12 distinct regions revealed critical rural disparities. We used these insights to push 4 key policy recommendations to the health ministry this year."</p>
+        </div>
+        <a href="#" class="testimonial-link" onclick="alert('Viewing Ramesh policy impact report...')">OPTIMIZED REGIONAL CLINIC ALLOCATIONS</a>
+      </div>
+
+      <div class="testimonial-card">
+        <div>
+          <div class="testimonial-user">
+            <img class="testimonial-avatar" src="{{ url_for('static', filename='images/patient_avatar.png') }}" alt="Anita">
+            <div class="testimonial-info">
+              <h4>Anita R.</h4>
+              <span>Patient User</span>
+            </div>
+          </div>
+          <p class="testimonial-quote">"Seeing my 78% health score motivated me to address the risk factors tracked by DataVibe. For the first time, my health feels like data I can actually manage."</p>
+        </div>
+        <a href="#" class="testimonial-link" onclick="alert('Viewing Anita metric tracking history...')">7.4% GAIN IN CARDIOVASCULAR HEALTH SCORE METRIC INDEX</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. Footer -->
+  <footer class="landing-footer">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h3 style="font-size: 1.1rem; font-weight: 800; color: #1e293b; text-transform: none; margin-bottom: 0.5rem;">DataVibe</h3>
+        <p style="font-size: 0.8rem; color: #64748b; line-height: 1.5; margin: 0 0 1.25rem;">Advanced Clinical Engine for a healthier heart. Transforming cardiovascular care through the power of data.</p>
+        <div style="display: flex; gap: 0.75rem; color: #64748b;">
+          <i data-lucide="globe" style="width: 1.1rem; height: 1.1rem; cursor: pointer;"></i>
+          <i data-lucide="mail" style="width: 1.1rem; height: 1.1rem; cursor: pointer;"></i>
+          <i data-lucide="share-2" style="width: 1.1rem; height: 1.1rem; cursor: pointer;"></i>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h3>Dashboards</h3>
+        <ul class="footer-links">
+          <li><a href="{{ url_for('auth.login') }}">Risk Factor Database</a></li>
+          <li><a href="{{ url_for('auth.login') }}">Clinical Analytics</a></li>
+          <li><a href="{{ url_for('auth.login') }}">Public Health Portal</a></li>
+          <li><a href="{{ url_for('auth.login') }}">Patient Stories</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h3>Resources</h3>
+        <ul class="footer-links">
+          <li><a href="#">Global Heart Registry</a></li>
+          <li><a href="#">Healthcare Partners</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Service</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h3>Contact</h3>
+        <ul class="footer-links">
+          <li><span style="font-size:0.8rem; color:#64748b; font-weight:600;">Support & Intake Clinic</span></li>
+          <li><span style="font-size:0.8rem; color:#64748b;">Bangalore Intervention Hub</span></li>
+          <li><span style="font-size:0.8rem; color:#64748b;">Karnataka, India</span></li>
+          <li><a href="tel:+918088000000" style="color: #3b82f6;">+91 80 8800 0000</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 DataVibe Clinical Intelligence. All rights reserved.</span>
+      <div style="display: flex; gap: 1rem;">
+        <span>HIPAA COMPLIANT</span>
+        <span>GDPR READY</span>
+        <span>ISO 27001</span>
+      </div>
+    </div>
+  </footer>
+</div>
+{% endblock %}

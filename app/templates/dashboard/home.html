@@ -1,0 +1,2076 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - DataVibe{% endblock %}
+{% block content %}
+<style>
+  /* Central Dashboard Layout */
+  .dashboard-container {
+    display: grid;
+    grid-template-columns: 16rem 1fr;
+    min-height: calc(100vh - 70px);
+    background: #f8fafc;
+    transition: grid-template-columns 0.3s ease;
+  }
+  .dashboard-container.collapsed {
+    grid-template-columns: 4.8rem 1fr;
+  }
+
+  /* Sidebar Navigation */
+  .sidebar {
+    background: white;
+    border-right: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1.5rem 1rem;
+    overflow-y: auto;
+    transition: padding 0.3s ease;
+  }
+  .dashboard-container.collapsed .sidebar {
+    padding: 1.5rem 0.5rem;
+    align-items: center;
+  }
+
+  .sidebar-brand-section {
+    transition: opacity 0.2s;
+  }
+  .dashboard-container.collapsed .sidebar-brand-section {
+    opacity: 0;
+    display: none;
+  }
+
+  .sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 2rem;
+  }
+  .sidebar-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #64748b;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+    text-decoration: none;
+  }
+  .sidebar-menu-item:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+  }
+  .sidebar-menu-item.active {
+    background: #eff6ff;
+    color: #3b82f6;
+    border-left-color: #3b82f6;
+    border-radius: 0 8px 8px 0;
+  }
+  .sidebar-menu-item i {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+  }
+  
+  .menu-text {
+    transition: opacity 0.2s;
+  }
+  .dashboard-container.collapsed .menu-text {
+    opacity: 0;
+    display: none;
+  }
+
+  /* Bottom Actions in Sidebar */
+  .sidebar-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .btn-quick-consult {
+    background: black;
+    color: white;
+    font-weight: 700;
+    font-size: 0.88rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    border: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    width: 100%;
+    margin-bottom: 1.25rem;
+    transition: transform 0.15s, background-color 0.2s;
+    text-decoration: none;
+  }
+  .btn-quick-consult:hover {
+    background: #1e293b;
+  }
+  .btn-quick-consult:active {
+    transform: scale(0.97);
+  }
+  .dashboard-container.collapsed .btn-quick-consult {
+    width: 2.8rem;
+    height: 2.8rem;
+    padding: 0;
+    border-radius: 50%;
+  }
+  .dashboard-container.collapsed .btn-quick-consult span {
+    display: none;
+  }
+
+  /* Sidebar Toggle Button */
+  .sidebar-toggle-btn {
+    align-self: flex-end;
+    background: transparent;
+    border: 0;
+    color: #64748b;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    transition: background 0.2s;
+  }
+  .sidebar-toggle-btn:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+  }
+  .dashboard-container.collapsed .sidebar-toggle-btn {
+    align-self: center;
+  }
+
+  /* Workspace Container */
+  .workspace {
+    padding: 2rem clamp(1rem, 4vw, 2.5rem);
+    overflow-y: auto;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  /* Dashboard Cards */
+  .dash-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.01);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .dash-card:hover {
+    box-shadow: 0 6px 24px rgba(0,0,0,0.03);
+  }
+  .dash-card h3 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0 0 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* Welcome Banner Widget */
+  .welcome-banner-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.75rem 2rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .heartbeat-svg {
+    position: absolute;
+    right: 5%;
+    bottom: 10%;
+    width: 250px;
+    height: 60px;
+    opacity: 0.85;
+    pointer-events: none;
+  }
+
+  .heartbeat-path {
+    stroke-dasharray: 600;
+    stroke-dashoffset: 600;
+    animation: pulse-line 4s linear infinite;
+  }
+  @keyframes pulse-line {
+    0% { stroke-dashoffset: 600; }
+    50% { stroke-dashoffset: 0; }
+    100% { stroke-dashoffset: -600; }
+  }
+
+  /* Hologram & Status Widgets */
+  .system-status-card {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+    color: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Metric layout details */
+  .stat-grid-three {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  @media (max-width: 768px) {
+    .stat-grid-three {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .stat-box {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 8.5rem;
+    position: relative;
+  }
+  .stat-box.border-blue { border-left: 4px solid #3b82f6; }
+  .stat-box.border-purple { border-left: 4px solid #a855f7; }
+  .stat-box.border-cyan { border-left: 4px solid #06b6d4; }
+
+  .stat-box-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-box-value {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #1e293b;
+    line-height: 1.1;
+  }
+
+  /* Risk lists */
+  .risk-stat-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .risk-stat-item:last-child {
+    border-bottom: 0;
+  }
+
+  /* Feed Items */
+  .feed-item {
+    padding: 1rem;
+    border-radius: 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 0.75rem;
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+  .feed-item.critical {
+    border-left: 4px solid #ef4444;
+  }
+  .feed-item.upload {
+    border-left: 4px solid #3b82f6;
+  }
+  .feed-item.calendar-alert {
+    border-left: 4px solid #f59e0b;
+  }
+
+  /* Buttons */
+  .btn-outline-brand {
+    background: white;
+    border: 1.5px solid #3b82f6;
+    color: #3b82f6;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .btn-outline-brand:hover {
+    background: #eff6ff;
+  }
+
+  .btn-solid-dark {
+    background: black;
+    color: white;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 0.5rem 1.25rem;
+    border-radius: 8px;
+    border: 0;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .btn-solid-dark:hover {
+    background: #1e293b;
+  }
+
+  /* Floating Action Button */
+  .floating-action-btn {
+    position: absolute;
+    right: 1.5rem;
+    bottom: 1.5rem;
+    width: 3.2rem;
+    height: 3.2rem;
+    border-radius: 50%;
+    background: #00d2ff;
+    color: white;
+    border: 0;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    box-shadow: 0 4px 12px rgba(0, 210, 255, 0.3);
+    transition: transform 0.2s;
+  }
+  .floating-action-btn:hover {
+    transform: scale(1.08);
+  }
+
+  /* Public Health Visual Layouts */
+  .map-overlay-container {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #f1f5f9;
+  }
+  .map-control-overlay {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .map-control-btn {
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    background: white;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  }
+
+  .map-tabs {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    background: white;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 2px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  }
+  .map-tab-btn {
+    border: 0;
+    background: transparent;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #64748b;
+    cursor: pointer;
+    border-radius: 6px;
+  }
+  .map-tab-btn.active {
+    background: #eff6ff;
+    color: #3b82f6;
+  }
+
+  /* Vitals panel items */
+  .vitals-tracker-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+  .vital-item-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+    position: relative;
+  }
+
+  /* Patient Portal CSS Styles */
+  .welcome-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .welcome-header h2 {
+    font-size: 1.7rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0 0 0.35rem;
+  }
+  .welcome-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #64748b;
+    flex-wrap: wrap;
+  }
+  .health-score-pill {
+    color: #10b981;
+    font-weight: 750;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  .metrics-grid-row {
+    display: grid;
+    grid-template-columns: 1.2fr repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  @media (max-width: 1100px) {
+    .metrics-grid-row {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .metrics-grid-row > div:first-child {
+      grid-column: span 2;
+    }
+  }
+  @media (max-width: 600px) {
+    .metrics-grid-row {
+      grid-template-columns: 1fr;
+    }
+    .metrics-grid-row > div:first-child {
+      grid-column: span 1;
+    }
+  }
+  .gauge-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.005);
+    position: relative;
+  }
+  .heart-heartbeat-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: transparent;
+    border: 0;
+    color: #cbd5e1;
+    cursor: pointer;
+    font-size: 1.2rem;
+  }
+  .heart-heartbeat-btn:hover, .heart-heartbeat-btn.active {
+    color: #ef4444;
+  }
+  .score-gauge-svg {
+    width: 6.5rem;
+    height: 6.5rem;
+    transform: rotate(-90deg);
+    margin-top: 0.5rem;
+  }
+  .score-gauge-track {
+    fill: none;
+    stroke: #f1f5f9;
+    stroke-width: 8;
+  }
+  .score-gauge-fill {
+    fill: none;
+    stroke: #06b6d4;
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-dasharray: 251.2;
+    stroke-dashoffset: 55;
+  }
+  .score-gauge-text {
+    position: absolute;
+    top: 4.8rem;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #1e293b;
+  }
+  .kpi-box {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 1.15rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.005);
+    min-height: 8rem;
+  }
+  .kpi-box.elevated { border-top: 4px solid #ef4444; }
+  .kpi-box.normal { border-top: 4px solid #10b981; }
+  .kpi-box.watch { border-top: 4px solid #f59e0b; }
+  .kpi-box.critical { border-top: 4px solid #ef4444; }
+  .kpi-label-wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .kpi-sub-lbl {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #94a3b8;
+    text-transform: uppercase;
+  }
+  .kpi-unit-lbl {
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: #64748b;
+  }
+  .kpi-main-val {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: #1e293b;
+    line-height: 1.1;
+    margin: 0.25rem 0;
+  }
+  .kpi-status-badge {
+    align-self: flex-start;
+    font-size: 0.62rem;
+    font-weight: 800;
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+  .kpi-status-badge.elevated { background: #fffbeb; color: #b45309; }
+  .kpi-status-badge.normal { background: #ecfdf5; color: #047857; }
+  .kpi-status-badge.watch { background: #fffbeb; color: #b45309; }
+  .kpi-status-badge.critical { background: #fef2f2; color: #b91c1c; }
+  .vitals-progress-panel {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.005);
+  }
+  .vitals-progress-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+  }
+  .vitals-progress-head h3 {
+    font-size: 1.02rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0;
+  }
+  .vitals-progress-tabs {
+    display: flex;
+    background: #f1f5f9;
+    border-radius: 6px;
+    padding: 2px;
+  }
+  .vitals-tab-btn {
+    border: 0;
+    background: transparent;
+    padding: 0.25rem 0.65rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #64748b;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  .vitals-tab-btn.active {
+    background: white;
+    color: #1e293b;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .charts-sub-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+  @media (max-width: 800px) {
+    .charts-sub-row {
+      grid-template-columns: 1fr;
+    }
+  }
+  .chart-sub-box {
+    display: flex;
+    flex-direction: column;
+  }
+  .chart-sub-box h4 {
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: #475569;
+    margin: 0 0 0.5rem;
+  }
+  .two-column-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  @media (max-width: 900px) {
+    .two-column-row {
+      grid-template-columns: 1fr;
+    }
+  }
+  .lifestyle-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 0.65rem;
+    margin-bottom: 0.65rem;
+  }
+  .lifestyle-item:last-child {
+    border-bottom: 0;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+  .lifestyle-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .lifestyle-icon-wrap {
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 8px;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    display: grid;
+    place-items: center;
+    color: #64748b;
+  }
+  .wellness-task {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 0.85rem;
+  }
+  .wellness-checkbox {
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 50%;
+    border: 1.5px solid #cbd5e1;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .wellness-checkbox.checked {
+    background: #10b981;
+    border-color: #10b981;
+    color: white;
+  }
+  .wellness-task-desc h5 {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 750;
+    color: #1e293b;
+  }
+  .wellness-task-desc p {
+    margin: 0.15rem 0 0;
+    font-size: 0.75rem;
+    color: #64748b;
+  }
+  .recipe-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    background: white;
+  }
+  .recipe-img {
+    height: 6rem;
+    width: 100%;
+    object-fit: cover;
+  }
+  .recipe-body {
+    padding: 0.75rem;
+  }
+  .recipe-badge {
+    background: #ecfdf5;
+    color: #10b981;
+    font-size: 0.62rem;
+    font-weight: 800;
+    padding: 0.15rem 0.35rem;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 0.35rem;
+    text-transform: uppercase;
+  }
+  .daily-task-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 0.65rem 0.75rem;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+  }
+  .edu-article {
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .edu-article:last-child {
+    border-bottom: 0;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+  .edu-tag {
+    background: #e0f2fe;
+    color: #0369a1;
+    font-size: 0.62rem;
+    font-weight: 800;
+    padding: 0.15rem 0.35rem;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+  }
+  .edu-title {
+    margin: 0 0 0.15rem;
+    font-size: 0.8rem;
+    font-weight: 750;
+    color: #1e293b;
+  }
+</style>
+
+<div class="dashboard-container" id="dashboard-container">
+  <!-- Dynamic Sidebar Navigation -->
+  <aside class="sidebar">
+    <div>
+      <button class="sidebar-toggle-btn" id="sidebar-toggle">
+        <i data-lucide="chevrons-left" id="toggle-icon"></i>
+      </button>
+
+      {% if session.user.persona == 'clinical' %}
+      <!-- Cardiologist Sidebar Menu -->
+      <div class="sidebar-brand-section" style="padding-left: 1rem; margin-bottom: 1.5rem; margin-top: 0.5rem;">
+        <span style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.5px;">Clinical Hub</span>
+        <span style="font-size: 1.25rem; font-weight: 800; color: #1e293b; display: block; font-family: Poppins, sans-serif; margin-top: 0.15rem;">Cardiology Unit</span>
+      </div>
+      <nav class="sidebar-menu">
+        <a href="{{ url_for('dashboard.home') }}" class="sidebar-menu-item active">
+          <i data-lucide="layout-grid"></i>
+          <span class="menu-text">Dashboard Overview</span>
+        </a>
+        <a href="{{ url_for('clinical.clinical_dashboard') }}#clinical-notes" class="sidebar-menu-item">
+          <i data-lucide="users"></i>
+          <span class="menu-text">Patient Management</span>
+        </a>
+        <a href="{{ url_for('clinical.clinical_dashboard') }}#risk-review" class="sidebar-menu-item">
+          <i data-lucide="activity"></i>
+          <span class="menu-text">Analytics Overview</span>
+        </a>
+        <a href="{{ url_for('dashboard.tableau_style_dashboard') }}" class="sidebar-menu-item">
+          <i data-lucide="line-chart"></i>
+          <span class="menu-text">Clinical Analytics</span>
+        </a>
+        <a href="{{ url_for('dashboard.heart_disease_story') }}" class="sidebar-menu-item">
+          <i data-lucide="clipboard-list"></i>
+          <span class="menu-text">Risk Assessments</span>
+        </a>
+      </nav>
+      {% elif session.user.persona == 'public_health' %}
+      <!-- Public Health Sidebar Menu -->
+      <div class="sidebar-brand-section" style="padding-left: 1rem; margin-bottom: 1.5rem; margin-top: 0.5rem;">
+        <span style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.5px;">Health Intelligence</span>
+        <span style="font-size: 1.15rem; font-weight: 800; color: #1e293b; display: block; font-family: Poppins, sans-serif; margin-top: 0.15rem; letter-spacing: -0.5px;">CLINICAL PORTAL</span>
+      </div>
+      <nav class="sidebar-menu">
+        <a href="{{ url_for('dashboard.home') }}" class="sidebar-menu-item active">
+          <i data-lucide="layout-grid"></i>
+          <span class="menu-text">Overview</span>
+        </a>
+        <a href="{{ url_for('public_health.public_health_dashboard') }}" class="sidebar-menu-item">
+          <i data-lucide="map"></i>
+          <span class="menu-text">Regional Health Map</span>
+        </a>
+        <a href="{{ url_for('public_health.visualizations_dashboard') }}" class="sidebar-menu-item">
+          <i data-lucide="trending-up"></i>
+          <span class="menu-text">Population Trends</span>
+        </a>
+        <a href="#" class="sidebar-menu-item">
+          <i data-lucide="scale"></i>
+          <span class="menu-text">Policy Analysis</span>
+        </a>
+        <a href="#" class="sidebar-menu-item">
+          <i data-lucide="wallet"></i>
+          <span class="menu-text">Resource Planning</span>
+        </a>
+        <a href="#" class="sidebar-menu-item">
+          <i data-lucide="book-open"></i>
+          <span class="menu-text">Reports</span>
+        </a>
+        <a href="#" class="sidebar-menu-item">
+          <i data-lucide="bar-chart-3"></i>
+          <span class="menu-text">Stakeholder Dashboard</span>
+        </a>
+      </nav>
+      {% else %}
+      <!-- Patient Sidebar Menu -->
+      <div class="sidebar-brand-section" style="padding-left: 1rem; margin-bottom: 1.5rem; margin-top: 0.5rem;">
+        <span style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.5px;">Health Navigator</span>
+        <span style="font-size: 1.25rem; font-weight: 800; color: #e11d48; display: block; font-family: Poppins, sans-serif; margin-top: 0.15rem; letter-spacing: -0.5px;">My Health Hub</span>
+      </div>
+      <nav class="sidebar-menu">
+        <a class="sidebar-tab sidebar-menu-item active" data-tab="my-health" href="#my-health">
+          <i data-lucide="layout-grid"></i>
+          <span class="menu-text">My Health Dashboard</span>
+        </a>
+        <a class="sidebar-tab sidebar-menu-item" data-tab="health-hub" href="#health-hub">
+          <i data-lucide="heart"></i>
+          <span class="menu-text">Personal Health Hub</span>
+        </a>
+        <a class="sidebar-tab sidebar-menu-item" data-tab="progress-tracking" href="#progress-tracking">
+          <i data-lucide="activity"></i>
+          <span class="menu-text">Progress Tracking</span>
+        </a>
+        <a class="sidebar-tab sidebar-menu-item" data-tab="appointments" href="#appointments">
+          <i data-lucide="calendar"></i>
+          <span class="menu-text">Appointments</span>
+        </a>
+        <a class="sidebar-tab sidebar-menu-item" data-tab="medications" href="#medications">
+          <i data-lucide="pill"></i>
+          <span class="menu-text">Medications</span>
+        </a>
+        <a class="sidebar-tab sidebar-menu-item" data-tab="health-journal" href="#health-journal">
+          <i data-lucide="book-open"></i>
+          <span class="menu-text">Health Journal</span>
+        </a>
+        <a class="sidebar-tab sidebar-menu-item" data-tab="health-education" href="#health-education">
+          <i data-lucide="award"></i>
+          <span class="menu-text">Health Education</span>
+        </a>
+      </nav>
+      {% endif %}
+    </div>
+
+    <div class="sidebar-footer">
+      {% if session.user.persona == 'clinical' %}
+      <button class="btn-quick-consult" onclick="alert('Initiating quick consult panel...')">
+        <i data-lucide="plus"></i>
+        <span>Quick Consult</span>
+      </button>
+      {% elif session.user.persona == 'public_health' %}
+      <button class="btn-quick-consult" style="background: white; border: 1.5px solid #3b82f6; color: #3b82f6; box-shadow: none;" onclick="alert('Simulate Policy Simulation initialized...')">
+        <i data-lucide="play-circle"></i>
+        <span>New Analysis</span>
+      </button>
+      {% else %}
+      <div style="background: #eff6ff; border: 1px dashed #3b82f6; border-radius: 8px; padding: 0.75rem; text-align: center; margin-bottom: 1rem;">
+        <p style="margin: 0; font-size: 0.75rem; color: #1e293b; font-weight: 600;">Need help with your data?</p>
+        <button onclick="alert('Connecting to care team...')" style="margin-top: 0.5rem; background: #3b82f6; border: 0; color: white; width: 100%; border-radius: 6px; padding: 0.35rem; font-size: 0.72rem; font-weight: 700; cursor: pointer;">Contact Care Team</button>
+      </div>
+      {% endif %}
+      <a href="#" class="sidebar-menu-item" style="margin: 0;"><i data-lucide="help-circle"></i> <span class="menu-text">Support</span></a>
+      <a href="{{ url_for('auth.logout') }}" class="sidebar-menu-item" style="margin: 0; border-left-color: transparent;"><i data-lucide="log-out"></i> <span class="menu-text">Sign Out</span></a>
+    </div>
+  </aside>
+
+  <!-- Central Content Workspace -->
+  <main class="workspace">
+    
+    {% if session.user.persona == 'clinical' %}
+      <!-- ============================================== -->
+      <!--            CARDIOLOGIST DASHBOARD              -->
+      <!-- ============================================== -->
+      
+      <!-- Welcome Header & Banner Row -->
+      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+        <!-- Left: Welcome Quote Card -->
+        <div class="welcome-banner-card">
+          <div style="max-width: 60%;">
+            <span style="font-size: 0.78rem; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.5px;">Cardiology Coordinator</span>
+            <h2 style="font-size: 1.8rem; font-weight: 800; color: #1e293b; margin: 0.25rem 0 0.5rem;">Welcome back, Dr. Sharma</h2>
+            <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: #fee2e2; color: #ef4444; font-size: 0.8rem; font-weight: 700; padding: 0.25rem 0.75rem; border-radius: 99px; margin-bottom: 0.75rem;">
+              <i data-lucide="alert-triangle" style="width: 0.9rem; height: 0.9rem;"></i>
+              12 high-risk patients require immediate review
+            </div>
+            <p style="margin: 0; font-size: 0.82rem; color: #64748b; font-style: italic; font-weight: 500;">
+              "The heartbeat is the rhythm of life." — Daily Diagnostic Focus
+            </p>
+          </div>
+          <!-- Heartbeat SVG wave visual -->
+          <svg class="heartbeat-svg" viewBox="0 0 300 60">
+            <path class="heartbeat-path" d="M0,30 L60,30 L70,10 L80,50 L90,30 L110,30 L115,0 L120,60 L125,30 L150,30 L160,15 L170,45 L180,30 L300,30" 
+                  fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+
+        <!-- Right: Indigo System Status Widget -->
+        <div class="welcome-banner-card" style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); color: white; padding: 1.5rem;">
+          <div style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <div>
+                <span style="font-size: 0.65rem; font-weight: 700; letter-spacing: 1px; color: #3b82f6; text-transform: uppercase;">SYSTEM STATUS</span>
+                <h4 style="font-size: 1rem; font-weight: 800; margin: 0.15rem 0 0;">Operational Excellence</h4>
+              </div>
+              <span style="display: inline-flex; width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981;"></span>
+            </div>
+            <div>
+              <span style="font-size: 1.25rem; font-weight: 800; display: block; color: #00d2ff;">99.8%</span>
+              <span style="font-size: 0.68rem; font-weight: 700; color: #94a3b8; text-transform: uppercase;">DATA PRECISION SCALE</span>
+            </div>
+            <!-- sparkline decoration -->
+            <div style="height: 15px; margin-top: 0.5rem; display: flex; align-items: flex-end; gap: 3px;">
+              <div style="height: 30%; width: 6px; background: rgba(59, 130, 246, 0.4); border-radius: 1px;"></div>
+              <div style="height: 50%; width: 6px; background: rgba(59, 130, 246, 0.4); border-radius: 1px;"></div>
+              <div style="height: 80%; width: 6px; background: rgba(59, 130, 246, 0.4); border-radius: 1px;"></div>
+              <div style="height: 60%; width: 6px; background: #3b82f6; border-radius: 1px;"></div>
+              <div style="height: 95%; width: 6px; background: #00d2ff; border-radius: 1px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3 Overview Cards -->
+      <div class="stat-grid-three">
+        <div class="stat-box border-blue">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <span class="stat-box-title">Total Patients</span>
+            <span style="font-size: 0.65rem; font-weight: 700; color: #10b981; background: #ecfdf5; padding: 0.15rem 0.4rem; border-radius: 4px;">+5% THIS MONTH</span>
+          </div>
+          <div>
+            <span class="stat-box-value">{{ patient_count if patient_count > 10 else 2847 }}</span>
+            <div style="height: 4px; background: #e2e8f0; border-radius: 99px; overflow: hidden; margin-top: 0.75rem;">
+              <div style="width: 62%; height: 100%; background: #3b82f6;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-box border-purple">
+          <span class="stat-box-title">Risk Distribution</span>
+          <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+            <div class="risk-stat-item">
+              <span style="font-size: 0.75rem; font-weight: 700; color: #ef4444; display: flex; align-items: center; gap: 0.25rem;"><span style="width:6px; height:6px; border-radius:50%; background:#ef4444;"></span> High</span>
+              <strong style="font-size: 0.85rem; color: #1e293b;">423 patients</strong>
+            </div>
+            <div class="risk-stat-item">
+              <span style="font-size: 0.75rem; font-weight: 700; color: #f59e0b; display: flex; align-items: center; gap: 0.25rem;"><span style="width:6px; height:6px; border-radius:50%; background:#f59e0b;"></span> Moderate</span>
+              <strong style="font-size: 0.85rem; color: #1e293b;">1,210 patients</strong>
+            </div>
+            <div class="risk-stat-item">
+              <span style="font-size: 0.75rem; font-weight: 700; color: #3b82f6; display: flex; align-items: center; gap: 0.25rem;"><span style="width:6px; height:6px; border-radius:50%; background:#3b82f6;"></span> Low</span>
+              <strong style="font-size: 0.85rem; color: #1e293b;">1,214 patients</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-box border-cyan">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <span class="stat-box-title">Top Risk Factor</span>
+            <i data-lucide="briefcase" style="color: #a855f7; width: 1.25rem; height: 1.25rem;"></i>
+          </div>
+          <div>
+            <span class="stat-box-value" style="font-size: 1.6rem; color: #1e293b;">{{ common_risk if common_risk else 'Hypertension' }}</span>
+            <p style="margin: 0.25rem 0 0; font-size: 0.75rem; color: #64748b; font-weight: 600;">{{ common_risk_pct if common_risk_pct else 64 }}% of patient cohort</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Layout Grid -->
+      <div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 1.5rem;">
+        <!-- Left: Critical Feed -->
+        <div class="dash-card">
+          <h3>Critical Intelligence Feed <i data-lucide="sparkles" style="color:#3b82f6; width:1.1rem; height:1.1rem;"></i></h3>
+          <div style="display: flex; flex-direction: column;">
+            
+            <!-- Feed 1 -->
+            <div class="feed-item critical">
+              <div style="background: #fef2f2; color: #ef4444; padding: 0.5rem; border-radius: 50%;">
+                <i data-lucide="alert-octagon" style="width: 1.25rem; height: 1.25rem;"></i>
+              </div>
+              <div style="flex: 1;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                  <h5 style="margin: 0; font-size: 0.85rem; font-weight: 700; color: #1e293b;">Critical Risk Alert: Sarah Jenkins</h5>
+                  <span style="font-size: 0.68rem; font-weight: 700; color: #94a3b8;">2 MINS AGO</span>
+                </div>
+                <p style="margin: 0.25rem 0 0.75rem; font-size: 0.8rem; color: #64748b; line-height: 1.4;">
+                  Abnormal ECG variation detected (ST-segment elevation), immediate telehealth follow-up recommended.
+                </p>
+                <div style="display: flex; gap: 0.5rem;">
+                  <button class="btn-solid-dark" style="background: #ef4444; padding: 0.35rem 0.75rem; font-size: 0.75rem;" onclick="alert('Opening telemetry charts for Jenkins...')">Review Data</button>
+                  <button class="btn-outline-brand" style="border-color: #cbd5e1; color: #475569; padding: 0.35rem 0.75rem; font-size: 0.75rem;" onclick="alert('Initiating care team conference call...')">Call Patient</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Feed 2 -->
+            <div class="feed-item upload">
+              <div style="background: #eff6ff; color: #3b82f6; padding: 0.5rem; border-radius: 50%;">
+                <i data-lucide="file-text" style="width: 1.25rem; height: 1.25rem;"></i>
+              </div>
+              <div style="flex: 1;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                  <h5 style="margin: 0; font-size: 0.85rem; font-weight: 700; color: #1e293b;">Diagnostic Upload: Echo Report</h5>
+                  <span style="font-size: 0.68rem; font-weight: 700; color: #94a3b8;">45 MINS AGO</span>
+                </div>
+                <p style="margin: 0.25rem 0 0.5rem; font-size: 0.8rem; color: #64748b;">
+                  Echo report available for Patient #8841. AI processing complete.
+                </p>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <span style="background: #e0f2fe; color: #0369a1; font-size: 0.65rem; font-weight: 700; padding: 0.15rem 0.45rem; border-radius: 4px; display: inline-flex; align-items: center; gap: 0.25rem;">
+                    <i data-lucide="check-circle" style="width:0.75rem; height:0.75rem;"></i> AI-Validated
+                  </span>
+                  <a href="#" style="font-size: 0.75rem; font-weight: 700; color: #3b82f6; text-decoration: none;" onclick="alert('Downloading echo report PDF...')">report_rw_8841.pdf</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Feed 3 -->
+            <div class="feed-item calendar-alert">
+              <div style="background: #fffbeb; color: #f59e0b; padding: 0.5rem; border-radius: 50%;">
+                <i data-lucide="calendar" style="width: 1.25rem; height: 1.25rem;"></i>
+              </div>
+              <div style="flex: 1;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                  <h5 style="margin: 0; font-size: 0.85rem; font-weight: 700; color: #1e293b;">Appointment Change</h5>
+                  <span style="font-size: 0.68rem; font-weight: 700; color: #94a3b8;">2 HOURS AGO</span>
+                </div>
+                <p style="margin: 0.25rem 0 0; font-size: 0.8rem; color: #64748b; line-height: 1.4;">
+                  David Sterling rescheduled from 10:30 AM to 02:15 PM tomorrow due to acute chest discomfort.
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Right: Actions & Efficiency -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+          <!-- Quick Actions -->
+          <div class="dash-card" style="margin-bottom: 0;">
+            <h3>Quick Actions</h3>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+              <button class="btn-outline-brand" style="justify-content: space-between; text-align: left; padding: 0.65rem 1rem;" onclick="alert('Opening registration form...')">
+                <span>Add New Patient</span> <i data-lucide="chevron-right" style="width: 1rem; height: 1rem;"></i>
+              </button>
+              <button class="btn-outline-brand" style="justify-content: space-between; text-align: left; padding: 0.65rem 1rem;" onclick="alert('Compiling patient cohort report...')">
+                <span>Generate Clinical Report</span> <i data-lucide="chevron-right" style="width: 1rem; height: 1rem;"></i>
+              </button>
+              <button class="btn-outline-brand" style="justify-content: space-between; text-align: left; padding: 0.65rem 1rem;" onclick="alert('Exporting dataset in CSV format...')">
+                <span>Export Risk Data</span> <i data-lucide="download" style="width: 1rem; height: 1rem;"></i>
+              </button>
+              <button class="btn-outline-brand" style="justify-content: space-between; text-align: left; padding: 0.65rem 1rem;" onclick="alert('Setting up consult scheduler...')">
+                <span>Schedule Consult</span> <i data-lucide="chevron-right" style="width: 1rem; height: 1rem;"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Efficiency Pulse -->
+          <div class="dash-card" style="margin-bottom: 0; position: relative; flex: 1;">
+            <h3>Efficiency Pulse <span style="font-size:0.65rem; background:#ecfdf5; color:#10b981; padding:0.15rem 0.45rem; border-radius:99px; margin-left:0.5rem;">LIVE</span></h3>
+            <p style="margin: 0 0 1rem; font-size: 0.78rem; color: #64748b;">Active workflow optimization indexes</p>
+            <div style="height: 100px; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 0.5rem;">
+              <div style="display: flex; flex-direction: column; align-items: center; width: 14%;">
+                <div style="width: 100%; height: 75px; background: linear-gradient(to top, #3b82f6, #00d2ff); border-radius: 4px;"></div>
+                <span style="font-size: 0.62rem; font-weight: 700; color: #64748b; margin-top: 0.25rem;">MON</span>
+              </div>
+              <div style="display: flex; flex-direction: column; align-items: center; width: 14%;">
+                <div style="width: 100%; height: 90px; background: linear-gradient(to top, #3b82f6, #00d2ff); border-radius: 4px;"></div>
+                <span style="font-size: 0.62rem; font-weight: 700; color: #64748b; margin-top: 0.25rem;">TUE</span>
+              </div>
+              <div style="display: flex; flex-direction: column; align-items: center; width: 14%;">
+                <div style="width: 100%; height: 60px; background: linear-gradient(to top, #3b82f6, #00d2ff); border-radius: 4px;"></div>
+                <span style="font-size: 0.62rem; font-weight: 700; color: #64748b; margin-top: 0.25rem;">WED</span>
+              </div>
+              <div style="display: flex; flex-direction: column; align-items: center; width: 14%;">
+                <div style="width: 100%; height: 85px; background: linear-gradient(to top, #3b82f6, #00d2ff); border-radius: 4px;"></div>
+                <span style="font-size: 0.62rem; font-weight: 700; color: #64748b; margin-top: 0.25rem;">THU</span>
+              </div>
+              <div style="display: flex; flex-direction: column; align-items: center; width: 14%;">
+                <div style="width: 100%; height: 95px; background: linear-gradient(to top, #3b82f6, #00d2ff); border-radius: 4px;"></div>
+                <span style="font-size: 0.62rem; font-weight: 700; color: #64748b; margin-top: 0.25rem;">FRI</span>
+              </div>
+            </div>
+            <!-- Floating Clinical FAB -->
+            <button class="floating-action-btn" title="AI Assistant" onclick="alert('Launching Clinical AI Copilot assistance panel...')">
+              <i data-lucide="sparkles" style="width: 1.4rem; height: 1.4rem;"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    {% elif session.user.persona == 'public_health' %}
+      <!-- ============================================== -->
+      <!--            PUBLIC HEALTH DASHBOARD             -->
+      <!-- ============================================== -->
+      
+      <!-- Welcome Header -->
+      <div class="welcome-banner-card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <span style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Public Health Administrator</span>
+          <h2 style="font-size: 1.8rem; font-weight: 800; color: #1e293b; margin: 0.25rem 0 0.5rem;">Welcome back, Ramesh</h2>
+          <p style="margin: 0; font-size: 0.85rem; color: #64748b; font-style: italic;">
+            "Public health is the foundation of a thriving society." — Daily Insight
+          </p>
+        </div>
+        
+        <!-- Urgent Insight box -->
+        <div style="background: #fef2f2; border-left: 4px solid #ef4444; border-radius: 0 12px 12px 0; padding: 0.75rem 1.25rem; max-width: 24rem;">
+          <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
+            <i data-lucide="alert-circle" style="color:#ef4444; width:1.25rem; height:1.25rem; flex-shrink:0;"></i>
+            <div>
+              <span style="display:block; font-size:0.62rem; font-weight:800; color:#ef4444; letter-spacing:0.5px; text-transform:uppercase;">URGENT INSIGHT</span>
+              <p style="margin:0.15rem 0 0; font-size:0.78rem; font-weight:700; color:#1e293b;">Southern region: 15% increase in hypertension reports</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3 Overview Cards -->
+      <div class="stat-grid-three">
+        <div class="stat-box border-blue">
+          <div>
+            <span class="stat-box-title">Total Population</span>
+            <span style="font-size: 0.65rem; font-weight: 700; color: #3b82f6; background: #eff6ff; padding: 0.15rem 0.4rem; border-radius: 4px;">TOTAL COVERAGE</span>
+          </div>
+          <div>
+            <span class="stat-box-value">1.2M</span>
+            <p style="margin:0.25rem 0 0; font-size:0.75rem; color:#64748b; font-weight:600;">Active tracking cohort</p>
+          </div>
+        </div>
+
+        <div class="stat-box border-purple">
+          <div>
+            <span class="stat-box-title">Regional Risk Index</span>
+            <span style="font-size: 0.65rem; font-weight: 700; color: #a855f7; background: #faf5ff; padding: 0.15rem 0.4rem; border-radius: 4px;">CURRENT STATUS</span>
+          </div>
+          <div>
+            <span class="stat-box-value" style="color: #f59e0b;">Moderate</span>
+            <p style="margin:0.25rem 0 0; font-size:0.75rem; color:#64748b; font-weight:600;">Stable since Q2</p>
+          </div>
+        </div>
+
+        <div class="stat-box border-cyan">
+          <div>
+            <span class="stat-box-title">Priority Concern</span>
+            <span style="font-size: 0.65rem; font-weight: 700; color: #06b6d4; background: #ecfeff; padding: 0.15rem 0.4rem; border-radius: 4px;">PRIORITY FOCUS</span>
+          </div>
+          <div>
+            <span class="stat-box-value" style="font-size: 1.55rem; color: #ef4444;">Resource Disparity</span>
+            <p style="margin:0.25rem 0 0; font-size:0.75rem; color:#64748b; font-weight:600;">Tier-3 rural sector screening</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Layout Grid -->
+      <div style="display: grid; grid-template-columns: 1.55fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+        
+        <!-- Left: Regional Map -->
+        <div class="dash-card" style="display: flex; flex-direction: column; margin-bottom: 0;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem;">
+            <div>
+              <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #1e293b;">Disease Prevalence Map</h3>
+              <p style="margin: 0.15rem 0 0; font-size: 0.8rem; color: #64748b;">District-level distribution and facility density</p>
+            </div>
+          </div>
+          
+          <div class="map-overlay-container" style="flex: 1;">
+            <img src="{{ url_for('static', filename='images/india_health_map.png') }}" style="width: 100%; height: auto; display: block;" alt="India health prevalence map">
+            
+            <div class="map-control-overlay">
+              <button class="map-control-btn" onclick="alert('Zooming map in...')"><strong>+</strong></button>
+              <button class="map-control-btn" onclick="alert('Zooming map out...')"><strong>-</strong></button>
+              <button class="map-control-btn" onclick="alert('Cycling map layers...')"><i data-lucide="layers" style="width: 1.1rem; height: 1.1rem; color: #64748b;"></i></button>
+            </div>
+
+            <div class="map-tabs">
+              <button class="map-tab-btn" onclick="alert('Switched to Heatmap view')">Heatmap</button>
+              <button class="map-tab-btn active" onclick="alert('Currently viewing Risk Levels')">Risk Levels</button>
+            </div>
+
+            <div style="position: absolute; bottom: 1rem; left: 1rem; background: rgba(255,255,255,0.9); border-radius: 8px; padding: 0.5rem 0.75rem; font-size: 0.68rem; font-weight: 700; color: #475569; display: flex; flex-direction: column; gap: 0.25rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+              <span style="display: flex; align-items: center; gap: 0.35rem;"><span style="width: 8px; height: 8px; border-radius: 50%; background: #ef4444;"></span> High Risk (&gt;15%)</span>
+              <span style="display: flex; align-items: center; gap: 0.35rem;"><span style="width: 8px; height: 8px; border-radius: 50%; background: #f59e0b;"></span> Moderate (8-15%)</span>
+              <span style="display: flex; align-items: center; gap: 0.35rem;"><span style="width: 8px; height: 8px; border-radius: 50%; background: #06b6d4;"></span> Low Risk (&lt;8%)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+          <!-- Quick Actions -->
+          <div class="dash-card" style="margin-bottom: 0;">
+            <h3>Quick Actions</h3>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+              <button class="btn-outline-brand" style="justify-content: space-between; text-align: left; padding: 0.65rem 1rem;" onclick="alert('Initializing policy simulator model...')">
+                <span>Simulate Policy Impact</span> <i data-lucide="play-circle" style="width: 1rem; height: 1rem;"></i>
+              </button>
+              <button class="btn-outline-brand" style="justify-content: space-between; text-align: left; padding: 0.65rem 1rem;" onclick="alert('Compiling national cardiac status document...')">
+                <span>Generate National Report</span> <i data-lucide="file-text" style="width: 1rem; height: 1rem;"></i>
+              </button>
+              <button class="btn-outline-brand" style="justify-content: space-between; text-align: left; padding: 0.65rem 1rem;" onclick="alert('Exporting regional dataset...')">
+                <span>Export Regional Data</span> <i data-lucide="download" style="width: 1rem; height: 1rem;"></i>
+              </button>
+              <button class="btn-outline-brand" style="justify-content: space-between; text-align: left; padding: 0.65rem 1rem;" onclick="alert('Opening meeting scheduler for health stakeholders...')">
+                <span>Schedule Stakeholder Meeting</span> <i data-lucide="users" style="width: 1rem; height: 1rem;"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Network Integrity Status -->
+          <div class="dash-card" style="margin-bottom: 0; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 1.5px solid #bfdbfe; display: flex; flex-direction: column; justify-content: space-between; min-height: 11rem;">
+            <div>
+              <h4 style="margin: 0; font-size: 0.95rem; font-weight: 800; color: #1e3a8a; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="shield-check" style="color: #3b82f6; width: 1.2rem; height: 1.2rem;"></i> Network Integrity
+              </h4>
+              <p style="margin: 0.5rem 0 0; font-size: 0.8rem; color: #1e40af; line-height: 1.4; font-weight: 600;">
+                4 key stakeholders pending review for Q3 resource allocation alignment. Review regional metrics to balance hospital beds and screenings.
+              </p>
+            </div>
+            <button class="btn-solid-brand" style="background: #3b82f6; color: white; border: 0; border-radius: 8px; padding: 0.5rem; font-weight: 700; font-size: 0.8rem; width: 100%; cursor: pointer;" onclick="alert('Opening stakeholder alignment dashboard...')">REVIEW NOW</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Policy Simulators row -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+        <!-- Scenario builder -->
+        <div class="dash-card" style="margin-bottom: 0;">
+          <h3>Policy Simulation Builder</h3>
+          <p style="margin: 0 0 1.25rem; font-size: 0.78rem; color: #64748b;">Alter parameters to project 10-year disease changes</p>
+          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; color: #1e293b; margin-bottom: 0.4rem;">
+                <span>Screening Budget</span>
+                <span style="color: #3b82f6;" id="budget-val">₹1.2Cr (+15%)</span>
+              </div>
+              <input type="range" min="0.5" max="3.0" step="0.1" value="1.2" id="sim-budget" style="width: 100%; cursor: pointer;">
+            </div>
+            <div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; color: #1e293b; margin-bottom: 0.4rem;">
+                <span>Clinic Density Intervention</span>
+                <span style="color: #3b82f6;" id="density-val">+20%</span>
+              </div>
+              <input type="range" min="0" max="50" step="5" value="20" id="sim-density" style="width: 100%; cursor: pointer;">
+            </div>
+          </div>
+        </div>
+
+        <!-- Impact projection line chart -->
+        <div class="dash-card" style="margin-bottom: 0;">
+          <h3>Impact Projection (10-Year)</h3>
+          <p style="margin: 0 0 1rem; font-size: 0.78rem; color: #64748b;">Predicted (Blue) vs Actual Baseline (Grey)</p>
+          <div style="position: relative; height: 8rem; width: 100%;">
+            <canvas id="impactProjectionChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Population Health Trajectories chart -->
+      <div class="dash-card" style="margin-bottom: 0;">
+        <h3>Population Health Trajectories</h3>
+        <p style="margin: 0 0 1rem; font-size: 0.78rem; color: #64748b;">Historical comparative analytics - Hypertension vs Diabetes prevalence</p>
+        <div style="height: 15rem; width: 100%; position: relative;">
+          <canvas id="populationHealthChart"></canvas>
+        </div>
+      </div>
+
+    {% else %}
+      <!-- ============================================== -->
+      <!--              PATIENT PORTAL DASHBOARD          -->
+      <!-- ============================================== -->
+
+      <div id="tab-my-health" class="tab-content active">
+        <!-- Welcome Banner & Vitals row -->
+        <div style="display: grid; grid-template-columns: 1.8fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+          
+          <!-- Left: Welcome Anita card -->
+          <div class="welcome-banner-card">
+            <h2 style="font-size: 1.8rem; font-weight: 800; color: #1e293b; margin: 0 0 0.5rem;">Welcome back, Anita! 👋</h2>
+            <p style="margin: 0 0 1rem; font-size: 0.88rem; color: #475569; line-height: 1.4; max-width: 80%;">
+              Great work this week. You're consistently hitting your activity targets and keeping your records updated.
+            </p>
+            <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+              <div style="background: #e0f2fe; color: #0369a1; border-radius: 8px; padding: 0.5rem 0.85rem; font-size: 0.78rem; font-weight: 700; display: flex; align-items: center; gap: 0.4rem;">
+                <i data-lucide="award" style="width: 1rem; height: 1rem;"></i>
+                Today's Tip: You've hit your step goal 3 days in a row!
+              </div>
+              <div style="color: #64748b; font-size: 0.78rem; font-style: italic; font-weight: 500; display: flex; align-items: center;">
+                "Small steps lead to big changes."
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Live Vitals -->
+          <div class="dash-card" style="margin-bottom: 0; padding: 1.25rem;">
+            <h3 style="margin: 0; font-size: 0.95rem; font-weight: 800; display: flex; justify-content: space-between; align-items: center;">
+              <span>❤️ Live Vitals</span>
+              <a href="#" class="sidebar-tab" data-tab="progress-tracking" style="font-size: 0.72rem; color: #3b82f6; text-decoration: none; font-weight: 700;" onclick="document.querySelector('.sidebar-tab[data-tab=\'progress-tracking\']').click(); return false;">Detailed Progress &rarr;</a>
+            </h3>
+            <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 0.5rem 0.75rem; border-radius: 8px;">
+                <span style="font-size: 0.78rem; font-weight: 600; color: #64748b; display: flex; align-items: center; gap: 0.35rem;"><i data-lucide="heart" style="color:#ef4444; width:0.9rem; height:0.9rem;"></i> Heart Rate</span>
+                <strong style="font-size: 0.9rem; color: #1e293b;">{{ patient.heart_rate if (patient and patient.heart_rate) else 72 }} BPM</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 0.5rem 0.75rem; border-radius: 8px;">
+                <span style="font-size: 0.78rem; font-weight: 600; color: #64748b; display: flex; align-items: center; gap: 0.35rem;"><i data-lucide="moon" style="color:#a855f7; width:0.9rem; height:0.9rem;"></i> Sleep Quality</span>
+                <strong style="font-size: 0.9rem; color: #1e293b;">8.2 HRS</strong>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Three Metric Boxes -->
+        <div class="stat-grid-three">
+          <div class="stat-box border-blue">
+            <span class="stat-box-title">Health Score</span>
+            <div>
+              <span class="stat-box-value">78/100</span>
+              <p style="margin: 0.25rem 0 0.5rem; font-size: 0.72rem; color: #10b981; font-weight: 700;">Top 15% in your age group</p>
+              <div style="height: 4px; background: #e2e8f0; border-radius: 99px; overflow: hidden;">
+                <div style="width: 78%; height: 100%; background: #3b82f6;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="stat-box border-purple" style="border-left-color: #f59e0b;">
+            <span class="stat-box-title">Active Risk</span>
+            <div>
+              <span class="stat-box-value" style="color: #f59e0b;">{{ patient.risk_category if (patient and patient.risk_category) else 'Moderate' }}</span>
+              <p style="margin: 0.25rem 0 0.5rem; font-size: 0.72rem; color: #64748b; font-weight: 600;">Manageable with lifestyle changes</p>
+              <div style="height: 4px; background: #e2e8f0; border-radius: 99px; overflow: hidden;">
+                <div style="width: 50%; height: 100%; background: #f59e0b;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="stat-box border-cyan">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <span class="stat-box-title">Next Milestone</span>
+              <span style="font-size: 0.65rem; font-weight: 700; color: #10b981; background: #ecfdf5; padding: 0.15rem 0.4rem; border-radius: 4px;">ON TRACK</span>
+            </div>
+            <div>
+              <span class="stat-box-value" style="font-size: 1.55rem; color: #1e293b;">5% Goal</span>
+              <p style="margin: 0.25rem 0 0; font-size: 0.72rem; color: #64748b; font-weight: 700;">Cholesterol Improvement (Sep 12)</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Layout Grid -->
+        <div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 1.5rem;">
+          
+          <!-- Left: Activity Trends -->
+          <div class="dash-card">
+            <h3>Activity Trends</h3>
+            <p style="margin: 0 0 1.25rem; font-size: 0.78rem; color: #64748b;">Step count variation vs daily active recovery minutes</p>
+            <div style="height: 12rem; position: relative;">
+              <canvas id="activityTrendsChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Right Column -->
+          <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            
+            <!-- Upcoming Care -->
+            <div class="dash-card" style="margin-bottom: 0;">
+              <h3>Upcoming Care</h3>
+              <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <div style="background: #f8fafc; border-left: 3px solid #3b82f6; padding: 0.6rem 0.75rem; border-radius: 0 8px 8px 0; display: flex; justify-content: space-between; align-items: center;">
+                  <div>
+                    <h5 style="margin: 0; font-size: 0.8rem; font-weight: 700; color: #1e293b;">Cardiology Follow-up</h5>
+                    <small style="font-size: 0.72rem; color: #64748b;">In-person • Dr. Sharma • Tomorrow</small>
+                  </div>
+                  <i data-lucide="chevron-right" style="width:1rem; height:1rem; color:#64748b;"></i>
+                </div>
+                <div style="background: #f8fafc; border-left: 3px solid #a855f7; padding: 0.6rem 0.75rem; border-radius: 0 8px 8px 0; display: flex; justify-content: space-between; align-items: center;">
+                  <div>
+                    <h5 style="margin: 0; font-size: 0.8rem; font-weight: 700; color: #1e293b;">Nutrition Review</h5>
+                    <small style="font-size: 0.72rem; color: #64748b;">Virtual • Oct 14 • Dietitian</small>
+                  </div>
+                  <i data-lucide="chevron-right" style="width:1rem; height:1rem; color:#64748b;"></i>
+                </div>
+              </div>
+              <button class="btn-outline-brand" style="width: 100%; font-size: 0.78rem; padding: 0.5rem; margin-top: 1rem;" onclick="document.querySelector('.sidebar-tab[data-tab=\'appointments\']').click();">View All Appointments</button>
+            </div>
+
+            <!-- Quick Actions & Articles -->
+            <div class="dash-card" style="margin-bottom: 0;">
+              <h3>Quick Actions</h3>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                <button class="btn-outline-brand" style="font-size: 0.75rem; padding: 0.5rem; justify-content: flex-start; gap: 0.25rem;" onclick="document.querySelector('.sidebar-tab[data-tab=\'health-journal\']').click();"><i data-lucide="edit-2" style="width:0.85rem; height:0.85rem;"></i> Log Health</button>
+                <button class="btn-outline-brand" style="font-size: 0.75rem; padding: 0.5rem; justify-content: flex-start; gap: 0.25rem;" onclick="document.querySelector('.sidebar-tab[data-tab=\'progress-tracking\']').click();"><i data-lucide="file-text" style="width:0.85rem; height:0.85rem;"></i> View Tests</button>
+                <button class="btn-outline-brand" style="font-size: 0.75rem; padding: 0.5rem; justify-content: flex-start; gap: 0.25rem;" onclick="document.querySelector('.sidebar-tab[data-tab=\'appointments\']').click();"><i data-lucide="calendar" style="width:0.85rem; height:0.85rem;"></i> Schedule Appt.</button>
+                <button class="btn-outline-brand" style="font-size: 0.75rem; padding: 0.5rem; justify-content: flex-start; gap: 0.25rem;" onclick="document.querySelector('.sidebar-tab[data-tab=\'health-education\']').click();"><i data-lucide="lightbulb" style="width:0.85rem; height:0.85rem;"></i> Read Tip</button>
+              </div>
+            </div>
+
+            <!-- Recommended Read -->
+            <div class="dash-card" style="margin-bottom: 0; padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between; border-left: 4px solid #06b6d4;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                <span style="font-size: 0.65rem; font-weight: 800; color: #0891b2; letter-spacing: 0.5px; text-transform: uppercase;">RECOMMENDED READ</span>
+                <button style="border:0; background:transparent; color:#64748b; cursor:pointer;" onclick="alert('Article bookmarked!')"><i data-lucide="bookmark" style="width: 1rem; height: 1rem;"></i></button>
+              </div>
+              <div>
+                <h5 style="margin: 0; font-size: 0.85rem; font-weight: 700; color: #1e293b;">Benefits of Low-Impact Cardio for Heart Health</h5>
+                <p style="margin: 0.25rem 0 0.75rem; font-size: 0.75rem; color: #64748b; line-height: 1.4;">
+                  Learn why walking 30 minutes a day is the single best exercise for your blood pressure.
+                </p>
+              </div>
+              <a href="#" style="font-size: 0.75rem; font-weight: 700; color: #0891b2; text-decoration: none;" onclick="document.querySelector('.sidebar-tab[data-tab=\'health-education\']').click(); return false;">Read Article &rarr;</a>
+            </div>
+
+          </div>
+
+        </div>
+      </div> <!-- end of tab-my-health -->
+
+      <!-- VIEW 2: PERSONAL HEALTH HUB -->
+      <div id="tab-health-hub" class="tab-content" style="display: none;">
+        <!-- welcome header -->
+        <div class="welcome-header">
+          <div>
+            <h2>Personal Health Hub 👋</h2>
+            <div class="welcome-meta">
+              <span><i data-lucide="clock" style="width: 0.9rem; height: 0.9rem; display:inline-block; vertical-align:middle;"></i> Last login: Today, 9:30 AM</span>
+              <span>|</span>
+              <span class="health-score-pill"><i data-lucide="shield-check" style="width: 0.9rem; height: 0.9rem; display:inline-block; vertical-align:middle;"></i> Health score: 78/100 (Good)</span>
+            </div>
+            <p style="margin: 0.5rem 0 0; font-size: 0.85rem; font-weight: 700; color: #ef4444;"><i data-lucide="calendar" style="width: 1rem; height: 1rem; display:inline-block; vertical-align:middle;"></i> Next appointment: July 25, 2026</p>
+          </div>
+
+          <button class="btn-solid-dark" style="padding: 0.65rem 1.25rem; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.5rem; background:black; color:white; border:0; border-radius:8px; cursor:pointer;" onclick="alert('Preparing download payload for health records...')">
+            <i data-lucide="download" style="width: 1.1rem; height: 1.1rem;"></i> Download Health Report
+          </button>
+        </div>
+
+        <!-- Health Score Card & Metrics Row -->
+        <div class="metrics-grid-row">
+          <!-- Score Gauge card -->
+          <div class="gauge-card">
+            <button class="heart-heartbeat-btn active" title="Mark favorite status"><i data-lucide="heart" style="fill:#ef4444; color:#ef4444; width:1.15rem; height:1.15rem;"></i></button>
+            <span style="font-size:0.65rem; font-weight:800; color:#64748b; letter-spacing:0.5px; text-transform:uppercase;">TOTAL HEALTH WELLNESS</span>
+            <div style="position:relative; display:flex; justify-content:center; align-items:center; width:100%;">
+              <svg class="score-gauge-svg" viewBox="0 0 100 100">
+                <circle class="score-gauge-track" cx="50" cy="50" r="40"></circle>
+                <circle class="score-gauge-fill" cx="50" cy="50" r="40"></circle>
+              </svg>
+              <div class="score-gauge-text">78<span style="display:block; font-size:0.65rem; color:#64748b; font-weight:700; text-transform:uppercase; margin-top:-2px;">Good</span></div>
+            </div>
+            <div style="margin-top: 0.5rem;">
+              <p style="margin:0; font-size: 0.78rem; font-weight:600; color:#64748b;">Risk level: <strong style="color:#a855f7;">Moderate</strong></p>
+              <p style="margin:0.15rem 0 0.5rem; font-size: 0.75rem; font-weight:600; color:#475569;">10-year risk prediction: <strong>{{ patient.framingham_score if patient else '8.5' }}%</strong></p>
+              <span class="kpi-badge green" style="background:#ecfdf5; color:#10b981; font-weight:800; font-size:0.7rem; padding:2px 6px; border-radius:4px;">+3 pts since June</span>
+            </div>
+          </div>
+
+          <!-- BP Box -->
+          <div class="kpi-box elevated">
+            <div class="kpi-label-wrap">
+              <span class="kpi-sub-lbl">BP</span>
+              <span class="kpi-unit-lbl">mmHg</span>
+            </div>
+            <span class="kpi-main-val">125/82</span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span class="kpi-status-badge elevated">Elevated</span>
+              <i data-lucide="trending-up" style="color:#ef4444; width:1rem; height:1rem;"></i>
+            </div>
+          </div>
+
+          <!-- Cholesterol Box -->
+          <div class="kpi-box normal">
+            <div class="kpi-label-wrap">
+              <span class="kpi-sub-lbl">Cholesterol</span>
+              <span class="kpi-unit-lbl">mg/dL</span>
+            </div>
+            <span class="kpi-main-val">195</span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span class="kpi-status-badge normal">Normal</span>
+              <i data-lucide="trending-down" style="color:#10b981; width:1rem; height:1rem;"></i>
+            </div>
+          </div>
+
+          <!-- BMI Box -->
+          <div class="kpi-box watch">
+            <div class="kpi-label-wrap">
+              <span class="kpi-sub-lbl">BMI</span>
+              <span class="kpi-unit-lbl">Overweight</span>
+            </div>
+            <span class="kpi-main-val">27.4</span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span class="kpi-status-badge watch">Watch</span>
+              <span style="color:#cbd5e1; font-weight:800;">—</span>
+            </div>
+          </div>
+
+          <!-- Blood Sugar Box -->
+          <div class="kpi-box critical">
+            <div class="kpi-label-wrap">
+              <span class="kpi-sub-lbl">Blood Sugar</span>
+              <span class="kpi-unit-lbl">mg/dL</span>
+            </div>
+            <span class="kpi-main-val">112</span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span class="kpi-status-badge critical">Critical</span>
+              <i data-lucide="alert-circle" style="color:#ef4444; width:1rem; height:1rem;"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lifestyle & Personalized Actions columns -->
+        <div class="two-column-row">
+          <!-- Left Panel: Lifestyle Insights -->
+          <div class="panel-card" style="min-height: auto; background:white; border:1px solid #e2e8f0; padding:1.25rem; border-radius:16px;">
+            <div class="panel-header" style="margin-bottom:1rem;"><h3 style="margin:0;">Lifestyle Insights</h3></div>
+            <div style="display:flex; flex-direction:column; gap:0.5rem; margin-top:0.5rem;">
+              <!-- Lifestyle 1: Smoking -->
+              <div class="lifestyle-item">
+                <div class="lifestyle-left">
+                  <div class="lifestyle-icon-wrap"><i data-lucide="ban" style="width:1.15rem; height:1.15rem;"></i></div>
+                  <div>
+                    <h5 style="margin:0; font-size: 0.82rem; font-weight:750; color:#1e293b;">Smoking</h5>
+                    <span style="font-size:0.75rem; color:#64748b; font-weight:600;">Non-smoker</span>
+                  </div>
+                </div>
+                <i data-lucide="check-circle-2" style="color:#10b981; fill:#ecfdf5; width:1.3rem; height:1.3rem;"></i>
+              </div>
+
+              <!-- Lifestyle 2: Physical Activity -->
+              <div class="lifestyle-item">
+                <div class="lifestyle-left">
+                  <div class="lifestyle-icon-wrap"><i data-lucide="activity" style="width:1.15rem; height:1.15rem;"></i></div>
+                  <div>
+                    <h5 style="margin:0; font-size: 0.82rem; font-weight:750; color:#1e293b;">Physical Activity</h5>
+                    <span style="font-size:0.75rem; color:#64748b; font-weight:600;">4 / 7 days this week</span>
+                  </div>
+                </div>
+                <div style="display:flex; gap:3px;">
+                  <div style="width:8px; height:8px; border-radius:50%; background:#06b6d4;"></div>
+                  <div style="width:8px; height:8px; border-radius:50%; background:#06b6d4;"></div>
+                  <div style="width:8px; height:8px; border-radius:50%; background:#06b6d4;"></div>
+                  <div style="width:8px; height:8px; border-radius:50%; background:#06b6d4;"></div>
+                  <div style="width:8px; height:8px; border-radius:50%; background:#e2e8f0;"></div>
+                  <div style="width:8px; height:8px; border-radius:50%; background:#e2e8f0;"></div>
+                </div>
+              </div>
+
+              <!-- Lifestyle 3: Sleep Quality -->
+              <div class="lifestyle-item">
+                <div class="lifestyle-left">
+                  <div class="lifestyle-icon-wrap"><i data-lucide="moon" style="width:1.15rem; height:1.15rem;"></i></div>
+                  <div>
+                    <h5 style="margin:0; font-size: 0.82rem; font-weight:750; color:#1e293b;">Sleep Quality</h5>
+                    <span style="font-size:0.75rem; color:#64748b; font-weight:600;">7.2h (Optimal)</span>
+                  </div>
+                </div>
+                <span style="font-size:0.75rem; font-weight:700; color:#3b82f6;">7.2 Hours</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Panel: Wellness Actions -->
+          <div class="panel-card" style="min-height: auto; background:white; border:1px solid #e2e8f0; padding:1.25rem; border-radius:16px;">
+            <div class="panel-header" style="margin-bottom:1rem;">
+              <h3 style="margin:0;">Personalized Wellness Actions</h3>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.5rem;">
+              <div>
+                <div class="wellness-task">
+                  <div class="wellness-checkbox" onclick="this.classList.toggle('checked')"></div>
+                  <div class="wellness-task-desc">
+                    <h5>Daily Step Goal</h5>
+                    <p>Target: 10,000 steps today. You're at 6,200.</p>
+                  </div>
+                </div>
+                <div class="wellness-task">
+                  <div class="wellness-checkbox" onclick="this.classList.toggle('checked')"></div>
+                  <div class="wellness-task-desc">
+                    <h5>Sodium Reduction</h5>
+                    <p>Limit intake to &lt; 1,500mg. Check lunch logs.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="recipe-card">
+                <div class="recipe-body">
+                  <span class="recipe-badge">Heart Healthy</span>
+                  <h5 style="margin:0 0 0.25rem; font-size: 0.8rem; font-weight:800; color:#1e293b;">Zesty Lemon Salmon Salad</h5>
+                  <p style="margin:0 0 0.5rem; font-size:0.68rem; color:#64748b; line-height:1.3;">A nutrient-dense meal high in Omega-3s.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 3: PROGRESS TRACKING -->
+      <div id="tab-progress-tracking" class="tab-content" style="display: none;">
+        <div style="margin-bottom: 1.5rem;">
+          <h2 style="font-size: 1.7rem; font-weight: 800; color: #1e293b; margin:0;">Progress Tracking</h2>
+          <p style="margin: 0.25rem 0 0; font-size: 0.85rem; color: #64748b;">Longitudinal history of your health metrics and active recovery.</p>
+        </div>
+        <div class="vitals-progress-panel">
+          <div class="charts-sub-row">
+            <div class="chart-sub-box">
+              <h4>Weight Trend</h4>
+              <div style="height: 120px; position: relative;">
+                <canvas id="tabProgressWeightChart"></canvas>
+              </div>
+              <span style="font-size: 0.72rem; font-weight: 700; color: #a855f7; margin-top: 0.5rem; text-align: center;">-2.4 lbs since Jan</span>
+            </div>
+            <div class="chart-sub-box">
+              <h4>Steps (7d Avg)</h4>
+              <div style="height: 120px; position: relative;">
+                <canvas id="tabProgressStepsChart"></canvas>
+              </div>
+              <span style="font-size: 0.72rem; font-weight: 700; color: #06b6d4; margin-top: 0.5rem; text-align: center;">8,420 avg steps</span>
+            </div>
+            <div class="chart-sub-box">
+              <h4>BP Stability</h4>
+              <div style="height: 120px; position: relative;">
+                <canvas id="tabProgressBPChart"></canvas>
+              </div>
+              <span style="font-size: 0.72rem; font-weight: 700; color: #3b82f6; margin-top: 0.5rem; text-align: center;">Steady Improvement</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 4: APPOINTMENTS -->
+      <div id="tab-appointments" class="tab-content" style="display: none;">
+        <div style="margin-bottom: 1.5rem;">
+          <h2 style="font-size: 1.7rem; font-weight: 800; color: #1e293b; margin:0;">Appointments & Messaging</h2>
+          <p style="margin: 0.25rem 0 0; font-size: 0.85rem; color: #64748b;">Schedule visits and communicate with your care team.</p>
+        </div>
+        <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 1.5rem;">
+          <div class="dash-card" style="background:white; border:1px solid #e2e8f0; padding:1.25rem; border-radius:16px;">
+            <h3>Schedule a Visit</h3>
+            <form onsubmit="alert('Appointment slot requested successfully.'); return false;" style="margin-top: 1rem; display: flex; flex-direction: column; gap: 1rem;">
+              <div>
+                <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">Choose Department</label>
+                <select style="width: 100%; padding: 0.65rem; border-radius: 8px; border: 1px solid #cbd5e1; font-weight: 600;">
+                  <option>Cardiology (Dr. Amit Sharma)</option>
+                  <option>General Practitioner (Dr. Anita GP)</option>
+                  <option>Dietitian & Nutritionist</option>
+                </select>
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">Preferred Date</label>
+                <input type="date" style="width: 100%; padding: 0.65rem; border-radius: 8px; border: 1px solid #cbd5e1; font-weight: 600;" value="2026-07-25">
+              </div>
+              <button type="submit" style="background:#e11d48; padding: 0.65rem 1.25rem; font-size: 0.85rem; border:0; color:white; border-radius:8px; cursor:pointer; font-weight:700;">Request Appointment Slot</button>
+            </form>
+          </div>
+          <div class="dash-card" style="background:white; border:1px solid #e2e8f0; padding:1.25rem; border-radius:16px;">
+            <h3>Message Dr. Sharma</h3>
+            <div style="background: #f8fafc; padding: 0.75rem; border-radius: 8px; font-size: 0.78rem; margin: 1rem 0; border-left: 3px solid #e11d48;">
+              <strong>Dr. Sharma:</strong> "Remember to log your BP reading daily before taking your metoprolol."
+            </div>
+            <textarea placeholder="Type a message to your cardiologist..." style="width: 100%; min-height: 80px; padding: 0.5rem; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.82rem; font-family: inherit; resize: none;"></textarea>
+            <button onclick="alert('Message sent to clinical portal.');" style="width: 100%; margin-top: 0.5rem; font-size: 0.82rem; padding: 0.5rem; background:black; color:white; border:0; border-radius:8px; cursor:pointer; font-weight:700;">Send Message</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 5: MEDICATIONS -->
+      <div id="tab-medications" class="tab-content" style="display: none;">
+        <div style="margin-bottom: 1.5rem;">
+          <h2 style="font-size: 1.7rem; font-weight: 800; color: #1e293b; margin:0;">Active Medications</h2>
+          <p style="margin: 0.25rem 0 0; font-size: 0.85rem; color: #64748b;">Manage your prescriptions and refill requests.</p>
+        </div>
+        <div class="dash-card" style="background:white; border:1px solid #e2e8f0; padding:1.25rem; border-radius:16px;">
+          <h3>Current Prescriptions</h3>
+          <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+            <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #10b981;">
+              <div>
+                <h4 style="margin: 0; font-size: 0.9rem; font-weight: 700; color: #1e293b;">Metoprolol Succinate</h4>
+                <p style="margin: 0.15rem 0 0; font-size: 0.75rem; color: #64748b;">50mg Daily • Morning • Take with food</p>
+              </div>
+              <button onclick="alert('Refill requested for Metoprolol.')" style="background: #ecfdf5; color: #10b981; border: 1px solid #10b981; padding: 0.35rem 0.75rem; font-size: 0.75rem; border-radius: 6px; font-weight: 700; cursor: pointer;">Request Refill</button>
+            </div>
+            <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #10b981;">
+              <div>
+                <h4 style="margin: 0; font-size: 0.9rem; font-weight: 700; color: #1e293b;">Atorvastatin</h4>
+                <p style="margin: 0.15rem 0 0; font-size: 0.75rem; color: #64748b;">20mg Daily • Bedtime • For cholesterol</p>
+              </div>
+              <button onclick="alert('Refill requested for Atorvastatin.')" style="background: #ecfdf5; color: #10b981; border: 1px solid #10b981; padding: 0.35rem 0.75rem; font-size: 0.75rem; border-radius: 6px; font-weight: 700; cursor: pointer;">Request Refill</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 6: HEALTH JOURNAL -->
+      <div id="tab-health-journal" class="tab-content" style="display: none;">
+        <div style="margin-bottom: 1.5rem;">
+          <h2 style="font-size: 1.7rem; font-weight: 800; color: #1e293b; margin:0;">Symptom & Vitals Log Journal</h2>
+          <p style="margin: 0.25rem 0 0; font-size: 0.85rem; color: #64748b;">Record daily observations and track symptoms over time.</p>
+        </div>
+        <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 1.5rem;">
+          <div class="dash-card" style="background:white; border:1px solid #e2e8f0; padding:1.25rem; border-radius:16px;">
+            <h3>Log Daily Entry</h3>
+            <form onsubmit="alert('Daily entry logged.'); return false;" style="margin-top: 1rem; display: flex; flex-direction: column; gap: 1rem;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                  <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">Systolic BP (mmHg)</label>
+                  <input type="number" style="width: 100%; padding: 0.65rem; border-radius: 8px; border: 1px solid #cbd5e1;" value="122">
+                </div>
+                <div>
+                  <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">Diastolic BP (mmHg)</label>
+                  <input type="number" style="width: 100%; padding: 0.65rem; border-radius: 8px; border: 1px solid #cbd5e1;" value="80">
+                </div>
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">Symptom Notes</label>
+                <textarea placeholder="No symptoms today, feeling energetic..." style="width: 100%; min-height: 80px; padding: 0.5rem; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.82rem; font-family: inherit; resize: none;"></textarea>
+              </div>
+              <button type="submit" style="background:black; color:white; border:0; border-radius:8px; padding:0.65rem 1.25rem; font-size:0.85rem; font-weight:700; cursor:pointer;">Save Daily Entry</button>
+            </form>
+          </div>
+          <div class="dash-card" style="background:white; border:1px solid #e2e8f0; padding:1.25rem; border-radius:16px;">
+            <h3>Journal Entries</h3>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem; max-height: 250px; overflow-y: auto;">
+              <div style="background: #f8fafc; padding: 0.75rem; border-radius: 8px; font-size: 0.78rem;">
+                <strong>July 8, 2026:</strong> BP 125/82 mmHg, no symptoms. Feel great.
+              </div>
+              <div style="background: #f8fafc; padding: 0.75rem; border-radius: 8px; font-size: 0.78rem;">
+                <strong>July 7, 2026:</strong> BP 123/81 mmHg, light headache in morning.
+              </div>
+              <div style="background: #f8fafc; padding: 0.75rem; border-radius: 8px; font-size: 0.78rem;">
+                <strong>July 6, 2026:</strong> BP 127/83 mmHg, logged after 30m cardio walk.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 7: HEALTH EDUCATION -->
+      <div id="tab-health-education" class="tab-content" style="display: none;">
+        <div style="margin-bottom: 1.5rem;">
+          <h2 style="font-size: 1.7rem; font-weight: 800; color: #1e293b; margin:0;">Cardiovascular Education</h2>
+          <p style="margin: 0.25rem 0 0; font-size: 0.85rem; color: #64748b;">Curated tips and guides to help manage your heart health.</p>
+        </div>
+        <div class="dash-card" style="background:white; border:1px solid #e2e8f0; padding:1.25rem; border-radius:16px;">
+          <h3>Recommended Guides</h3>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+            <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; border-left: 4px solid #06b6d4;">
+              <h4 style="margin: 0; font-size: 0.88rem; font-weight: 700; color: #1e293b;">Low-Impact Cardio Walk benefits</h4>
+              <p style="margin: 0.25rem 0 0.5rem; font-size: 0.75rem; color: #64748b;">Walking 30 minutes daily improves systolic BP significantly.</p>
+              <a href="#" onclick="alert('Loading full educational text...'); return false;" style="font-size:0.75rem; font-weight:700; color:#0891b2; text-decoration:none;">Read Guide &rarr;</a>
+            </div>
+            <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; border-left: 4px solid #06b6d4;">
+              <h4 style="margin: 0; font-size: 0.88rem; font-weight: 700; color: #1e293b;">Sodium intake & blood pressure</h4>
+              <p style="margin: 0.25rem 0 0.5rem; font-size: 0.75rem; color: #64748b;">Reducing daily sodium to less than 1,500mg lowers arterial tension.</p>
+              <a href="#" onclick="alert('Loading full sodium restrictions resource...'); return false;" style="font-size:0.75rem; font-weight:700; color:#0891b2; text-decoration:none;">Read Guide &rarr;</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Load Chart.js for trends and simulation -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  // Sidebar toggle animation
+  const sidebarToggle = document.getElementById("sidebar-toggle");
+  const dbContainer = document.getElementById("dashboard-container");
+  const toggleIcon = document.getElementById("toggle-icon");
+  
+  if (sidebarToggle && dbContainer) {
+    sidebarToggle.addEventListener("click", () => {
+      dbContainer.classList.toggle("collapsed");
+      if (dbContainer.classList.contains("collapsed")) {
+        toggleIcon.setAttribute("data-lucide", "chevrons-right");
+      } else {
+        toggleIcon.setAttribute("data-lucide", "chevrons-left");
+      }
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // ----------------------------------------------------
+    // Public Health Visualizations and Policy Simulation
+    // ----------------------------------------------------
+    const simCtx = document.getElementById("impactProjectionChart");
+    if (simCtx) {
+      const impactChart = new Chart(simCtx.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: ['Year 0', 'Year 2', 'Year 4', 'Year 6', 'Year 8', 'Year 10'],
+          datasets: [
+            {
+              label: 'Simulated',
+              data: [12.4, 11.2, 10.1, 8.9, 7.8, 6.5],
+              borderColor: '#3b82f6',
+              backgroundColor: 'rgba(59, 130, 246, 0.05)',
+              fill: true,
+              tension: 0.3
+            },
+            {
+              label: 'Baseline',
+              data: [12.4, 12.5, 12.7, 12.8, 13.0, 13.2],
+              borderColor: '#94a3b8',
+              fill: false,
+              tension: 0.3
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false } },
+            y: { grid: { color: '#f1f5f9' }, min: 4, max: 15 }
+          }
+        }
+      });
+
+      const budgetInput = document.getElementById("sim-budget");
+      const budgetVal = document.getElementById("budget-val");
+      if (budgetInput && budgetVal) {
+        budgetInput.addEventListener("input", (e) => {
+          const val = parseFloat(e.target.value);
+          const changePct = Math.round((val - 1.2) / 1.2 * 100);
+          budgetVal.textContent = `₹${val.toFixed(1)}Cr (${changePct >= 0 ? '+' : ''}${changePct}%)`;
+
+          const factor = (val / 1.2);
+          impactChart.data.datasets[0].data = [
+            12.4,
+            Math.max(5.0, 12.4 - 1.2 * factor),
+            Math.max(4.5, 12.4 - 2.3 * factor),
+            Math.max(4.0, 12.4 - 3.5 * factor),
+            Math.max(3.5, 12.4 - 4.6 * factor),
+            Math.max(3.0, 12.4 - 5.9 * factor)
+          ];
+          impactChart.update();
+        });
+      }
+
+      const densityInput = document.getElementById("sim-density");
+      const densityVal = document.getElementById("density-val");
+      if (densityInput && densityVal) {
+        densityInput.addEventListener("input", (e) => {
+          const val = e.target.value;
+          densityVal.textContent = `+${val}%`;
+        });
+      }
+    }
+
+    const trajectoriesCtx = document.getElementById("populationHealthChart");
+    if (trajectoriesCtx) {
+      new Chart(trajectoriesCtx.getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
+          datasets: [
+            {
+              label: 'Hypertension',
+              data: [12.1, 12.2, 12.3, 12.5, 12.4, 12.6, 12.7, 12.8, 12.9, 13.1],
+              backgroundColor: '#3b82f6',
+              borderRadius: 4
+            },
+            {
+              label: 'Diabetes',
+              data: [7.8, 7.9, 8.1, 8.2, 8.1, 8.3, 8.4, 8.5, 8.6, 8.8],
+              backgroundColor: '#a855f7',
+              borderRadius: 4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { grid: { display: false } },
+            y: { grid: { color: '#f1f5f9' } }
+          }
+        }
+      });
+    }
+
+    // ----------------------------------------------------
+    // Patient Activity Trends Bar Chart
+    // ----------------------------------------------------
+    const activityCtx = document.getElementById("activityTrendsChart");
+    if (activityCtx) {
+      new Chart(activityCtx.getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          datasets: [
+            {
+              label: 'Steps Taken',
+              data: [8400, 9200, 10500, 7100, 9800, 12000, 11000],
+              backgroundColor: '#06b6d4',
+              borderRadius: 4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false } },
+            y: { grid: { color: '#f1f5f9' } }
+          }
+        }
+      });
+    }
+  });
+
+  // Patient Portal Sidebar tab switcher logic
+  document.querySelectorAll(".sidebar-tab").forEach(tab => {
+    tab.addEventListener("click", (e) => {
+      if (document.getElementById("tab-my-health")) {
+        e.preventDefault();
+        
+        document.querySelectorAll(".sidebar-tab").forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+        
+        document.querySelectorAll(".tab-content").forEach(tc => {
+          tc.classList.remove("active");
+          tc.style.display = "none";
+        });
+        
+        const targetTabId = `tab-${tab.dataset.tab}`;
+        const targetContent = document.getElementById(targetTabId);
+        if (targetContent) {
+          targetContent.classList.add("active");
+          targetContent.style.display = "block";
+        }
+      }
+    });
+  });
+
+  // Initialize Progress Tracking charts on page load if elements exist
+  document.addEventListener("DOMContentLoaded", () => {
+    const tabWeightCtx = document.getElementById("tabProgressWeightChart");
+    if (tabWeightCtx) {
+      new Chart(tabWeightCtx.getContext("2d"), {
+        type: 'bar',
+        data: {
+          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+          datasets: [{
+            data: [154, 153, 151, 151, 149.5, 148],
+            backgroundColor: '#c084fc',
+            borderRadius: 4,
+            barThickness: 14
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false } },
+            y: { grid: { color: '#f1f5f9' }, min: 140, max: 160 }
+          }
+        }
+      });
+    }
+
+    const tabStepsCtx = document.getElementById("tabProgressStepsChart");
+    if (tabStepsCtx) {
+      new Chart(tabStepsCtx.getContext("2d"), {
+        type: 'bar',
+        data: {
+          labels: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+          datasets: [{
+            data: [6400, 7800, 7200, 6800, 9200, 7650, 9800],
+            backgroundColor: '#22d3ee',
+            borderRadius: 4,
+            barThickness: 10
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false } },
+            y: { grid: { color: '#f1f5f9' } }
+          }
+        }
+      });
+    }
+
+    const tabBpCtx = document.getElementById("tabProgressBPChart");
+    if (tabBpCtx) {
+      new Chart(tabBpCtx.getContext("2d"), {
+        type: 'line',
+        data: {
+          labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+          datasets: [{
+            data: [132, 129, 126, 125],
+            borderColor: '#0ea5e9',
+            backgroundColor: 'rgba(14, 165, 233, 0.05)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false } },
+            y: { grid: { color: '#f1f5f9' }, min: 120, max: 140 }
+          }
+        }
+      });
+    }
+
+    // Auto-select tab if hash exists in URL
+    const initialHash = window.location.hash.substring(1);
+    if (initialHash) {
+      const targetTab = document.querySelector(`.sidebar-tab[data-tab="${initialHash}"]`);
+      if (targetTab) {
+        targetTab.click();
+      }
+    }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,1455 @@
+{% extends "base.html" %}
+{% block title %}Clinical Workflows - DataVibe{% endblock %}
+{% block content %}
+<style>
+  /* Layout Grid Container */
+  .dashboard-container {
+    display: grid;
+    grid-template-columns: 16rem 1fr;
+    min-height: calc(100vh - 70px);
+    background: #f8fafc;
+    transition: grid-template-columns 0.3s ease;
+  }
+  .dashboard-container.collapsed {
+    grid-template-columns: 4.8rem 1fr;
+  }
+
+  /* Sidebar Navigation */
+  .sidebar {
+    background: white;
+    border-right: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1.5rem 1rem;
+    overflow-y: auto;
+    transition: padding 0.3s ease;
+  }
+  .dashboard-container.collapsed .sidebar {
+    padding: 1.5rem 0.5rem;
+    align-items: center;
+  }
+
+  .sidebar-brand-section {
+    transition: opacity 0.2s;
+  }
+  .dashboard-container.collapsed .sidebar-brand-section {
+    opacity: 0;
+    display: none;
+  }
+
+  .sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 2rem;
+  }
+  .sidebar-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #64748b;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .sidebar-menu-item:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+  }
+  .sidebar-menu-item.active {
+    background: #eff6ff;
+    color: #3b82f6;
+    border-left-color: #3b82f6;
+    border-radius: 0 8px 8px 0;
+  }
+  .sidebar-menu-item i {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+  }
+  
+  .menu-text {
+    transition: opacity 0.2s;
+  }
+  .dashboard-container.collapsed .menu-text {
+    opacity: 0;
+    display: none;
+  }
+
+  .sidebar-toggle-btn {
+    align-self: flex-end;
+    background: transparent;
+    border: 0;
+    color: #64748b;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    transition: background 0.2s;
+  }
+  .sidebar-toggle-btn:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+  }
+
+  /* Workspace */
+  .workspace {
+    padding: 2rem clamp(1rem, 4vw, 2.5rem);
+    overflow-y: auto;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  /* Tab content switcher */
+  .tab-content {
+    display: none;
+  }
+  .tab-content.active {
+    display: block;
+  }
+
+  /* Header Section */
+  .workspace-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 1rem;
+  }
+  .workspace-head h1 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0 0 0.25rem;
+  }
+  .workspace-head p {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 0;
+    font-weight: 600;
+  }
+
+  /* Action buttons */
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .btn-export {
+    background: white;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0.55rem 1.25rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1e293b;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .btn-export:hover {
+    background: #f8fafc;
+  }
+  .btn-add-patient {
+    background: black;
+    color: white;
+    border: 0;
+    border-radius: 8px;
+    padding: 0.55rem 1.25rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .btn-add-patient:hover {
+    background: #1e293b;
+  }
+
+  /* Split Content Panel Grid */
+  .split-panel-grid {
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  @media (max-width: 1024px) {
+    .split-panel-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Left Panel Cards */
+  .sidebar-filter-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.005);
+  }
+  .sidebar-filter-card h3 {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0 0 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .sidebar-filter-card h3 a {
+    font-size: 0.72rem;
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 700;
+  }
+
+  .filter-group {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .filter-group label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+  }
+  .checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #334155;
+    cursor: pointer;
+  }
+
+  .pill-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+  }
+  .filter-pill-mini {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 99px;
+    padding: 0.25rem 0.65rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #475569;
+    cursor: pointer;
+  }
+  .filter-pill-mini.active {
+    background: #eff6ff;
+    color: #3b82f6;
+    border-color: #bfdbfe;
+  }
+
+  .btn-apply-filters {
+    background: #e2e8f0;
+    color: #475569;
+    border: 0;
+    width: 100%;
+    padding: 0.55rem;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-apply-filters:hover {
+    background: #cbd5e1;
+  }
+
+  /* Quick Actions */
+  .quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+  .action-btn-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1rem 0.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  .action-btn-card:hover {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+  }
+  .action-btn-card i {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #3b82f6;
+  }
+  .action-btn-card span {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #334155;
+  }
+
+  /* Search & Table Header Row */
+  .table-tools-row {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px 12px 0 0;
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    border-bottom: 0;
+  }
+  .table-search-box {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0.45rem 0.75rem;
+    width: 20rem;
+  }
+  .table-search-box input {
+    border: 0;
+    background: transparent;
+    outline: none;
+    font-size: 0.85rem;
+    width: 100%;
+    color: #1e293b;
+  }
+
+  .table-actions-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #475569;
+  }
+
+  /* Patient Table */
+  .table-container {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0 0 12px 12px;
+    overflow-x: auto;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.005);
+  }
+  .patient-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .patient-table th {
+    text-align: left;
+    padding: 0.85rem 1rem;
+    background: #f8fafc;
+    color: #475569;
+    font-weight: 750;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .patient-table td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #334155;
+    vertical-align: middle;
+  }
+  .patient-table tr:hover td {
+    background: #f8fafc;
+  }
+
+  .patient-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+  }
+  .patient-avatar-circle {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  .patient-name-link {
+    color: #0284c7;
+    text-decoration: none;
+    font-weight: 750;
+    cursor: pointer;
+  }
+  .patient-name-link:hover {
+    text-decoration: underline;
+  }
+
+  .risk-badge-ph {
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    display: inline-block;
+  }
+  .risk-badge-ph.critical { background: #fef2f2; color: #ef4444; }
+  .risk-badge-ph.moderate { background: #eff6ff; color: #3b82f6; }
+  .risk-badge-ph.low { background: #ecfdf5; color: #10b981; }
+
+  .status-dot-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+  }
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+  .status-dot.active { background: #8b5cf6; }
+  .status-dot.pending { background: #94a3b8; }
+  .status-dot.completed { background: #10b981; }
+
+  /* Pagination footer */
+  .table-pagination-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #64748b;
+  }
+  .pagination-btns-wrap {
+    display: flex;
+    gap: 0.35rem;
+  }
+  .pagination-btn {
+    border: 1px solid #cbd5e1;
+    background: white;
+    color: #475569;
+    padding: 0.35rem 0.65rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .pagination-btn:hover {
+    background: #f8fafc;
+  }
+  .pagination-btn.active {
+    background: #eff6ff;
+    color: #3b82f6;
+    border-color: #3b82f6;
+  }
+
+  /* Bottom stats row */
+  .ph-stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+  }
+  @media (max-width: 768px) {
+    .ph-stats-row {
+      grid-template-columns: 1fr;
+    }
+  }
+  .ph-stat-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.005);
+  }
+  .ph-stat-icon-wrap {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 10px;
+    background: #fff5f5;
+    color: #ef4444;
+    display: grid;
+    place-items: center;
+  }
+  .ph-stat-info span {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .ph-stat-info strong {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-top: 0.15rem;
+  }
+
+  /* Modals Overlay style */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  .modal-card {
+    background: white;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 32rem;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: modalSlideUp 0.25s ease-out;
+  }
+  @keyframes modalSlideUp {
+    from { transform: translateY(15px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .modal-head {
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 1rem 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .modal-head h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #1e293b;
+  }
+  .modal-close-btn {
+    background: transparent;
+    border: 0;
+    color: #64748b;
+    font-size: 1.25rem;
+    cursor: pointer;
+  }
+
+  .modal-body {
+    padding: 1.25rem;
+    overflow-y: auto;
+    max-height: calc(85vh - 4rem);
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .form-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .form-item label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+  }
+  .form-input {
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.85rem;
+    outline: none;
+  }
+
+  /* Interactive timeline in modal */
+  .history-timeline-modal {
+    margin-top: 1rem;
+    border-left: 2px solid #e2e8f0;
+    padding-left: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .timeline-modal-step {
+    position: relative;
+  }
+  .timeline-modal-dot {
+    position: absolute;
+    left: -1.65rem;
+    top: 3px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #cbd5e1;
+    border: 2px solid white;
+  }
+  .timeline-modal-step.active .timeline-modal-dot {
+    background: #3b82f6;
+  }
+
+  /* KPI Cards Grid */
+  .kpi-grid-four {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+  }
+  @media (max-width: 900px) {
+    .kpi-grid-four {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  @media (max-width: 600px) {
+    .kpi-grid-four {
+      grid-template-columns: 1fr;
+    }
+  }
+  .kpi-card-new {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.25rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.005);
+  }
+  .kpi-card-new span {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 750;
+    color: #64748b;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 0.35rem;
+  }
+  .kpi-card-new strong {
+    display: block;
+    font-size: 1.6rem;
+    font-weight: 850;
+    color: #0f172a;
+  }
+
+  /* High Priority Section */
+  .section-title-new {
+    font-size: 1.1rem;
+    font-weight: 850;
+    color: #0f172a;
+    margin: 2rem 0 1.25rem;
+  }
+  .high-priority-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+  @media (max-width: 900px) {
+    .high-priority-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .priority-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-top: 4px solid #cbd5e1;
+    border-radius: 0 0 12px 12px;
+    padding: 1.25rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.005);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .priority-card.border-critical { border-top-color: #ef4444; }
+  .priority-card.border-monitoring { border-top-color: #f59e0b; }
+  .priority-card.border-stable { border-top-color: #10b981; }
+
+  .priority-head {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .avatar-new {
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #475569;
+    font-weight: 800;
+    font-size: 0.8rem;
+    display: grid;
+    place-items: center;
+  }
+  .priority-head h3 {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #1e293b;
+  }
+  .priority-head small {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    font-weight: 600;
+  }
+  .badge-new {
+    margin-left: auto;
+    font-size: 0.62rem;
+    font-weight: 850;
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+  .badge-new.bg-critical { background: #fee2e2; color: #b91c1c; }
+  .badge-new.bg-monitoring { background: #fffbeb; color: #92400e; }
+  .badge-new.bg-stable { background: #ecfdf5; color: #065f46; }
+
+  .priority-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f1f5f9;
+    padding: 0.75rem 0;
+    text-align: center;
+  }
+  .priority-stats dt {
+    font-size: 0.62rem;
+    font-weight: 750;
+    color: #94a3b8;
+    text-transform: uppercase;
+    margin-bottom: 0.15rem;
+  }
+  .priority-stats dd {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #334155;
+    margin: 0;
+  }
+  .priority-stats dd.text-danger { color: #ef4444; }
+  .priority-stats dd.text-warning { color: #f59e0b; }
+  .priority-stats dd.text-success { color: #10b981; }
+
+  .priority-notes {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.4;
+  }
+</style>
+
+<div class="dashboard-container" id="dashboard-container">
+  <!-- Collapsible Left Sidebar Navigation -->
+  <aside class="sidebar">
+    <div>
+      <button class="sidebar-toggle-btn" id="sidebar-toggle">
+        <i data-lucide="chevrons-left" id="toggle-icon"></i>
+      </button>
+
+      <div class="sidebar-brand-section" style="padding-left: 1rem; margin-bottom: 1.5rem; margin-top: 0.5rem;">
+        <span style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.5px;">DataVibe</span>
+        <span style="font-size: 1.15rem; font-weight: 800; color: #3b82f6; display: block; font-family: Poppins, sans-serif; margin-top: 0.15rem; letter-spacing: -0.5px;">CLINICAL INTELLIGENCE</span>
+      </div>
+
+      <nav class="sidebar-menu">
+        <a href="{{ url_for('dashboard.home') }}" class="sidebar-menu-item">
+          <i data-lucide="layout-grid"></i>
+          <span class="menu-text">Dashboard</span>
+        </a>
+        <a class="sidebar-tab sidebar-menu-item active" data-tab="clinical-notes" href="{{ url_for('clinical.clinical_dashboard') }}#clinical-notes">
+          <i data-lucide="users"></i>
+          <span class="menu-text">Patient Management</span>
+        </a>
+        <a class="sidebar-tab sidebar-menu-item" data-tab="risk-review" href="{{ url_for('clinical.clinical_dashboard') }}#risk-review">
+          <i data-lucide="activity"></i>
+          <span class="menu-text">Analytics Overview</span>
+        </a>
+        <a href="{{ url_for('dashboard.tableau_style_dashboard') }}" class="sidebar-menu-item">
+          <i data-lucide="line-chart"></i>
+          <span class="menu-text">Analytics Deep-dive</span>
+        </a>
+        <a href="{{ url_for('dashboard.heart_disease_story') }}" class="sidebar-menu-item">
+          <i data-lucide="file-text"></i>
+          <span class="menu-text">Clinical Reports</span>
+        </a>
+      </nav>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="#" class="sidebar-menu-item" style="margin: 0;"><i data-lucide="help-circle"></i> <span class="menu-text">Support</span></a>
+      <a href="{{ url_for('auth.logout') }}" class="sidebar-menu-item" style="margin: 0; color: #ef4444; border-left-color: transparent;"><i data-lucide="log-out"></i> <span class="menu-text">Sign Out</span></a>
+    </div>
+  </aside>
+
+  <!-- Workspace content -->
+  <main class="workspace">
+    
+    <!-- TAB 1: PATIENT MANAGEMENT (DEFAULT ACTIVE TAB) -->
+    <div id="tab-clinical-notes" class="tab-content active">
+      <!-- Header Section -->
+      <div class="workspace-head">
+        <div>
+          <h1>Patient Management</h1>
+          <p>Managing 1,248 active cardiac patients in Clinical Intelligence Hub.</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-export" onclick="alert('Preparing download payload for patient registries export...')"><i data-lucide="download"></i> Export</button>
+          <button class="btn-add-patient" onclick="openAddPatientModal()"><i data-lucide="plus"></i> Add New Patient</button>
+        </div>
+      </div>
+
+      <!-- Split content grid -->
+      <div class="split-panel-grid">
+        
+        <!-- Left Panel: Filters & Quick Actions -->
+        <div>
+          <!-- Filters Card -->
+          <div class="sidebar-filter-card">
+            <h3>Advanced Filters <a href="#" onclick="alert('Filters cleared.')">RESET</a></h3>
+            
+            <div class="filter-group">
+              <label>Risk Category</label>
+              <select class="dropdown-select" style="padding: 0.4rem; font-size: 0.8rem;">
+                <option value="all">All Risk Levels</option>
+                <option value="critical">Critical Risk</option>
+                <option value="moderate">Moderate Risk</option>
+                <option value="low">Low Risk</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label>Age Range (18 - 95)</label>
+              <input type="range" min="18" max="95" value="65" style="cursor:pointer;" oninput="document.getElementById('age-filter-val').textContent = this.value">
+              <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#64748b; font-weight:700; margin-top:2px;">
+                <span>18 yrs</span>
+                <span id="age-filter-val" style="color:#1e293b;">65</span>
+                <span>95 yrs</span>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <label>Treatment Status</label>
+              <div class="checkbox-group">
+                <label class="checkbox-item"><input type="checkbox" checked> Active Treatment</label>
+                <label class="checkbox-item"><input type="checkbox"> Pending Approval</label>
+                <label class="checkbox-item"><input type="checkbox"> Completed</label>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <label>Lifestyle Factors</label>
+              <div class="pill-group">
+                <button class="filter-pill-mini active">Smoker</button>
+                <button class="filter-pill-mini">Diabetic</button>
+                <button class="filter-pill-mini">Hypertension</button>
+                <button class="filter-pill-mini">Post-Op</button>
+              </div>
+            </div>
+
+            <button class="btn-apply-filters" style="margin-top: 0.5rem;" onclick="alert('Filtering database registries...')">Apply Filters</button>
+          </div>
+
+          <!-- Quick Actions Card -->
+          <div class="sidebar-filter-card">
+            <h3>Quick Actions</h3>
+            <div class="quick-actions-grid">
+              <div class="action-btn-card" onclick="alert('Opening appointments calendar manager...')">
+                <i data-lucide="calendar"></i>
+                <span>Schedule</span>
+              </div>
+              <div class="action-btn-card" onclick="alert('Opening lab orders workbook...')">
+                <i data-lucide="beaker"></i>
+                <span>Order Lab</span>
+              </div>
+              <div class="action-btn-card" onclick="alert('Opening prescription manager...')">
+                <i data-lucide="pill"></i>
+                <span>Rx Plan</span>
+              </div>
+              <div class="action-btn-card" onclick="alert('Loading specialist referral network...')">
+                <i data-lucide="send"></i>
+                <span>Referral</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Panel: Patient Table -->
+        <div>
+          <div class="table-tools-row">
+            <div class="table-search-box">
+              <i data-lucide="search" style="color: #64748b; width:1.05rem; height:1.05rem;"></i>
+              <input type="text" placeholder="Filter by name, ID or symptom..." oninput="filterPatientsList(this.value)">
+            </div>
+            
+            <div class="table-actions-right">
+              <div style="display:flex; align-items:center; gap:0.35rem; cursor:pointer;" onclick="alert('Triggering bulk action selection...')">
+                <i data-lucide="sliders-horizontal" style="width:1rem; height:1rem;"></i>
+                <span>Bulk Actions</span>
+                <i data-lucide="chevron-down" style="width:0.85rem; height:0.85rem;"></i>
+              </div>
+              <span>Showing 1-10 of 1,248</span>
+              <div style="display:flex; gap:0.25rem;">
+                <button style="border:1px solid #cbd5e1; background:white; padding:0.25rem 0.5rem; border-radius:4px; cursor:pointer;" onclick="alert('Loading previous page...')"><i data-lucide="chevron-left" style="width:0.9rem; height:0.9rem;"></i></button>
+                <button style="border:1px solid #cbd5e1; background:white; padding:0.25rem 0.5rem; border-radius:4px; cursor:pointer;" onclick="alert('Loading next page...')"><i data-lucide="chevron-right" style="width:0.9rem; height:0.9rem;"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table class="patient-table">
+              <thead>
+                <tr>
+                  <th style="width: 2.5rem;"><input type="checkbox"></th>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Demographics</th>
+                  <th>Risk Score</th>
+                  <th>Timeline</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="patient-table-body">
+                <!-- Statically mock rows matching the mockup exactly, while keeping them interactive -->
+                <tr>
+                  <td><input type="checkbox"></td>
+                  <td>#PT-8291</td>
+                  <td>
+                    <div class="patient-name-cell">
+                      <img class="patient-avatar-circle" src="{{ url_for('static', filename='images/patient_avatar.png') }}" alt="Avatar">
+                      <span class="patient-name-link" onclick="openPatientModal('arlene')">Arlene McCoy</span>
+                    </div>
+                  </td>
+                  <td>62 / F</td>
+                  <td><span class="risk-badge-ph critical">Critical</span></td>
+                  <td><small>Last: Oct 12, 2023<br><strong>Next: Oct 28, 2023</strong></small></td>
+                  <td><span class="status-dot-text"><span class="status-dot active"></span> Active</span></td>
+                </tr>
+
+                <tr>
+                  <td><input type="checkbox"></td>
+                  <td>#PT-8244</td>
+                  <td>
+                    <div class="patient-name-cell">
+                      <img class="patient-avatar-circle" src="{{ url_for('static', filename='images/doctor_avatar.png') }}" alt="Avatar">
+                      <span class="patient-name-link" onclick="openPatientModal('cameron')">Cameron Williamson</span>
+                    </div>
+                  </td>
+                  <td>45 / M</td>
+                  <td><span class="risk-badge-ph moderate">Moderate</span></td>
+                  <td><small>Last: Oct 05, 2023<br>Next: TBD</small></td>
+                  <td><span class="status-dot-text"><span class="status-dot pending"></span> Pending</span></td>
+                </tr>
+
+                <tr>
+                  <td><input type="checkbox"></td>
+                  <td>#PT-7901</td>
+                  <td>
+                    <div class="patient-name-cell">
+                      <img class="patient-avatar-circle" src="{{ url_for('static', filename='images/public_health_avatar.png') }}" alt="Avatar">
+                      <span class="patient-name-link" onclick="openPatientModal('eleanor')">Eleanor Pena</span>
+                    </div>
+                  </td>
+                  <td>34 / F</td>
+                  <td><span class="risk-badge-ph low">Low Risk</span></td>
+                  <td><small>Last: Sep 20, 2023<br>Next: Nov 15</small></td>
+                  <td><span class="status-dot-text"><span class="status-dot completed"></span> Completed</span></td>
+                </tr>
+
+                <tr>
+                  <td><input type="checkbox"></td>
+                  <td>#PT-7822</td>
+                  <td>
+                    <div class="patient-name-cell">
+                      <img class="patient-avatar-circle" src="{{ url_for('static', filename='images/patient_avatar.png') }}" alt="Avatar">
+                      <span class="patient-name-link" onclick="openPatientModal('robert')">Robert Fox</span>
+                    </div>
+                  </td>
+                  <td>74 / M</td>
+                  <td><span class="risk-badge-ph critical">Critical</span></td>
+                  <td><small>Last: Oct 20, 2023<br><strong>Next: Oct 22, 2023</strong></small></td>
+                  <td><span class="status-dot-text"><span class="status-dot active"></span> Active</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination footer -->
+          <div class="table-pagination-footer">
+            <span>Page 1 of 125</span>
+            <div class="pagination-btns-wrap">
+              <button class="pagination-btn" onclick="alert('Loading previous page...')">Previous</button>
+              <button class="pagination-btn active">1</button>
+              <button class="pagination-btn" onclick="alert('Loading page 2...')">2</button>
+              <button class="pagination-btn" onclick="alert('Loading page 3...')">3</button>
+              <span>...</span>
+              <button class="pagination-btn" onclick="alert('Loading next page...')">Next</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Stats widgets row -->
+      <div class="ph-stats-row">
+        <div class="ph-stat-card">
+          <div class="ph-stat-icon-wrap"><i data-lucide="alert-triangle"></i></div>
+          <div class="ph-stat-info">
+            <span>Critical Alerts</span>
+            <strong>24</strong>
+          </div>
+        </div>
+
+        <div class="ph-stat-card">
+          <div class="ph-stat-icon-wrap" style="background:#e0f2fe; color:#0284c7;"><i data-lucide="calendar"></i></div>
+          <div class="ph-stat-info">
+            <span>Visits Today</span>
+            <strong>18</strong>
+          </div>
+        </div>
+
+        <div class="ph-stat-card">
+          <div class="ph-stat-icon-wrap" style="background:#ecfdf5; color:#10b981;"><i data-lucide="file-text"></i></div>
+          <div class="ph-stat-info">
+            <span>Pending Results</span>
+            <strong>42</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: CLINICAL WORKBOOK ANALYTICS -->
+    <div id="tab-risk-review" class="tab-content">
+      <div class="workspace-head">
+        <div>
+          <p class="eyebrow">DataVibe Intelligence</p>
+          <h1>Clinical Workbook Analytics</h1>
+        </div>
+      </div>
+
+      <!-- KPI cards -->
+      <div class="kpi-grid-four">
+        <article class="kpi-card-new clinical-kpi">
+          <span>ACTIVE HIGH-RISK PATIENTS</span>
+          <strong>124</strong>
+        </article>
+        <article class="kpi-card-new clinical-kpi">
+          <span>AVG CRITICAL VITALS (BPM)</span>
+          <strong>82.4</strong>
+        </article>
+        <article class="kpi-card-new clinical-kpi">
+          <span>CLINIC EFFICIENCY</span>
+          <strong>94%</strong>
+        </article>
+        <article class="kpi-card-new clinical-kpi">
+          <span>ANALYTICS PRECISION</span>
+          <strong>0.98</strong>
+        </article>
+      </div>
+
+      <!-- High Priority Patients -->
+      <h2 class="section-title-new">High Priority Patients</h2>
+      <div class="high-priority-grid">
+        <article class="priority-card border-critical">
+          <div class="priority-head">
+            <span class="avatar-new">JD</span>
+            <div>
+              <h3>John Doe</h3>
+              <small>ID: #CAR-0921</small>
+            </div>
+            <span class="badge-new bg-critical">CRITICAL</span>
+          </div>
+          <div class="priority-stats">
+            <div><dt>BP</dt><dd>145/92</dd></div>
+            <div><dt>BMI</dt><dd>28.4</dd></div>
+            <div><dt>EF</dt><dd class="text-danger">42%</dd></div>
+          </div>
+          <p class="priority-notes">Patient presenting with recurrent palpitations and mild dyspnea on exertion...</p>
+        </article>
+
+        <article class="priority-card border-monitoring">
+          <div class="priority-head">
+            <span class="avatar-new">MS</span>
+            <div>
+              <h3>Maria Santos</h3>
+              <small>ID: #CAR-1142</small>
+            </div>
+            <span class="badge-new bg-monitoring">MONITORING</span>
+          </div>
+          <div class="priority-stats">
+            <div><dt>BP</dt><dd>128/84</dd></div>
+            <div><dt>BMI</dt><dd>24.1</dd></div>
+            <div><dt>EF</dt><dd class="text-warning">58%</dd></div>
+          </div>
+          <p class="priority-notes">Post-operative review. Stable hemodynamics. Medications adjusted to...</p>
+        </article>
+
+        <article class="priority-card border-stable">
+          <div class="priority-head">
+            <span class="avatar-new">RB</span>
+            <div>
+              <h3>Robert Brown</h3>
+              <small>ID: #CAR-0883</small>
+            </div>
+            <span class="badge-new bg-stable">STABLE</span>
+          </div>
+          <div class="priority-stats">
+            <div><dt>BP</dt><dd>118/76</dd></div>
+            <div><dt>BMI</dt><dd>22.8</dd></div>
+            <div><dt>EF</dt><dd class="text-success">62%</dd></div>
+          </div>
+          <p class="priority-notes">Vitals within normal limits. Compliance with exercise regime is excellent. Continue...</p>
+        </article>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Modal 1: Patient Profile Deep-dive Modal -->
+<div class="modal-overlay" id="patient-profile-modal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3 id="modal-patient-title">Patient Profile Summary</h3>
+      <button class="modal-close-btn" onclick="closePatientModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <!-- Personal Info -->
+      <div style="display:flex; gap:1rem; align-items:center; margin-bottom:1.25rem; border-bottom:1px solid #f1f5f9; padding-bottom:1rem;">
+        <img id="modal-avatar" src="{{ url_for('static', filename='images/patient_avatar.png') }}" style="width:3.5rem; height:3.5rem; border-radius:50%; object-fit:cover;" alt="Avatar">
+        <div>
+          <h4 id="modal-name" style="margin:0; font-size:1.15rem; font-weight:800; color:#1e293b;">Arlene McCoy</h4>
+          <span style="font-size:0.75rem; color:#64748b; font-weight:700;" id="modal-meta-demographics">62 / Female • ID: #PT-8291</span>
+        </div>
+      </div>
+
+      <!-- Medical details tabs tabs -->
+      <div class="filter-group">
+        <label>Active Medications</label>
+        <ul style="margin:0; padding-left:1.15rem; font-size:0.8rem; color:#334155; font-weight:600; line-height:1.5;" id="modal-meds-list">
+          <li>Atorvastatin 20mg daily</li>
+          <li>Lisinopril 10mg daily</li>
+        </ul>
+      </div>
+
+      <div class="filter-group" style="margin-top:1rem;">
+        <label>Lab Results History</label>
+        <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:0.65rem; font-size:0.78rem; font-weight:700; color:#475569;" id="modal-labs">
+          Cholesterol Total: 215 mg/dL | HbA1c: 6.2%
+        </div>
+      </div>
+
+      <div class="filter-group" style="margin-top:1rem;">
+        <label>Medical History Timeline</label>
+        <div class="history-timeline-modal">
+          <div class="timeline-modal-step active">
+            <div class="timeline-modal-dot"></div>
+            <strong style="font-size:0.75rem; color:#1e293b;">Oct 2023</strong>
+            <p style="margin:0; font-size:0.75rem; color:#64748b;">Heart scan diagnostic review.</p>
+          </div>
+          <div class="timeline-modal-step">
+            <div class="timeline-modal-dot"></div>
+            <strong style="font-size:0.75rem; color:#1e293b;">Jul 2023</strong>
+            <p style="margin:0; font-size:0.75rem; color:#64748b;">Hypertension treatment regimen adjustment.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-group" style="margin-top:1.25rem;">
+        <label>Physician Notes & Comments</label>
+        <textarea class="form-input" style="height:4.5rem; resize:none; font-size:0.8rem; font-weight:600;" id="modal-notes">Patient compliant with statins regimen. Monitor blood sugar markers weekly.</textarea>
+      </div>
+
+      <button class="btn-add-patient" style="width:100%; margin-top:1rem; justify-content:center;" onclick="savePatientNotes()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal 2: Add New Patient Registration Modal -->
+<div class="modal-overlay" id="add-patient-modal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3>Add New Patient Profile</h3>
+      <button class="modal-close-btn" onclick="closeAddPatientModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="add-patient-form" onsubmit="submitNewPatientForm(event)">
+        <div class="form-row">
+          <div class="form-item">
+            <label>First Name</label>
+            <input type="text" class="form-input" required id="form-first-name">
+          </div>
+          <div class="form-item">
+            <label>Last Name</label>
+            <input type="text" class="form-input" required id="form-last-name">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-item">
+            <label>Age</label>
+            <input type="number" class="form-input" required id="form-age">
+          </div>
+          <div class="form-item">
+            <label>Gender</label>
+            <select class="dropdown-select" required id="form-gender">
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-item">
+            <label>Systolic BP (mmHg)</label>
+            <input type="number" class="form-input" required id="form-bp">
+          </div>
+          <div class="form-item">
+            <label>Cholesterol (mg/dL)</label>
+            <input type="number" class="form-input" required id="form-chol">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-item">
+            <label>BMI</label>
+            <input type="number" step="0.1" class="form-input" required id="form-bmi">
+          </div>
+          <div class="form-item">
+            <label>Risk Level Category</label>
+            <select class="dropdown-select" required id="form-risk">
+              <option value="Low">Low Risk</option>
+              <option value="Moderate">Moderate</option>
+              <option value="Critical">Critical</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-add-patient" style="width:100%; justify-content:center; margin-top:1rem;">Register Patient Profile</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Sidebar toggle animation
+  const sidebarToggle = document.getElementById("sidebar-toggle");
+  const dbContainer = document.getElementById("dashboard-container");
+  const toggleIcon = document.getElementById("toggle-icon");
+  
+  if (sidebarToggle && dbContainer) {
+    sidebarToggle.addEventListener("click", () => {
+      dbContainer.classList.toggle("collapsed");
+      if (dbContainer.classList.contains("collapsed")) {
+        toggleIcon.setAttribute("data-lucide", "chevrons-right");
+      } else {
+        toggleIcon.setAttribute("data-lucide", "chevrons-left");
+      }
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    });
+  }
+
+  // Sidebar tab switcher logic
+  document.querySelectorAll(".sidebar-tab").forEach(tab => {
+    tab.addEventListener("click", (e) => {
+      e.preventDefault();
+      
+      document.querySelectorAll(".sidebar-tab").forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      
+      document.querySelectorAll(".tab-content").forEach(tc => tc.classList.remove("active"));
+      const targetTabId = `tab-${tab.dataset.tab}`;
+      const targetContent = document.getElementById(targetTabId);
+      if (targetContent) {
+        targetContent.classList.add("active");
+      }
+    });
+  });
+
+  // Check hash on page load to switch tabs dynamically
+  const initialHash = window.location.hash.substring(1);
+  if (initialHash) {
+    const targetTab = document.querySelector(`.sidebar-tab[data-tab="${initialHash}"]`);
+    if (targetTab) {
+      targetTab.click();
+    }
+  }
+
+  // Modal display controllers
+  function openPatientModal(patientKey) {
+    const modal = document.getElementById("patient-profile-modal");
+    if (!modal) return;
+
+    // Load dynamic data based on selected row
+    const data = {
+      arlene: {
+        name: "Arlene McCoy",
+        demographics: "62 / Female • ID: #PT-8291",
+        meds: ["Atorvastatin 20mg daily", "Lisinopril 10mg daily", "Aspirin 81mg daily"],
+        labs: "Cholesterol Total: 215 mg/dL | HbA1c: 6.2% | LDL: 135 mg/dL",
+        notes: "Patient compliant with statins regimen. Monitor blood sugar markers weekly. Schedule ECG next month."
+      },
+      cameron: {
+        name: "Cameron Williamson",
+        demographics: "45 / Male • ID: #PT-8244",
+        meds: ["Metoprolol 25mg daily", "Fish Oil 1000mg daily"],
+        labs: "Cholesterol Total: 195 mg/dL | BMI: 28.2 | Fasting Glucose: 98 mg/dL",
+        notes: "Post-operative review. Stable hemodynamics. Medications adjusted to baseline."
+      },
+      eleanor: {
+        name: "Eleanor Pena",
+        demographics: "34 / Female • ID: #PT-7901",
+        meds: ["Multivitamins daily"],
+        labs: "Cholesterol Total: 165 mg/dL | BP: 118/76 avg | Glucose: 85 mg/dL",
+        notes: "Vitals within normal limits. Compliance with exercise regime is excellent. Continue current lifestyle recommendations."
+      },
+      robert: {
+        name: "Robert Fox",
+        demographics: "74 / Male • ID: #PT-7822",
+        meds: ["Atorvastatin 40mg daily", "Amlodipine 5mg daily", "Metformin 500mg daily"],
+        labs: "Cholesterol Total: 242 mg/dL | HbA1c: 7.1% | BP: 142/88 avg",
+        notes: "Palpitations reported during exercise. Schedule cardiac stress test. Follow up in 14 days."
+      }
+    };
+
+    const patient = data[patientKey];
+    if (patient) {
+      document.getElementById("modal-name").textContent = patient.name;
+      document.getElementById("modal-meta-demographics").textContent = patient.demographics;
+      document.getElementById("modal-notes").value = patient.notes;
+      document.getElementById("modal-labs").textContent = patient.labs;
+
+      const medsList = document.getElementById("modal-meds-list");
+      medsList.innerHTML = "";
+      patient.meds.forEach(med => {
+        const li = document.createElement("li");
+        li.textContent = med;
+        medsList.appendChild(li);
+      });
+    }
+
+    modal.style.display = "flex";
+  }
+
+  function closePatientModal() {
+    document.getElementById("patient-profile-modal").style.display = "none";
+  }
+
+  function savePatientNotes() {
+    alert("Physician clinical notes successfully updated.");
+    closePatientModal();
+  }
+
+  function openAddPatientModal() {
+    document.getElementById("add-patient-modal").style.display = "flex";
+  }
+
+  function closeAddPatientModal() {
+    document.getElementById("add-patient-modal").style.display = "none";
+  }
+
+  // Handle registration submissions
+  function submitNewPatientForm(e) {
+    e.preventDefault();
+    
+    const first = document.getElementById("form-first-name").value;
+    const last = document.getElementById("form-last-name").value;
+    const age = document.getElementById("form-age").value;
+    const gender = document.getElementById("form-gender").value;
+    const bp = document.getElementById("form-bp").value;
+    const chol = document.getElementById("form-chol").value;
+    const bmi = document.getElementById("form-bmi").value;
+    const risk = document.getElementById("form-risk").value;
+
+    // Create a new row in table
+    const tableBody = document.getElementById("patient-table-body");
+    const newRow = document.createElement("tr");
+
+    const badgeClass = risk === 'Critical' ? 'critical' : (risk === 'Moderate' ? 'moderate' : 'low');
+    const randomId = "PT-" + Math.floor(7000 + Math.random() * 1000);
+
+    newRow.innerHTML = `
+      <td><input type="checkbox"></td>
+      <td>#${randomId}</td>
+      <td>
+        <div class="patient-name-cell">
+          <img class="patient-avatar-circle" src="/static/images/patient_avatar.png" alt="Avatar">
+          <span class="patient-name-link" onclick="alert('Profile summary loading for newly registered patient...')">${first} ${last}</span>
+        </div>
+      </td>
+      <td>${age} / ${gender[0]}</td>
+      <td><span class="risk-badge-ph ${badgeClass}">${risk}</span></td>
+      <td><small>Last: Just Registered<br><strong>Next: Scheduled</strong></small></td>
+      <td><span class="status-dot-text"><span class="status-dot active"></span> Active</span></td>
+    `;
+
+    tableBody.insertBefore(newRow, tableBody.firstChild);
+    
+    alert(`Successfully registered new patient profile:\n${first} ${last} (ID: #${randomId})`);
+    
+    // Clear form and close modal
+    document.getElementById("add-patient-form").reset();
+    closeAddPatientModal();
+  }
+
+  // Live filter patient rows in table
+  function filterPatientsList(query) {
+    const rows = document.querySelectorAll("#patient-table-body tr");
+    const lowerQuery = query.toLowerCase();
+
+    rows.forEach(row => {
+      const nameText = row.querySelector(".patient-name-link").textContent.toLowerCase();
+      const idText = row.cells[1].textContent.toLowerCase();
+      const riskText = row.querySelector(".risk-badge-ph").textContent.toLowerCase();
+
+      if (nameText.includes(lowerQuery) || idText.includes(lowerQuery) || riskText.includes(lowerQuery)) {
+        row.style.display = "";
+      } else {
+        row.style.display = "none";
+      }
+    });
+  }
+</script>
+{% endblock %}
