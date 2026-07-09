@@ -2,7 +2,8 @@
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "run.py"
+      "destination": "app.py"
     }
   ]
 }
+
