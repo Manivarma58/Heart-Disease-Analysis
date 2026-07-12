@@ -457,9 +457,17 @@
           <i data-lucide="users"></i>
           <span class="menu-text">Patients</span>
         </a>
+        <a href="{{ url_for('dashboard.powerbi_style_dashboard') }}" class="sidebar-menu-item">
+          <i data-lucide="pie-chart"></i>
+          <span class="menu-text">Power BI Report</span>
+        </a>
         <a href="{{ url_for('dashboard.tableau_style_dashboard') }}" class="sidebar-menu-item">
           <i data-lucide="line-chart"></i>
-          <span class="menu-text">Analytics</span>
+          <span class="menu-text">Clinical Tableau View</span>
+        </a>
+        <a href="{{ url_for('dashboard.sql_console') }}" class="sidebar-menu-item">
+          <i data-lucide="database"></i>
+          <span class="menu-text">SQL Query Console</span>
         </a>
         <a href="{{ url_for('dashboard.heart_disease_story') }}" class="sidebar-menu-item">
           <i data-lucide="file-text"></i>

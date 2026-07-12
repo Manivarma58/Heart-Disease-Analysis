@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Governance &amp; Accessibility | CardioViz</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "on-secondary-container": "#610001",
+                "surface": "#faf8ff",
+                "on-surface": "#171b2b",
+                "primary-container": "#1a2a6c",
+                "secondary-container": "#fe5c4a",
+                "outline": "#767681",
+                "outline-variant": "#c6c5d2",
+                "primary": "#001255",
+                "on-primary": "#ffffff",
+                "surface-container-low": "#f3f2ff",
+                "surface-container-high": "#e4e7fe",
+                "surface-container-highest": "#dfe1f8",
+                "on-surface-variant": "#454650",
+                "status-stable": "#1a2a6c",
+                "status-critical": "#E74C3C"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "base": "4px",
+                "sm": "16px",
+                "margin-desktop": "40px",
+                "xl": "48px",
+                "lg": "32px",
+                "md": "24px",
+                "margin-mobile": "16px",
+                "gutter": "24px",
+                "xs": "8px"
+            },
+            "fontFamily": {
+                "title-lg": ["Inter"],
+                "label-sm": ["Inter"],
+                "headline-lg": ["Inter"],
+                "label-md": ["Inter"],
+                "headline-md": ["Inter"]
+            },
+            "fontSize": {
+                "title-lg": ["20px", {"lineHeight": "28px", "fontWeight": "500"}],
+                "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}]
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-surface font-body-md text-on-surface">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center px-margin-desktop w-full h-16 sticky top-0 z-50 bg-surface dark:bg-inverse-surface border-b border-outline-variant shadow-sm">
+    <div class="flex items-center gap-md">
+        <a href="/" class="flex items-center gap-2">
+            <span class="font-headline-md text-headline-md font-bold text-primary">CardioViz</span>
+        </a>
+        <nav class="hidden md:flex items-center gap-lg ml-lg">
+            <a class="text-on-surface-variant hover:bg-surface-container-low transition-colors px-2 py-1 rounded" href="{{ url_for('dashboard.home') }}">Dashboard</a>
+            <a class="text-on-surface-variant hover:bg-surface-container-low transition-colors px-2 py-1 rounded" href="{{ url_for('dashboard.support_hub_page') }}">Support</a>
+            <a class="text-primary font-bold border-b-2 border-primary px-2 py-1" href="{{ url_for('dashboard.accessibility_governance_page') }}">Accessibility</a>
+        </nav>
+    </div>
+    <div class="flex items-center gap-md">
+        <img class="w-10 h-10 rounded-full border-2 border-primary-container object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmw1FPEGcfC25hzLcSkBzhjdKbOXybRz1Y-y_LRD6dEFezccT3q38MO-X8wztFtD8iU5sltu9jucaj1SOldKq_IWNruyETi7awZFHVLdesfyGSYApDh-3ItzBkJ1Ebrc0VBE_i_2gjLJNXEsajrNnHSBhUtH4aRZNqkVGBvWaKUXLOGpYyLnR68KyUSEbnpQse2i21d9K5Rx_uwYWZljPACoIRw2peCAeF-9iif3xTzSN5-PhuQYpr5LIlVixo6BjxEx7lt02b4k0Q"/>
+    </div>
+</header>
+
+<main class="max-w-[1440px] mx-auto px-margin-desktop py-xl">
+    <div class="space-y-lg">
+        <!-- Header -->
+        <div class="bg-surface-container-lowest rounded-2xl p-lg border border-outline-variant shadow-sm">
+            <h1 class="font-display-lg text-3xl font-extrabold text-primary mb-2">Governance &amp; Accessibility</h1>
+            <p class="text-sm text-on-surface-variant max-w-3xl">At CardioViz, we prioritize clinical precision and universal access. Our data handling and interface standards are designed to support life-saving decisions for every user, regardless of ability.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+            <!-- Left Side Policies -->
+            <div class="lg:col-span-8 space-y-lg">
+                <!-- Cookie Policy -->
+                <div class="bg-white rounded-2xl p-lg border border-outline-variant shadow-sm space-y-md">
+                    <h3 class="font-bold text-lg text-primary flex items-center gap-2">
+                        <span class="material-symbols-outlined text-secondary">cookie</span> Cookie Policy
+                    </h3>
+                    <p class="text-sm text-on-surface-variant">This policy details how CardioViz Analytics utilizes cookies and similar tracking technologies to ensure the integrity of diagnostic data and optimize user performance in medical environments.</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-xs">
+                            <div class="flex items-center gap-2 text-primary font-bold text-sm">
+                                <span class="material-symbols-outlined text-md">check_circle</span>
+                                <span>Essential</span>
+                            </div>
+                            <p class="text-xs text-on-surface-variant">Strictly necessary for security, authentication, and maintaining HIPAA compliance sessions.</p>
+                        </div>
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-xs">
+                            <div class="flex items-center gap-2 text-primary font-bold text-sm">
+                                <span class="material-symbols-outlined text-md">query_stats</span>
+                                <span>Performance</span>
+                            </div>
+                            <p class="text-xs text-on-surface-variant">Used to monitor system latency and data processing speeds for critical patient monitoring.</p>
+                        </div>
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-xs">
+                            <div class="flex items-center gap-2 text-primary font-bold text-sm">
+                                <span class="material-symbols-outlined text-md">tune</span>
+                                <span>Functional</span>
+                            </div>
+                            <p class="text-xs text-on-surface-variant">Remembers your interface preferences, such as chart density and dark mode settings.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-sm pt-md border-t">
+                        <button onclick="alert('Cookie preferences updated successfully!')" class="px-md py-sm bg-primary text-white font-bold rounded-lg text-sm hover:opacity-90">Manage Preferences</button>
+                        <button onclick="alert('Downloading PDF policy documentation...')" class="px-md py-sm bg-white border border-outline-variant text-on-surface font-bold rounded-lg text-sm hover:bg-slate-50">Download PDF Policy</button>
+                    </div>
+                </div>
+
+                <!-- Accessibility Statement -->
+                <div class="bg-white rounded-2xl p-lg border border-outline-variant shadow-sm space-y-md">
+                    <h3 class="font-bold text-lg text-primary flex items-center gap-2">
+                        <span class="material-symbols-outlined text-secondary">accessibility</span> Accessibility Statement
+                    </h3>
+                    <div class="p-4 bg-primary-container/5 border border-primary-container/20 rounded-xl text-sm">
+                        <strong>Our Commitment to WCAG 2.1:</strong> CardioViz is committed to ensuring digital accessibility for people with disabilities. We are continually improving the user experience for everyone and applying the relevant accessibility standards. We aim for full compliance with <strong>Web Content Accessibility Guidelines (WCAG) 2.1 Level AA</strong>.
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-md text-sm text-on-surface-variant">
+                        <div class="space-y-xs">
+                            <h4 class="font-bold text-primary flex items-center gap-1">
+                                <span class="material-symbols-outlined text-md">keyboard</span> Keyboard Navigation
+                            </h4>
+                            <p class="text-xs">Our diagnostic dashboard is fully navigable via keyboard, including complex ECG chart exploration.</p>
+                        </div>
+                        <div class="space-y-xs">
+                            <h4 class="font-bold text-primary flex items-center gap-1">
+                                <span class="material-symbols-outlined text-md">record_voice_over</span> Screen Reader Support
+                            </h4>
+                            <p class="text-xs">Dynamic ARIA labels are updated in real-time as patient data streams into the interface.</p>
+                        </div>
+                        <div class="space-y-xs">
+                            <h4 class="font-bold text-primary flex items-center gap-1">
+                                <span class="material-symbols-outlined text-md">contrast</span> Visual Standards
+                            </h4>
+                            <p class="text-xs">High-contrast color palettes (exceeding 4.5:1 ratio) ensure clarity for clinicians with low vision.</p>
+                        </div>
+                        <div class="space-y-xs">
+                            <h4 class="font-bold text-primary flex items-center gap-1">
+                                <span class="material-symbols-outlined text-md">description</span> Data Descriptions
+                            </h4>
+                            <p class="text-xs">All visual charts provide machine-readable descriptions of heart rate trends and anomalies.</p>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-orange-50 border border-orange-200 rounded-xl text-xs font-semibold text-orange-800">
+                        Need Assistance? If you experience any difficulty accessing our software or have feedback regarding accessibility, please contact our Compliance Liaison at compliance@cardioviz.med.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side Badges / Links -->
+            <div class="lg:col-span-4 space-y-lg">
+                <!-- Compliance Status -->
+                <div class="bg-white rounded-2xl p-lg border border-outline-variant shadow-sm space-y-md">
+                    <h3 class="font-bold text-lg text-primary">Compliance Status</h3>
+                    
+                    <div class="divide-y text-sm">
+                        <div class="flex justify-between items-center py-sm">
+                            <span class="font-semibold">WCAG 2.1 AA</span>
+                            <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-xs font-bold uppercase">Certified</span>
+                        </div>
+                        <div class="flex justify-between items-center py-sm">
+                            <span class="font-semibold">GDPR/HIPAA</span>
+                            <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-xs font-bold uppercase">Audited</span>
+                        </div>
+                        <div class="flex justify-between items-center py-sm">
+                            <span class="font-semibold">FDA CLASS II</span>
+                            <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-xs font-bold uppercase">Cleared</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section Links -->
+                <div class="bg-white rounded-2xl p-lg border border-outline-variant shadow-sm space-y-sm">
+                    <h3 class="font-bold text-sm text-primary uppercase tracking-wide">Section Links</h3>
+                    <div class="flex flex-col text-sm space-y-xs">
+                        <a href="#" class="flex justify-between items-center py-2 px-3 hover:bg-slate-50 rounded-lg transition-colors border">
+                            <span>Cookie Policy</span>
+                            <span class="material-symbols-outlined text-sm">chevron_right</span>
+                        </a>
+                        <a href="#" class="flex justify-between items-center py-2 px-3 hover:bg-slate-50 rounded-lg transition-colors border">
+                            <span>Accessibility Statement</span>
+                            <span class="material-symbols-outlined text-sm">chevron_right</span>
+                        </a>
+                        <a href="{{ url_for('dashboard.privacy_policy_page') }}" class="flex justify-between items-center py-2 px-3 hover:bg-slate-50 rounded-lg transition-colors border">
+                            <span>Privacy Framework</span>
+                            <span class="material-symbols-outlined text-sm">chevron_right</span>
+                        </a>
+                        <a href="{{ url_for('dashboard.terms_of_service_page') }}" class="flex justify-between items-center py-2 px-3 hover:bg-slate-50 rounded-lg transition-colors border">
+                            <span>Terms of Clinical Use</span>
+                            <span class="material-symbols-outlined text-sm">chevron_right</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Interactive Side Mockup Image -->
+                <div class="bg-primary text-white rounded-2xl p-md border relative overflow-hidden h-48 flex items-end">
+                    <div class="relative z-10">
+                        <p class="text-xs italic text-slate-200">"Precision in every pulse, access for every clinician."</p>
+                    </div>
+                    <!-- Decorative design pattern -->
+                    <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 16px 16px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer class="w-full py-lg px-margin-desktop grid grid-cols-1 md:grid-cols-2 items-center bg-surface-container-highest dark:bg-inverse-surface border-t border-outline-variant mt-20">
+    <div class="flex flex-col gap-2">
+        <span class="font-title-lg text-title-lg font-bold text-on-surface">CardioViz Analytics</span>
+        <p class="font-label-sm text-label-sm text-on-surface-variant">© 2026 CardioViz Analytics. FDA Cleared Class II Software.</p>
+    </div>
+    <div class="flex flex-wrap md:justify-end gap-lg mt-md md:mt-0">
+        <a class="text-on-surface-variant hover:text-primary transition-colors font-label-sm" href="{{ url_for('dashboard.privacy_policy_page') }}">Privacy Policy</a>
+        <a class="text-on-surface-variant hover:text-primary transition-colors font-label-sm" href="{{ url_for('dashboard.terms_of_service_page') }}">Terms of Service</a>
+        <a class="text-on-surface-variant hover:text-primary transition-colors font-label-sm" href="{{ url_for('dashboard.hipaa_compliance_page') }}">Compliance</a>
+        <a class="text-on-surface-variant hover:text-primary transition-colors font-label-sm" href="{{ url_for('dashboard.support_hub_page') }}">Contact Support</a>
+    </div>
+</footer>
+</body>
+</html>

@@ -18,14 +18,11 @@ if (search && results) {
           <span class="badge ${badgeClass(patient.risk_category)}">${patient.risk_category}</span>
         </div>
         <h3>${patient.first_name} ${patient.last_name}</h3>
-        <p>${patient.age} yrs · ${patient.gender} · ${patient.region}</p>
+        <p>${patient.gender} · ${patient.region}</p>
         <dl>
           <div><dt>Risk</dt><dd>${patient.framingham_score}%</dd></div>
-          <div><dt>BP</dt><dd>${patient.systolic_bp}</dd></div>
-          <div><dt>Chol.</dt><dd>${patient.cholesterol_total}</dd></div>
-          <div><dt>BMI</dt><dd>${patient.bmi}</dd></div>
+          <div><dt>ID</dt><dd>${patient.patient_id}</dd></div>
         </dl>
-        <p class="recommendation">${patient.recommendation}</p>
       </article>
     `).join("");
   });

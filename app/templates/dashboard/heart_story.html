@@ -1,1371 +1,1841 @@
-{% extends "base.html" %}
-{% block title %}Reporting Center - CardioViz{% endblock %}
-{% block content %}
-<style>
-  /* Layout Grid Container */
-  .dashboard-container {
-    display: grid;
-    grid-template-columns: 16rem 1fr;
-    min-height: calc(100vh - 70px);
-    background: #f8fafc;
-    transition: grid-template-columns 0.3s ease;
-  }
-  .dashboard-container.collapsed {
-    grid-template-columns: 4.8rem 1fr;
-  }
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Reports &amp; Analytics | CardioViz</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .fill-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f8fafc;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 24px;
+        }
+        /* Custom drag and drop visualization styles */
+        .viz-list-item {
+            transition: all 0.2s ease;
+        }
+        .viz-list-item.dragging {
+            opacity: 0.5;
+            background-color: #f1f5f9;
+            border-style: dashed;
+        }
+    </style>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary": "#ffffff",
+                        "surface-tint": "#4b5a9e",
+                        "surface-container-low": "#f3f2ff",
+                        "on-error-container": "#93000a",
+                        "inverse-surface": "#2c3041",
+                        "surface-container-high": "#e4e7fe",
+                        "secondary-container": "#fe5c4a",
+                        "error-container": "#ffdad6",
+                        "on-secondary": "#ffffff",
+                        "secondary": "#b4271d",
+                        "on-tertiary-fixed": "#410000",
+                        "primary-container": "#1a2a6c",
+                        "on-primary-container": "#8594dc",
+                        "on-primary-fixed-variant": "#334284",
+                        "error": "#ba1a1a",
+                        "secondary-fixed": "#ffdad5",
+                        "on-background": "#171b2b",
+                        "primary-fixed-dim": "#b9c3ff",
+                        "on-surface": "#171b2b",
+                        "tertiary-fixed-dim": "#ffb4a9",
+                        "on-primary-fixed": "#001356",
+                        "status-critical": "#E74C3C",
+                        "inverse-on-surface": "#efefff",
+                        "status-stable": "#1a2a6c",
+                        "outline-variant": "#c6c5d2",
+                        "surface-muted": "#F1F5F9",
+                        "secondary-fixed-dim": "#ffb4a9",
+                        "on-secondary-fixed": "#410000",
+                        "tertiary": "#400000",
+                        "primary": "#001255",
+                        "on-secondary-fixed-variant": "#910807",
+                        "on-tertiary-fixed-variant": "#8e130c",
+                        "surface-light": "#F8FAFC",
+                        "background": "#faf8ff",
+                        "surface-container-highest": "#dfe1f8",
+                        "tertiary-container": "#680001",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed": "#ffdad5",
+                        "surface-dim": "#d6d9f0",
+                        "surface-variant": "#dfe1f8",
+                        "inverse-primary": "#b9c3ff",
+                        "on-surface-variant": "#454650",
+                        "surface": "#faf8ff",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#dde1ff",
+                        "on-secondary-container": "#610001",
+                        "on-error": "#ffffff",
+                        "gradient-vital": "linear-gradient(135deg, #1a2a6c 0%, #c0392b 100%)",
+                        "surface-container": "#ebedff",
+                        "on-tertiary-container": "#fe6653",
+                        "outline": "#767681",
+                        "surface-bright": "#faf8ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "32px",
+                        "sm": "16px",
+                        "margin-mobile": "16px",
+                        "margin-desktop": "40px",
+                        "xs": "8px",
+                        "md": "24px",
+                        "base": "4px",
+                        "gutter": "24px",
+                        "xl": "48px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Inter"],
+                        "data-mono": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "title-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "data-mono": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "title-lg": ["20px", {"lineHeight": "28px", "fontWeight": "500"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen flex overflow-hidden">
 
-  /* Sidebar Navigation */
-  .sidebar {
-    background: white;
-    border-right: 1px solid #e2e8f0;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 1.5rem 1rem;
-    overflow-y: auto;
-    transition: padding 0.3s ease;
-  }
-  .dashboard-container.collapsed .sidebar {
-    padding: 1.5rem 0.5rem;
-    align-items: center;
-  }
+<!-- Notification Toasts Container -->
+<div id="toast-container" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2"></div>
 
-  .sidebar-brand-section {
-    transition: opacity 0.2s;
-  }
-  .dashboard-container.collapsed .sidebar-brand-section {
-    opacity: 0;
-    display: none;
-  }
-
-  .sidebar-menu {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-    margin-bottom: 2rem;
-  }
-  .sidebar-menu-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #64748b;
-    transition: all 0.2s ease;
-    border-left: 3px solid transparent;
-    text-decoration: none;
-    cursor: pointer;
-  }
-  .sidebar-menu-item:hover {
-    background: #f1f5f9;
-    color: #1e293b;
-  }
-  .sidebar-menu-item.active {
-    background: #eff6ff;
-    color: #3b82f6;
-    border-left-color: #3b82f6;
-    border-radius: 0 8px 8px 0;
-  }
-  .sidebar-menu-item i {
-    width: 1.25rem;
-    height: 1.25rem;
-    flex-shrink: 0;
-  }
-  
-  .menu-text {
-    transition: opacity 0.2s;
-  }
-  .dashboard-container.collapsed .menu-text {
-    opacity: 0;
-    display: none;
-  }
-
-  .sidebar-toggle-btn {
-    align-self: flex-end;
-    background: transparent;
-    border: 0;
-    color: #64748b;
-    cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 6px;
-    margin-bottom: 1rem;
-    transition: background 0.2s;
-  }
-  .sidebar-toggle-btn:hover {
-    background: #f1f5f9;
-    color: #1e293b;
-  }
-
-  /* Workspace */
-  .workspace {
-    padding: 2rem clamp(1rem, 4vw, 2.5rem);
-    overflow-y: auto;
-    max-width: 1400px;
-    margin: 0 auto;
-    width: 100%;
-  }
-
-  /* Tab content switcher */
-  .tab-content {
-    display: none;
-  }
-  .tab-content.active {
-    display: block;
-  }
-
-  /* Headers */
-  .workspace-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid #e2e8f0;
-    padding-bottom: 1rem;
-  }
-  .workspace-head h1 {
-    font-size: 1.6rem;
-    font-weight: 800;
-    color: #1e293b;
-    margin: 0 0 0.25rem;
-  }
-  .workspace-head p {
-    font-size: 0.85rem;
-    color: #64748b;
-    margin: 0;
-    font-weight: 600;
-  }
-
-  /* Action buttons */
-  .btn-new-report {
-    background: #0ea5e9;
-    color: white;
-    border: 0;
-    border-radius: 8px;
-    padding: 0.55rem 1.25rem;
-    font-size: 0.85rem;
-    font-weight: 700;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  .btn-new-report:hover {
-    background: #0284c7;
-  }
-
-  /* Quick Access Section */
-  .quick-access-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.25rem;
-    margin-bottom: 1.75rem;
-  }
-  @media (max-width: 768px) {
-    .quick-access-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-  .quick-card {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 1rem 1.25rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.005);
-  }
-  .quick-card:hover {
-    transform: translateY(-2px);
-    border-color: #bfdbfe;
-  }
-  .quick-icon-wrap {
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 10px;
-    background: #eff6ff;
-    color: #3b82f6;
-    display: grid;
-    place-items: center;
-  }
-  .quick-info h4 {
-    margin: 0;
-    font-size: 0.85rem;
-    font-weight: 750;
-    color: #1e293b;
-  }
-  .quick-info span {
-    font-size: 0.72rem;
-    color: #94a3b8;
-    font-weight: 600;
-  }
-
-  /* Templates Row */
-  .templates-row-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 1rem;
-    margin-bottom: 2rem;
-  }
-  @media (max-width: 1024px) {
-    .templates-row-grid {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
-  @media (max-width: 600px) {
-    .templates-row-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-  .template-card {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 1.25rem;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-height: 12rem;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.005);
-  }
-  .template-icon-wrap {
-    width: 2.8rem;
-    height: 2.8rem;
-    border-radius: 50%;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    color: #475569;
-    display: grid;
-    place-items: center;
-    margin: 0 auto 0.75rem;
-  }
-  .template-card h4 {
-    margin: 0 0 0.25rem;
-    font-size: 0.85rem;
-    font-weight: 800;
-    color: #1e293b;
-  }
-  .template-card p {
-    font-size: 0.72rem;
-    color: #64748b;
-    margin: 0 0 0.85rem;
-    line-height: 1.3;
-  }
-  .btn-template-action {
-    background: white;
-    border: 1.5px solid #cbd5e1;
-    border-radius: 6px;
-    padding: 0.45rem;
-    font-size: 0.75rem;
-    font-weight: 750;
-    color: #475569;
-    cursor: pointer;
-    width: 100%;
-    transition: all 0.2s;
-  }
-  .btn-template-action:hover {
-    background: #eff6ff;
-    color: #3b82f6;
-    border-color: #bfdbfe;
-  }
-
-  /* Recent & Scheduled Splits */
-  .dashboard-split-grid {
-    display: grid;
-    grid-template-columns: 2.3fr 1fr;
-    gap: 1.5rem;
-  }
-  @media (max-width: 900px) {
-    .dashboard-split-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .split-card {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.005);
-  }
-  .split-card h3 {
-    font-size: 0.95rem;
-    font-weight: 850;
-    color: #1e293b;
-    margin: 0 0 1.25rem;
-  }
-
-  .recent-reports-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  .recent-reports-table td {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid #f1f5f9;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: #334155;
-  }
-  .recent-reports-table tr:last-child td {
-    border-bottom: 0;
-  }
-
-  /* Scheduled deliveries list */
-  .schedule-item-card {
-    border-left: 4px solid #3b82f6;
-    background: #f8fafc;
-    border-radius: 0 8px 8px 0;
-    padding: 0.75rem 1rem;
-    margin-bottom: 0.75rem;
-    position: relative;
-  }
-  .schedule-item-card.weekly { border-left-color: #f59e0b; }
-  .schedule-item-card.monthly { border-left-color: #10b981; }
-
-  .schedule-type-badge {
-    position: absolute;
-    right: 1rem;
-    top: 0.75rem;
-    font-size: 0.58rem;
-    font-weight: 800;
-    padding: 0.1rem 0.35rem;
-    border-radius: 4px;
-    text-transform: uppercase;
-  }
-  .schedule-type-badge.daily { background: #eff6ff; color: #1e40af; }
-  .schedule-type-badge.weekly { background: #fffbeb; color: #92400e; }
-  .schedule-type-badge.monthly { background: #ecfdf5; color: #065f46; }
-
-  .schedule-item-card h4 {
-    margin: 0 0 0.15rem;
-    font-size: 0.8rem;
-    font-weight: 800;
-    color: #1e293b;
-  }
-  .schedule-item-card p {
-    margin: 0 0 0.35rem;
-    font-size: 0.72rem;
-    color: #64748b;
-  }
-  .schedule-item-card span {
-    font-size: 0.68rem;
-    font-weight: 750;
-    color: #475569;
-  }
-
-  /* ---------------------------------------------------- */
-  /* REPORT BUILDER DESIGNER INTERFACE STYLING */
-  /* ---------------------------------------------------- */
-  .builder-grid-three {
-    display: grid;
-    grid-template-columns: 14rem 1fr 15rem;
-    gap: 1rem;
-  }
-  @media (max-width: 1100px) {
-    .builder-grid-three {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  /* Left columns items (Fields list) */
-  .fields-sidebar {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-  .fields-sidebar h4 {
-    font-size: 0.65rem;
-    font-weight: 800;
-    color: #94a3b8;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin: 0 0 0.5rem;
-  }
-
-  .draggable-field-item {
-    background: #f8fafc;
-    border: 1px dashed #cbd5e1;
-    border-radius: 6px;
-    padding: 0.45rem 0.65rem;
-    font-size: 0.72rem;
-    font-weight: 750;
-    color: #475569;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    cursor: grab;
-    margin-bottom: 0.35rem;
-  }
-  .draggable-field-item:hover {
-    background: #eff6ff;
-    border-color: #bfdbfe;
-    color: #3b82f6;
-  }
-
-  /* Center canvas builder */
-  .builder-canvas-card {
-    background: white;
-    border: 1px solid #cbd5e1;
-    border-radius: 12px;
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-  }
-  .canvas-top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #f1f5f9;
-    padding-bottom: 0.75rem;
-    margin-bottom: 1.25rem;
-  }
-  .canvas-top-bar h3 {
-    margin: 0;
-    font-size: 1rem;
-    font-weight: 800;
-    color: #1e293b;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  .canvas-controls {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-  .canvas-ctrl-btn {
-    border: 1px solid #cbd5e1;
-    background: white;
-    border-radius: 6px;
-    padding: 0.35rem;
-    cursor: pointer;
-    color: #64748b;
-    display: grid;
-    place-items: center;
-  }
-
-  .canvas-dropzone {
-    border: 2px dashed #e2e8f0;
-    background: #f8fafc;
-    border-radius: 8px;
-    padding: 1.5rem;
-    text-align: center;
-    font-size: 0.78rem;
-    font-weight: 700;
-    color: #94a3b8;
-    margin-bottom: 1rem;
-    cursor: pointer;
-  }
-  .canvas-dropzone:hover {
-    border-color: #3b82f6;
-    color: #3b82f6;
-  }
-
-  .canvas-chart-area {
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    padding: 1.25rem;
-    position: relative;
-    margin-bottom: 1rem;
-  }
-  .canvas-chart-area h4 {
-    margin: 0;
-    font-size: 1.1rem;
-    font-weight: 800;
-    color: #1e293b;
-  }
-  .canvas-chart-area p {
-    font-size: 0.72rem;
-    color: #64748b;
-    margin: 0.15rem 0 1rem;
-    font-weight: 600;
-  }
-
-  /* Right properties panels */
-  .properties-sidebar {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 1.25rem 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-  }
-  .properties-sidebar h4 {
-    font-size: 0.78rem;
-    font-weight: 850;
-    color: #1e293b;
-    margin: 0;
-  }
-
-  .properties-section {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  .properties-section-label {
-    font-size: 0.65rem;
-    font-weight: 800;
-    color: #94a3b8;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .chart-type-picker-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem;
-  }
-  .chart-picker-btn {
-    border: 1px solid #cbd5e1;
-    background: white;
-    border-radius: 8px;
-    padding: 0.65rem 0.5rem;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.35rem;
-    transition: all 0.2s;
-  }
-  .chart-picker-btn:hover {
-    border-color: #bfdbfe;
-    background: #eff6ff;
-  }
-  .chart-picker-btn.active {
-    border-color: #3b82f6;
-    background: #eff6ff;
-    color: #1e3a8a;
-  }
-  .chart-picker-btn i {
-    width: 1.1rem;
-    height: 1.1rem;
-  }
-  .chart-picker-btn span {
-    font-size: 0.7rem;
-    font-weight: 700;
-  }
-
-  /* Active builder filters block */
-  .builder-filter-row {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
-    padding: 0.45rem 0.75rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: #334155;
-    margin-bottom: 0.5rem;
-  }
-
-  /* Styling Switches */
-  .switch-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.78rem;
-    font-weight: 700;
-    color: #475569;
-    margin-bottom: 0.5rem;
-  }
-  .switch {
-    position: relative;
-    display: inline-block;
-    width: 2.2rem;
-    height: 1.2rem;
-  }
-  .switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-  .slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #cbd5e1;
-    transition: .3s;
-    border-radius: 34px;
-  }
-  .slider:before {
-    position: absolute;
-    content: "";
-    height: 0.85rem;
-    width: 0.85rem;
-    left: 3px;
-    bottom: 3px;
-    background-color: white;
-    transition: .3s;
-    border-radius: 50%;
-  }
-  input:checked + .slider {
-    background-color: #3b82f6;
-  }
-  input:checked + .slider:before {
-    transform: translateX(1rem);
-  }
-
-  /* Theme circles */
-  .color-dot-group {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 0.25rem;
-  }
-  .color-circle-btn {
-    width: 1.15rem;
-    height: 1.15rem;
-    border-radius: 50%;
-    cursor: pointer;
-    border: 2px solid transparent;
-  }
-  .color-circle-btn.active {
-    border-color: #1e293b;
-    transform: scale(1.1);
-  }
-
-  /* Watermark style inside canvas */
-  .canvas-watermark-overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.8rem;
-    font-weight: 900;
-    color: rgba(30, 58, 138, 0.03);
-    pointer-events: none;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    transform: rotate(-15deg);
-  }
-
-  /* Tab-scheduled-reports items */
-  .form-group-ph {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    margin-bottom: 1rem;
-  }
-  .form-group-ph label {
-    font-size: 0.72rem;
-    font-weight: 800;
-    color: #475569;
-    text-transform: uppercase;
-  }
-  .form-input {
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    padding: 0.5rem 0.75rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-    outline: none;
-  }
-</style>
-
-<div class="dashboard-container" id="dashboard-container">
-  <!-- Collapsible Left Sidebar Navigation -->
-  <aside class="sidebar">
-    <div>
-      <button class="sidebar-toggle-btn" id="sidebar-toggle">
-        <i data-lucide="chevrons-left" id="toggle-icon"></i>
-      </button>
-
-      <div class="sidebar-brand-section" style="padding-left: 1rem; margin-bottom: 1.5rem; margin-top: 0.5rem;">
-        <span style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.5px;">CardioViz</span>
-        <span style="font-size: 1.15rem; font-weight: 800; color: #3b82f6; display: block; font-family: Poppins, sans-serif; margin-top: 0.15rem; letter-spacing: -0.5px;">CLINICAL INTELLIGENCE</span>
-      </div>
-
-      <nav class="sidebar-menu">
-        <a href="{{ url_for('dashboard.home') }}" class="sidebar-menu-item">
-          <i data-lucide="layout-grid"></i>
-          <span class="menu-text">Dashboard Overview</span>
-        </a>
-        <a href="{{ url_for('clinical.clinical_dashboard') }}#clinical-notes" class="sidebar-menu-item">
-          <i data-lucide="users"></i>
-          <span class="menu-text">Patient Management</span>
-        </a>
-        <a href="{{ url_for('clinical.clinical_dashboard') }}#risk-review" class="sidebar-menu-item">
-          <i data-lucide="activity"></i>
-          <span class="menu-text">Analytics Overview</span>
-        </a>
-        <a href="{{ url_for('dashboard.tableau_style_dashboard') }}" class="sidebar-menu-item">
-          <i data-lucide="line-chart"></i>
-          <span class="menu-text">Clinical Analytics</span>
-        </a>
-        <a href="{{ url_for('dashboard.heart_disease_story') }}" class="sidebar-menu-item active">
-          <i data-lucide="clipboard-list"></i>
-          <span class="menu-text">Risk Assessments</span>
-        </a>
-      </nav>
+<!-- Modal Dialogs -->
+<div id="preview-modal" class="fixed inset-0 z-[999] hidden flex items-center justify-center bg-black/50 p-4 transition-all backdrop-blur-sm">
+    <div class="bg-white dark:bg-inverse-surface rounded-xl shadow-xl border border-outline-variant max-w-2xl w-full overflow-hidden flex flex-col max-h-[85vh]">
+        <div class="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-muted">
+            <h3 class="text-title-lg font-bold text-primary flex items-center gap-xs">
+                <span class="material-symbols-outlined text-[24px]">description</span> Report Preview
+            </h3>
+            <button onclick="closePreviewModal()" class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined">close</span></button>
+        </div>
+        <div class="p-6 overflow-y-auto space-y-md flex-grow">
+            <div id="preview-content-area" class="space-y-4 text-body-md text-on-surface-variant">
+                <!-- Dynamic Content here -->
+            </div>
+        </div>
+        <div class="p-6 border-t border-outline-variant bg-surface-muted flex justify-end gap-xs">
+            <button onclick="closePreviewModal()" class="px-4 py-2 border border-outline-variant rounded-lg font-bold hover:bg-surface-container transition-colors">Close</button>
+            <button onclick="alert('Downloading PDF summary...'); closePreviewModal();" class="px-4 py-2 bg-primary text-on-primary rounded-lg font-bold hover:opacity-90 flex items-center gap-xs">
+                <span class="material-symbols-outlined text-[18px]">download</span> Download PDF
+            </button>
+        </div>
     </div>
-
-    <div class="sidebar-footer">
-      <a href="#" class="sidebar-menu-item" style="margin: 0;"><i data-lucide="help-circle"></i> <span class="menu-text">Support</span></a>
-      <a href="{{ url_for('dashboard.api_docs_page') }}" class="sidebar-menu-item" style="margin: 0;"><i data-lucide="book-open"></i> <span class="menu-text">Documentation</span></a>
-    </div>
-  </aside>
-
-  <!-- Workspace content -->
-  <main class="workspace">
-    <div class="horizontal-tabs-nav" style="display: flex; gap: 1rem; border-bottom: 1px solid #cbd5e1; margin-bottom: 1.5rem; padding-bottom: 0.5rem;">
-      <button class="sidebar-tab horiz-tab active" data-tab="report-dashboard" style="background: none; border: none; padding: 0.5rem 1rem; font-weight: 700; color: #1e293b; border-bottom: 2.5px solid #3b82f6; cursor: pointer; font-size: 0.88rem;">Report Dashboard</button>
-      <button class="sidebar-tab horiz-tab" data-tab="report-builder" style="background: none; border: none; padding: 0.5rem 1rem; font-weight: 600; color: #64748b; border-bottom: 2.5px solid transparent; cursor: pointer; font-size: 0.88rem;">Report Builder</button>
-      <button class="sidebar-tab horiz-tab" data-tab="analytics-tools" style="background: none; border: none; padding: 0.5rem 1rem; font-weight: 600; color: #64748b; border-bottom: 2.5px solid transparent; cursor: pointer; font-size: 0.88rem;">Analytics Tools</button>
-      <button class="sidebar-tab horiz-tab" data-tab="scheduled-reports" style="background: none; border: none; padding: 0.5rem 1rem; font-weight: 600; color: #64748b; border-bottom: 2.5px solid transparent; cursor: pointer; font-size: 0.88rem;">Scheduled Reports</button>
-    </div>
-    
-    <!-- VIEW 1: REPORT DASHBOARD (ACTIVE BY DEFAULT) -->
-    <div id="tab-report-dashboard" class="tab-content active">
-      <div class="workspace-head">
-        <div>
-          <h1>Report Dashboard</h1>
-          <p>Review and manage your longitudinal clinical data reports.</p>
-        </div>
-        <button class="btn-new-report" onclick="toggleToBuilderView()"><i data-lucide="plus"></i> New Report</button>
-      </div>
-
-      <!-- Quick Access cards -->
-      <span style="font-size: 0.65rem; font-weight:800; color:#94a3b8; letter-spacing:0.5px; text-transform:uppercase; display:block; margin-bottom:0.75rem;">QUICK ACCESS</span>
-      <div class="quick-access-grid">
-        <div class="quick-card" onclick="alert('Loading Q3 Patient Outcomes report analytics workbook...')">
-          <div class="quick-icon-wrap"><i data-lucide="file-text"></i></div>
-          <div class="quick-info">
-            <h4>Q3 Patient Outcomes</h4>
-            <span>Modified 2h ago</span>
-          </div>
-        </div>
-
-        <div class="quick-card" onclick="alert('Loading ICU Capacity Trend analytics workbook...')">
-          <div class="quick-icon-wrap"><i data-lucide="activity"></i></div>
-          <div class="quick-info">
-            <h4>ICU Capacity Trend</h4>
-            <span>Modified 1d ago</span>
-          </div>
-        </div>
-
-        <div class="quick-card" onclick="alert('Loading Medication Adherence analytics workbook...')">
-          <div class="quick-icon-wrap"><i data-lucide="pill"></i></div>
-          <div class="quick-info">
-            <h4>Medication Adherence</h4>
-            <span>Modified 3d ago</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Report Templates -->
-      <span style="font-size: 0.65rem; font-weight:800; color:#94a3b8; letter-spacing:0.5px; text-transform:uppercase; display:block; margin-bottom:0.75rem;">REPORT TEMPLATES</span>
-      <div class="templates-row-grid">
-        <!-- Template 1 -->
-        <div class="template-card">
-          <div>
-            <div class="template-icon-wrap"><i data-lucide="file-text"></i></div>
-            <h4>Clinical Summary</h4>
-            <p>Patient encounter overview and vital stats.</p>
-          </div>
-          <button class="btn-template-action" onclick="toggleToBuilderView('Clinical Summary')">Use Template</button>
-        </div>
-
-        <!-- Template 2 -->
-        <div class="template-card">
-          <div>
-            <div class="template-icon-wrap"><i data-lucide="alert-triangle"></i></div>
-            <h4>Risk Factor Analysis</h4>
-            <p>Predictive markers for chronic conditions.</p>
-          </div>
-          <button class="btn-template-action" onclick="toggleToBuilderView('Risk Factor Analysis')">Use Template</button>
-        </div>
-
-        <!-- Template 3 -->
-        <div class="template-card">
-          <div>
-            <div class="template-icon-wrap"><i data-lucide="users"></i></div>
-            <h4>Population Health</h4>
-            <p>Demographic trends and health equity metrics.</p>
-          </div>
-          <button class="btn-template-action" onclick="toggleToBuilderView('Population Health')">Use Template</button>
-        </div>
-
-        <!-- Template 4 -->
-        <div class="template-card">
-          <div>
-            <div class="template-icon-wrap"><i data-lucide="trending-up"></i></div>
-            <h4>Patient Progress</h4>
-            <p>Individual journey tracking over time.</p>
-          </div>
-          <button class="btn-template-action" onclick="toggleToBuilderView('Patient Progress')">Use Template</button>
-        </div>
-
-        <!-- Template 5 -->
-        <div class="template-card">
-          <div>
-            <div class="template-icon-wrap"><i data-lucide="shield-check"></i></div>
-            <h4>Policy Impact</h4>
-            <p>Regulatory compliance and efficiency reports.</p>
-          </div>
-          <button class="btn-template-action" onclick="toggleToBuilderView('Policy Impact')">Use Template</button>
-        </div>
-      </div>
-
-      <!-- Split section: Recent & Scheduled -->
-      <div class="dashboard-split-grid">
-        <!-- Recent Reports -->
-        <div class="split-card">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-            <h3 style="margin:0;">Recent Reports</h3>
-            <a href="#" style="font-size:0.75rem; color:#3b82f6; font-weight:700; text-decoration:none;" onclick="alert('Loading full recent reports archive registry...')">View All</a>
-          </div>
-          <table class="recent-reports-table">
-            <tbody>
-              <tr>
-                <td style="width:2rem;"><i data-lucide="file-text" style="color:#ef4444;"></i></td>
-                <td>Annual_Quality_Review_2023.pdf</td>
-                <td style="color:#64748b;">Oct 24, 2024 • 09:45 AM</td>
-              </tr>
-              <tr>
-                <td><i data-lucide="file-text" style="color:#3b82f6;"></i></td>
-                <td>Diabetes_Pathway_Efficacy_V2</td>
-                <td style="color:#64748b;">Oct 22, 2024 • 03:12 PM</td>
-              </tr>
-              <tr>
-                <td><i data-lucide="file-text" style="color:#3b82f6;"></i></td>
-                <td>Hospital_Readmission_Raw_Oct</td>
-                <td style="color:#64748b;">Oct 20, 2024 • 11:30 AM</td>
-              </tr>
-              <tr>
-                <td><i data-lucide="file-text" style="color:#3b82f6;"></i></td>
-                <td>Neonatal_Care_Metrics_Dashboard</td>
-                <td style="color:#64748b;">Oct 19, 2024 • 04:50 PM</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Scheduled deliveries -->
-        <div class="split-card">
-          <h3>Scheduled Deliveries</h3>
-          
-          <div class="schedule-item-card">
-            <span class="schedule-type-badge daily">Daily</span>
-            <h4>Executive Summary</h4>
-            <p>Recipients: Board of Directors, CMO</p>
-            <span><i data-lucide="clock" style="width:0.85rem; height:0.85rem; display:inline-block; vertical-align:middle;"></i> Next: Tomorrow, 06:00 AM</span>
-          </div>
-
-          <div class="schedule-item-card weekly">
-            <span class="schedule-type-badge weekly">Weekly</span>
-            <h4>Billing Variance Report</h4>
-            <p>Recipients: Finance Dept</p>
-            <span><i data-lucide="clock" style="width:0.85rem; height:0.85rem; display:inline-block; vertical-align:middle;"></i> Next: Monday, 08:00 AM</span>
-          </div>
-
-          <div class="schedule-item-card monthly">
-            <span class="schedule-type-badge monthly">Monthly</span>
-            <h4>Staff Performance Matrix</h4>
-            <p>Recipients: HR, Unit Managers</p>
-            <span><i data-lucide="clock" style="width:0.85rem; height:0.85rem; display:inline-block; vertical-align:middle;"></i> Next: Nov 1, 09:00 AM</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- VIEW 2: REPORT BUILDER (WORKSPACE DRAG DESIGNER) -->
-    <div id="tab-report-builder" class="tab-content">
-      <div class="workspace-head">
-        <div>
-          <h1>Report Builder</h1>
-          <p>Drag and drop elements to build personalized analytics publications.</p>
-        </div>
-        <div class="header-actions">
-          <button class="btn-export" onclick="alert('Saved current draft to favorites.')"><i data-lucide="bookmark"></i> Save to Favorites</button>
-        </div>
-      </div>
-
-      <div class="builder-grid-three">
-        <!-- Column 1: Left fields picker -->
-        <div class="fields-sidebar">
-          <div>
-            <h4>Data Fields</h4>
-            <div style="display:flex; align-items:center; background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; padding:0.25rem 0.5rem; margin-bottom:0.75rem;">
-              <i data-lucide="search" style="width:0.9rem; height:0.9rem; color:#64748b;"></i>
-              <input type="text" placeholder="Search fields..." style="border:0; background:transparent; outline:none; font-size:0.72rem; width:100%; margin-left:0.25rem;">
-            </div>
-            
-            <span style="font-size:0.58rem; font-weight:800; color:#94a3b8; display:block; margin-bottom:0.35rem;">IDENTIFIERS</span>
-            <div class="draggable-field-item" draggable="true" ondragstart="e => alert('Dragging PATIENT_ID field')"><i data-lucide="grip-vertical"></i> PATIENT_ID</div>
-            <div class="draggable-field-item" draggable="true"><i data-lucide="grip-vertical"></i> CLINIC_NODE</div>
-
-            <span style="font-size:0.58rem; font-weight:800; color:#94a3b8; display:block; margin-top:0.75rem; margin-bottom:0.35rem;">METRICS</span>
-            <div class="draggable-field-item" draggable="true"><i data-lucide="grip-vertical"></i> RISK_SCORE_V2</div>
-            <div class="draggable-field-item" draggable="true"><i data-lucide="grip-vertical"></i> ACUITY_INDEX</div>
-            <div class="draggable-field-item" draggable="true"><i data-lucide="grip-vertical"></i> LOS_PROJECTION</div>
-
-            <span style="font-size:0.58rem; font-weight:800; color:#94a3b8; display:block; margin-top:0.75rem; margin-bottom:0.35rem;">TEMPORAL</span>
-            <div class="draggable-field-item" draggable="true"><i data-lucide="grip-vertical"></i> ADMISSION_DATE</div>
-            <div class="draggable-field-item" draggable="true"><i data-lucide="grip-vertical"></i> READMIT_30D</div>
-          </div>
-        </div>
-
-        <!-- Column 2: Center canvas -->
-        <div class="builder-canvas-card">
-          <div class="canvas-top-bar">
-            <h3><i data-lucide="file-text" style="color:#0ea5e9;"></i> <span id="builder-report-title">Longitudinal Patient Analysis v2</span> <span style="font-size:0.65rem; background:#cbd5e1; padding:0.1rem 0.35rem; border-radius:4px; font-weight:800;">DRAFT</span></h3>
-            
-            <div class="canvas-controls">
-              <button class="canvas-ctrl-btn" onclick="alert('Undo action')"><i data-lucide="undo" style="width:0.95rem; height:0.95rem;"></i></button>
-              <button class="canvas-ctrl-btn" onclick="alert('Redo action')"><i data-lucide="redo" style="width:0.95rem; height:0.95rem;"></i></button>
-              <button class="btn-export" style="padding:0.4rem 0.85rem;" onclick="alert('Opening preview mode layout...')"><i data-lucide="eye" style="width:0.9rem; height:0.9rem;"></i> Preview</button>
-            </div>
-          </div>
-
-          <!-- Drop zones and chart area representation -->
-          <div class="canvas-dropzone" onclick="alert('Add custom header elements')">
-            <i data-lucide="plus" style="display:block; margin:0 auto 0.25rem;"></i>
-            Drag 'Logo' or 'Header Text' here
-          </div>
-
-          <!-- Preview dynamic Chart -->
-          <div class="canvas-chart-area" id="builder-chart-box">
-            <div class="canvas-watermark-overlay" id="watermark-element">CLINICAL INTELLIGENCE</div>
-            <h4>Patient Risk Distribution</h4>
-            <p>Aggregate analysis of Risk Score vs. Age Cohort</p>
-            
-            <div style="height: 12rem; position: relative;">
-              <canvas id="builderPreviewChart"></canvas>
-            </div>
-          </div>
-
-          <!-- Bottom filters layout -->
-          <div style="display:flex; gap:0.5rem; margin-bottom:1rem; flex-wrap:wrap;">
-            <div style="background:#f1f5f9; border-radius:6px; padding:0.35rem 0.65rem; font-size:0.7rem; font-weight:750; color:#475569; display:inline-flex; align-items:center; gap:0.35rem;">
-              <i data-lucide="filter" style="width:0.85rem; height:0.85rem; color:#3b82f6;"></i> Region: NA_East
-            </div>
-            <div style="background:#f1f5f9; border-radius:6px; padding:0.35rem 0.65rem; font-size:0.7rem; font-weight:750; color:#475569; display:inline-flex; align-items:center; gap:0.35rem;">
-              <i data-lucide="calendar" style="width:0.85rem; height:0.85rem; color:#3b82f6;"></i> Q3 2023 - Q4 2024
-            </div>
-          </div>
-
-          <div class="canvas-dropzone" style="margin-bottom:0;" onclick="alert('Add detailed breakdown table fields')">
-            <i data-lucide="database" style="display:block; margin:0 auto 0.25rem;"></i>
-            Drag 'Data Table' here for detailed breakdown
-          </div>
-        </div>
-
-        <!-- Column 3: Right Properties panel -->
-        <div class="properties-sidebar">
-          <h4>Properties</h4>
-          
-          <!-- Chart Type switcher -->
-          <div class="properties-section">
-            <span class="properties-section-label">Chart Type</span>
-            <div class="chart-type-picker-grid">
-              <button class="chart-picker-btn active" id="btn-chart-bar" onclick="changeBuilderChartType('bar')">
-                <i data-lucide="bar-chart-3"></i>
-                <span>Bar</span>
-              </button>
-              <button class="chart-picker-btn" id="btn-chart-line" onclick="changeBuilderChartType('line')">
-                <i data-lucide="trending-up"></i>
-                <span>Line</span>
-              </button>
-              <button class="chart-picker-btn" id="btn-chart-scatter" onclick="changeBuilderChartType('scatter')">
-                <i data-lucide="compass"></i>
-                <span>Scatter</span>
-              </button>
-              <button class="chart-picker-btn" id="btn-chart-heatmap" onclick="changeBuilderChartType('heatmap')">
-                <i data-lucide="grid"></i>
-                <span>Heatmap</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Active filters list editor -->
-          <div class="properties-section">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <span class="properties-section-label">Filters</span>
-              <a href="#" style="font-size:0.68rem; color:#3b82f6; text-decoration:none; font-weight:800;" onclick="alert('Adding new filter metadata...')">+ ADD</a>
-            </div>
-            
-            <div class="builder-filter-row">
-              <div>
-                <span style="display:block; font-size:0.58rem; color:#94a3b8; text-transform:uppercase;">REGION_ID</span>
-                <span>Is exactly...</span>
-              </div>
-              <button style="background:transparent; border:0; color:#ef4444; cursor:pointer;" onclick="alert('Delete filter')">&times;</button>
-            </div>
-
-            <div class="builder-filter-row">
-              <div>
-                <span style="display:block; font-size:0.58rem; color:#94a3b8; text-transform:uppercase;">DATE_RANGE</span>
-                <span>2023-01-01 to 2024-12-31</span>
-              </div>
-              <button style="background:transparent; border:0; color:#ef4444; cursor:pointer;" onclick="alert('Delete filter')">&times;</button>
-            </div>
-          </div>
-
-          <!-- Styling & Branding switches -->
-          <div class="properties-section" style="border-top:1px solid #f1f5f9; padding-top:1rem;">
-            <span class="properties-section-label">Styling & Branding</span>
-            
-            <div class="switch-row">
-              <span>Show Watermark</span>
-              <label class="switch">
-                <input type="checkbox" id="toggle-watermark-switch" checked onchange="toggleWatermark(this.checked)">
-                <span class="slider"></span>
-              </label>
-            </div>
-
-            <div class="switch-row">
-              <span>Show Gridlines</span>
-              <label class="switch">
-                <input type="checkbox" id="toggle-gridlines-switch" onchange="toggleGridlines(this.checked)">
-                <span class="slider"></span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Theme selection color dots -->
-          <div class="properties-section">
-            <span class="properties-section-label">Theme Palette</span>
-            <div class="color-dot-group">
-              <button class="color-circle-btn active" style="background:#2563eb;" onclick="changeChartTheme('blue', this)"></button>
-              <button class="color-circle-btn" style="background:#78350f;" onclick="changeChartTheme('brown', this)"></button>
-              <button class="color-circle-btn" style="background:#15803d;" onclick="changeChartTheme('green', this)"></button>
-              <button class="color-circle-btn" style="background:#b91c1c;" onclick="changeChartTheme('red', this)"></button>
-            </div>
-          </div>
-
-          <button class="btn-solid-dark" style="width:100%; font-size:0.8rem; padding:0.6rem; margin-top:0.5rem;" onclick="alert('Compiling final PDF export...')">Export PDF Summary</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- VIEW 3: ANALYTICS TOOLS -->
-    <div id="tab-analytics-tools" class="tab-content">
-      <div class="workspace-head">
-        <div>
-          <h1>Analytics Tools</h1>
-          <p>Ad-hoc queries, cross-tabulations, and correlation metrics builders.</p>
-        </div>
-      </div>
-      
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-        <div class="split-card">
-          <h3>Ad-hoc Query Builder</h3>
-          <div class="form-group-ph">
-            <label>Query Dataset Segment</label>
-            <select class="dropdown-select">
-              <option value="raw">Raw Heart Disease Cohort</option>
-              <option value="clinical">Clinical Indicators Segment</option>
-            </select>
-          </div>
-          <div class="form-group-ph">
-            <label>Statistical Function</label>
-            <select class="dropdown-select">
-              <option value="pearson">Pearson Correlation Coefficient</option>
-              <option value="anova">ANOVA Variance Testing</option>
-            </select>
-          </div>
-          <button class="btn-new-report" style="width:100%; justify-content:center;" onclick="alert('Analyzing query criteria...')">Execute Analytical Query</button>
-        </div>
-
-        <div class="split-card">
-          <h3>Correlation Matrix Results</h3>
-          <div style="background:#f8fafc; border: 1px solid #cbd5e1; border-radius:8px; padding:1.25rem; font-size:0.82rem; font-family:monospace; line-height:1.6; color:#334155;">
-            Age vs BP: 0.72 (Strong)<br>
-            Cholesterol vs Risk: 0.81 (Critical)<br>
-            BMI vs Sugar: 0.48 (Moderate)<br>
-            Activity vs Risk: -0.35 (Inverse)
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- VIEW 4: SCHEDULED REPORTS MANAGER -->
-    <div id="tab-scheduled-reports" class="tab-content">
-      <div class="workspace-head">
-        <div>
-          <h1>Scheduled Reports</h1>
-          <p>Configure automatic deliveries, email lists, and scheduling cycles.</p>
-        </div>
-      </div>
-
-      <div class="split-card" style="max-width: 32rem; margin: 0 auto;">
-        <h3>Add New Delivery Schedule</h3>
-        <form onsubmit="event.preventDefault(); alert('Delivery schedule successfully registered.'); this.reset();">
-          <div class="form-group-ph">
-            <label>Report Target</label>
-            <select class="dropdown-select">
-              <option value="summary">Clinical Summary Report</option>
-              <option value="risk">Risk Factor Analysis</option>
-              <option value="pop">Population Health</option>
-            </select>
-          </div>
-
-          <div class="form-group-ph">
-            <label>Delivery Frequency</label>
-            <div class="toggle-button-group">
-              <button class="toggle-btn active" type="button">Daily</button>
-              <button class="toggle-btn" type="button">Weekly</button>
-              <button class="toggle-btn" type="button">Monthly</button>
-            </div>
-          </div>
-
-          <div class="form-group-ph">
-            <label>Recipients (Email list separated by commas)</label>
-            <input type="text" class="form-input" required placeholder="cmo@cardioviz.local, board@cardioviz.local">
-          </div>
-
-          <button type="submit" class="btn-new-report" style="width:100%; justify-content:center; margin-top:0.75rem;">Register Automated Delivery</button>
-        </form>
-      </div>
-    </div>
-
-  </main>
 </div>
 
-{% endblock %}
+<div id="share-modal" class="fixed inset-0 z-[999] hidden flex items-center justify-center bg-black/50 p-4 transition-all backdrop-blur-sm">
+    <div class="bg-white dark:bg-inverse-surface rounded-xl shadow-xl border border-outline-variant max-w-md w-full overflow-hidden">
+        <div class="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-muted">
+            <h3 class="text-title-lg font-bold text-primary flex items-center gap-xs">
+                <span class="material-symbols-outlined text-[24px]">share</span> Share Report
+            </h3>
+            <button onclick="closeShareModal()" class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined">close</span></button>
+        </div>
+        <div class="p-6 space-y-md">
+            <div>
+                <label class="block text-label-md font-bold text-primary mb-1">Select Report</label>
+                <input id="share-report-name" type="text" readonly class="w-full rounded-lg border-outline-variant bg-surface-muted" value=""/>
+            </div>
+            <div>
+                <label class="block text-label-md font-bold text-primary mb-1">Email Addresses (comma separated)</label>
+                <input id="share-recipients" type="text" class="w-full rounded-lg border-outline-variant focus:border-primary focus:ring-primary" placeholder="colleague@hospital.com, team@cardioviz.local" />
+            </div>
+            <div>
+                <label class="block text-label-md font-bold text-primary mb-1">Message (optional)</label>
+                <textarea id="share-msg" class="w-full rounded-lg border-outline-variant focus:border-primary focus:ring-primary" rows="2" placeholder="Hi team, sharing the latest analysis report."></textarea>
+            </div>
+        </div>
+        <div class="p-6 border-t border-outline-variant bg-surface-muted flex justify-end gap-xs">
+            <button onclick="closeShareModal()" class="px-4 py-2 border border-outline-variant rounded-lg font-bold hover:bg-surface-container transition-colors">Cancel</button>
+            <button onclick="submitShare()" class="px-4 py-2 bg-primary text-on-primary rounded-lg font-bold hover:opacity-90">Send</button>
+        </div>
+    </div>
+</div>
 
-{% block scripts %}
-<!-- Load Chart.js CDN -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Side Navigation Shell (SideNavBar) -->
+<aside class="hidden md:flex flex-col h-full py-md border-r border-outline-variant dark:border-outline bg-surface-container dark:bg-inverse-surface w-64 shrink-0 shadow-md">
+    <div class="px-6 mb-8">
+        <h1 class="text-headline-md font-headline-md font-bold text-primary dark:text-primary-fixed text-[20px]">CardioViz Pro</h1>
+        <p class="text-label-sm font-label-sm text-on-surface-variant">Central Hospital Wing A</p>
+    </div>
+    <nav class="flex-1 space-y-1">
+        <a class="flex items-center gap-3 text-on-surface-variant dark:text-surface-variant px-4 py-3 mx-2 hover:bg-surface-container-high transition-all active:scale-95 duration-150" href="{{ url_for('dashboard.home') }}">
+            <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+            <span class="text-label-md font-label-md">Dashboard</span>
+        </a>
+        <a class="flex items-center gap-3 text-on-surface-variant dark:text-surface-variant px-4 py-3 mx-2 hover:bg-surface-container-high transition-all active:scale-95 duration-150" href="{{ url_for('dashboard.tableau_style_dashboard') }}">
+            <span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+            <span class="text-label-md font-label-md">Analytics</span>
+        </a>
+        <a class="flex items-center gap-3 text-on-surface-variant dark:text-surface-variant px-4 py-3 mx-2 hover:bg-surface-container-high transition-all active:scale-95 duration-150" href="{{ url_for('clinical.clinical_dashboard') }}">
+            <span class="material-symbols-outlined" data-icon="group">group</span>
+            <span class="text-label-md font-label-md">Patients</span>
+        </a>
+        <a class="flex items-center gap-3 bg-primary-container text-on-primary-container rounded-lg px-4 py-3 mx-2 transition-all active:scale-95 duration-150" href="{{ url_for('dashboard.heart_disease_story') }}">
+            <span class="material-symbols-outlined fill-icon" data-icon="description">description</span>
+            <span class="text-label-md font-label-md">Reports</span>
+        </a>
+        <a class="flex items-center gap-3 text-on-surface-variant dark:text-surface-variant px-4 py-3 mx-2 hover:bg-surface-container-high transition-all active:scale-95 duration-150" href="#schedule-section-anchor">
+            <span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+            <span class="text-label-md font-label-md">Schedule</span>
+        </a>
+    </nav>
+    <div class="mt-auto px-2 space-y-1">
+        <button class="w-[calc(100%-16px)] mx-2 bg-secondary text-on-secondary font-label-md py-3 rounded-lg shadow-sm hover:opacity-90 active:scale-95 transition-all mb-4" onclick="alert('Dialing emergency cardiology response line...')">
+            Emergency Alert
+        </button>
+        <div class="text-on-surface-variant dark:text-surface-variant px-4 py-3 mx-2 hover:bg-surface-container-high transition-all cursor-pointer flex items-center gap-3" onclick="alert('Opening clinical system help support documentation...')">
+            <span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+            <span class="text-label-md font-label-md">Support</span>
+        </div>
+        <a class="flex items-center gap-3 text-on-surface-variant dark:text-surface-variant px-4 py-3 mx-2 hover:bg-surface-container-high transition-all" href="{{ url_for('auth.logout') }}">
+            <span class="material-symbols-outlined" data-icon="logout">logout</span>
+            <span class="text-label-md font-label-md">Sign Out</span>
+        </a>
+    </div>
+</aside>
 
+<div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+    <!-- Top Navigation Bar (TopNavBar) -->
+    <header class="flex justify-between items-center w-full px-margin-desktop h-16 sticky top-0 z-50 bg-surface dark:bg-inverse-surface shadow-sm dark:shadow-none border-b border-outline-variant dark:border-outline">
+        <div class="flex items-center gap-4">
+            <div class="md:hidden">
+                <span class="material-symbols-outlined text-on-surface cursor-pointer" data-icon="menu" onclick="alert('Sidebar navigation menu toggled.')">menu</span>
+            </div>
+            <h2 class="text-title-lg font-title-lg font-bold text-primary dark:text-primary-fixed">Reports &amp; Analytics</h2>
+        </div>
+        <div class="flex items-center gap-6">
+            <div class="hidden lg:flex items-center bg-surface-container-low px-4 py-2 rounded-full border border-outline-variant">
+                <span class="material-symbols-outlined text-outline" data-icon="search">search</span>
+                <input class="bg-transparent border-none focus:ring-0 text-body-md w-48 ml-2 outline-none" placeholder="Search reports..." type="text" oninput="console.log('Searching for reports...')"/>
+            </div>
+            <div class="flex items-center gap-4">
+                <button class="relative material-symbols-outlined text-on-surface-variant cursor-pointer active:opacity-80" data-icon="notifications" onclick="alert('Opening alerts stack...')">notifications</button>
+                <button class="material-symbols-outlined text-on-surface-variant cursor-pointer active:opacity-80" data-icon="settings" onclick="alert('Opening reporting options panel...')">settings</button>
+                <div class="h-8 w-8 rounded-full bg-primary-container flex items-center justify-center overflow-hidden border border-outline-variant shadow-sm">
+                    <img class="h-full w-full object-cover" alt="Practitioner headshot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAM4YfqwyzLuE02sH4DKX5zN_E2axQhyD7J7FwtIPsaFz5e1JX7Qx9Osh56TYjH_YvIeWAFrGFv65cC4pL0smPDgt-FC9dDf11v8TXmu-D1bmrhE4u-dpEoDbLTbbIkZyPg3GPbfZ29jjjAqVA6X1XwB3gOJyvr4f2jhx0f96ZGaFn7oFIBUtnj1rpPM7fuLqpgEgbrobMIKkPsmTwxBskMFobtuBF-ySzOvJz17GRPllV5aBuW9wx0y_G-W7dmgeq6ly-jJ2sF6FM_"/>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto bg-surface-light p-margin-desktop space-y-lg">
+        
+        <!-- Page Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h3 class="text-headline-lg font-headline-lg text-primary text-[28px] font-bold">Generate &amp; Manage Reports</h3>
+                <p class="text-body-md text-on-surface-variant">Centralized analytics engine for clinical and research data precision.</p>
+            </div>
+            <button onclick="scrollToReportBuilder()" class="flex items-center gap-2 bg-primary text-on-primary px-lg py-3 rounded-xl font-label-md shadow-md hover:bg-primary-container transition-all active:scale-95">
+                <span class="material-symbols-outlined">add</span>
+                Create New Report
+            </button>
+        </div>
+
+        <!-- Section 4: Report Analytics (Dashboard Stats) -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <!-- Card 1 -->
+            <div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline-variant/30 flex flex-col">
+                <span class="text-label-sm text-on-surface-variant mb-1 uppercase tracking-wider font-bold">Reports Generated</span>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-display-lg font-display-lg text-primary text-[36px] font-black">156</span>
+                    <span class="text-label-md text-green-600 flex items-center font-bold">
+                        <span class="material-symbols-outlined text-sm font-bold">arrow_upward</span> ▲ 12%
+                    </span>
+                </div>
+                <span class="text-[11px] text-on-surface-variant mt-1">Generated in the last 30 days</span>
+            </div>
+            <!-- Card 2 -->
+            <div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline-variant/30 flex flex-col">
+                <span class="text-label-sm text-on-surface-variant mb-1 uppercase tracking-wider font-bold">Most Downloaded</span>
+                <span class="text-headline-md font-headline-md text-primary text-[20px] font-bold truncate">Clinical Report</span>
+                <div class="flex items-center gap-2 mt-1">
+                    <span class="text-[12px] bg-primary-fixed text-primary px-1.5 py-0.5 rounded font-bold">234 DLs</span>
+                    <span class="text-[12px] text-on-surface-variant">45% Popularity</span>
+                </div>
+            </div>
+            <!-- Card 3 -->
+            <div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline-variant/30 flex flex-col">
+                <span class="text-label-sm text-on-surface-variant mb-1 uppercase tracking-wider font-bold">Avg Report Size</span>
+                <span class="text-headline-md font-headline-md text-primary text-[24px] font-bold">3.2 MB</span>
+                <div class="w-full bg-surface-container mt-2 h-1.5 rounded-full overflow-hidden">
+                    <div class="bg-primary h-full w-[64%]"></div>
+                </div>
+                <span class="text-[11px] text-on-surface-variant mt-1">Within standard limits</span>
+            </div>
+            <!-- Card 4 -->
+            <div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline-variant/30 flex flex-col">
+                <span class="text-label-sm text-on-surface-variant mb-1 uppercase tracking-wider font-bold">Most Active User</span>
+                <div class="flex items-center gap-3">
+                    <div class="h-10 w-10 rounded-full bg-primary-fixed border border-primary text-primary flex items-center justify-center font-bold">
+                        {{ doctor_name[0] if doctor_name else 'D' }}
+                    </div>
+                    <div>
+                        <span class="text-[15px] font-bold text-primary block leading-tight">{{ doctor_name if doctor_name else 'Dr. John Smith' }}</span>
+                        <span class="text-[11px] text-on-surface-variant">Generated 23 reports</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bento Grid Layout -->
+        <div class="grid grid-cols-12 gap-6">
+            <!-- Left Column: Report Builder & Export Settings (Span 4) -->
+            <div class="col-span-12 lg:col-span-4 space-y-6">
+                <!-- Section 2: Report Builder Stepper -->
+                <section id="report-builder-card" class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden flex flex-col transition-all duration-300">
+                    <div class="p-6 border-b border-outline-variant/30 bg-surface-muted">
+                        <h4 class="text-title-lg font-title-lg text-primary font-bold">Interactive Report Builder</h4>
+                        <p class="text-label-sm text-on-surface-variant">Configure parameters for custom analysis</p>
+                    </div>
+                    
+                    <div class="p-6 space-y-4">
+                        <!-- Stepper Indicator Header -->
+                        <div class="flex justify-between items-center bg-surface-light p-3 rounded-lg border border-outline-variant/50">
+                            <span id="step-label" class="text-label-md font-bold text-primary">Step 1 of 4: Data Source</span>
+                            <div class="flex gap-1">
+                                <span id="dot-1" class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+                                <span id="dot-2" class="w-2.5 h-2.5 rounded-full bg-outline-variant"></span>
+                                <span id="dot-3" class="w-2.5 h-2.5 rounded-full bg-outline-variant"></span>
+                                <span id="dot-4" class="w-2.5 h-2.5 rounded-full bg-outline-variant"></span>
+                            </div>
+                        </div>
+
+                        <!-- Step 1 Container -->
+                        <div id="step-content-1" class="space-y-4">
+                            <div>
+                                <label class="block text-label-md font-bold text-primary mb-1">Select Dashboard context</label>
+                                <select id="builder-dashboard" class="w-full rounded-lg border-outline-variant text-body-md focus:border-primary focus:ring-primary">
+                                    <option value="clinical">Clinical Dashboard</option>
+                                    <option value="public_health">Public Health Dashboard</option>
+                                    <option value="patient">Patient Dashboard</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-label-md font-bold text-primary mb-1">Select Dataset</label>
+                                <select id="builder-dataset" class="w-full rounded-lg border-outline-variant text-body-md focus:border-primary focus:ring-primary">
+                                    <option value="raw_heart">Raw Heart Dataset ({{ totals.records }} records)</option>
+                                    <option value="cardio_main">Main Cardiology Database</option>
+                                    <option value="ecg_wing">ECG Stream - Wing B</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-label-md font-bold text-primary mb-1">Date Range</label>
+                                <div class="flex gap-2">
+                                    <input id="builder-start-date" class="w-1/2 rounded-lg border-outline-variant text-sm focus:border-primary focus:ring-primary" type="date" value="2026-07-01"/>
+                                    <input id="builder-end-date" class="w-1/2 rounded-lg border-outline-variant text-sm focus:border-primary focus:ring-primary" type="date" value="2026-07-31"/>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-label-md font-bold text-primary mb-1">Apply Filters</label>
+                                <input id="builder-filters" type="text" class="w-full rounded-lg border-outline-variant text-body-md focus:border-primary focus:ring-primary" placeholder="e.g. age_category >= '65 or older'" />
+                            </div>
+                        </div>
+
+                        <!-- Step 2 Container -->
+                        <div id="step-content-2" class="space-y-4 hidden">
+                            <label class="block text-label-md font-bold text-primary">Select &amp; Reorder Visualizations</label>
+                            <p class="text-[11px] text-on-surface-variant italic">Drag elements to customize layout order</p>
+                            <div id="viz-sortable-list" class="space-y-2 max-h-[250px] overflow-y-auto pr-1">
+                                <div class="viz-list-item flex items-center justify-between border border-outline-variant p-2 rounded-lg bg-surface-light cursor-move" draggable="true" data-viz="gender_hd">
+                                    <label class="flex items-center gap-2 text-sm text-on-surface-variant font-medium select-none pointer-events-none">
+                                        <input checked type="checkbox" class="rounded border-outline-variant text-primary focus:ring-primary" />
+                                        Gender vs Heart Disease
+                                    </label>
+                                    <span class="material-symbols-outlined text-outline text-[18px]">drag_indicator</span>
+                                </div>
+                                <div class="viz-list-item flex items-center justify-between border border-outline-variant p-2 rounded-lg bg-surface-light cursor-move" draggable="true" data-viz="age_hd">
+                                    <label class="flex items-center gap-2 text-sm text-on-surface-variant font-medium select-none pointer-events-none">
+                                        <input checked type="checkbox" class="rounded border-outline-variant text-primary focus:ring-primary" />
+                                        Age vs Heart Disease
+                                    </label>
+                                    <span class="material-symbols-outlined text-outline text-[18px]">drag_indicator</span>
+                                </div>
+                                <div class="viz-list-item flex items-center justify-between border border-outline-variant p-2 rounded-lg bg-surface-light cursor-move" draggable="true" data-viz="diabetic_stroke">
+                                    <label class="flex items-center gap-2 text-sm text-on-surface-variant font-medium select-none pointer-events-none">
+                                        <input checked type="checkbox" class="rounded border-outline-variant text-primary focus:ring-primary" />
+                                        Diabetic vs Stroke
+                                    </label>
+                                    <span class="material-symbols-outlined text-outline text-[18px]">drag_indicator</span>
+                                </div>
+                                <div class="viz-list-item flex items-center justify-between border border-outline-variant p-2 rounded-lg bg-surface-light cursor-move" draggable="true" data-viz="smoking_alcohol">
+                                    <label class="flex items-center gap-2 text-sm text-on-surface-variant font-medium select-none pointer-events-none">
+                                        <input type="checkbox" class="rounded border-outline-variant text-primary focus:ring-primary" />
+                                        Smoking and Alcohol impact
+                                    </label>
+                                    <span class="material-symbols-outlined text-outline text-[18px]">drag_indicator</span>
+                                </div>
+                                <div class="viz-list-item flex items-center justify-between border border-outline-variant p-2 rounded-lg bg-surface-light cursor-move" draggable="true" data-viz="race_hd">
+                                    <label class="flex items-center gap-2 text-sm text-on-surface-variant font-medium select-none pointer-events-none">
+                                        <input type="checkbox" class="rounded border-outline-variant text-primary focus:ring-primary" />
+                                        Race wise Heart Disease
+                                    </label>
+                                    <span class="material-symbols-outlined text-outline text-[18px]">drag_indicator</span>
+                                </div>
+                                <div class="viz-list-item flex items-center justify-between border border-outline-variant p-2 rounded-lg bg-surface-light cursor-move" draggable="true" data-viz="gen_health">
+                                    <label class="flex items-center gap-2 text-sm text-on-surface-variant font-medium select-none pointer-events-none">
+                                        <input checked type="checkbox" class="rounded border-outline-variant text-primary focus:ring-primary" />
+                                        General Health vs Heart Disease
+                                    </label>
+                                    <span class="material-symbols-outlined text-outline text-[18px]">drag_indicator</span>
+                                </div>
+                                <div class="viz-list-item flex items-center justify-between border border-outline-variant p-2 rounded-lg bg-surface-light cursor-move" draggable="true" data-viz="activity">
+                                    <label class="flex items-center gap-2 text-sm text-on-surface-variant font-medium select-none pointer-events-none">
+                                        <input type="checkbox" class="rounded border-outline-variant text-primary focus:ring-primary" />
+                                        Physical Activity vs Heart Disease
+                                    </label>
+                                    <span class="material-symbols-outlined text-outline text-[18px]">drag_indicator</span>
+                                </div>
+                                <div class="viz-list-item flex items-center justify-between border border-outline-variant p-2 rounded-lg bg-surface-light cursor-move" draggable="true" data-viz="age_bmi_diabetic">
+                                    <label class="flex items-center gap-2 text-sm text-on-surface-variant font-medium select-none pointer-events-none">
+                                        <input checked type="checkbox" class="rounded border-outline-variant text-primary focus:ring-primary" />
+                                        Age and BMI vs Diabetic
+                                    </label>
+                                    <span class="material-symbols-outlined text-outline text-[18px]">drag_indicator</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 3 Container -->
+                        <div id="step-content-3" class="space-y-4 hidden">
+                            <div>
+                                <label class="block text-label-md font-bold text-primary mb-1">Layout Style</label>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <button type="button" onclick="setBuilderLayout('classic')" id="layout-classic" class="py-1.5 border border-outline-variant rounded-md text-xs font-bold bg-surface-light text-primary hover:bg-surface-container active:scale-95 transition-all">Classic</button>
+                                    <button type="button" onclick="setBuilderLayout('modern')" id="layout-modern" class="py-1.5 border border-primary bg-primary text-on-primary rounded-md text-xs font-bold active:scale-95 transition-all">Modern</button>
+                                    <button type="button" onclick="setBuilderLayout('minimal')" id="layout-minimal" class="py-1.5 border border-outline-variant rounded-md text-xs font-bold bg-surface-light text-primary hover:bg-surface-container active:scale-95 transition-all">Minimal</button>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-label-md font-bold text-primary mb-1">Document Format</label>
+                                <div class="grid grid-cols-2 gap-2 text-sm text-on-surface-variant font-medium">
+                                    <label class="flex items-center gap-2"><input checked type="radio" name="b-format" value="PDF" class="text-primary focus:ring-primary" /> PDF</label>
+                                    <label class="flex items-center gap-2"><input type="radio" name="b-format" value="Excel" class="text-primary focus:ring-primary" /> Excel</label>
+                                    <label class="flex items-center gap-2"><input type="radio" name="b-format" value="CSV" class="text-primary focus:ring-primary" /> CSV</label>
+                                    <label class="flex items-center gap-2"><input type="radio" name="b-format" value="PPT" class="text-primary focus:ring-primary" /> PowerPoint</label>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-label-md font-bold text-primary mb-1">Include Sections</label>
+                                <div class="grid grid-cols-2 gap-2 text-xs text-on-surface-variant font-medium">
+                                    <label class="flex items-center gap-1.5"><input checked type="checkbox" id="inc-title" class="rounded text-primary focus:ring-primary"/> Title page</label>
+                                    <label class="flex items-center gap-1.5"><input checked type="checkbox" id="inc-summary" class="rounded text-primary focus:ring-primary"/> Summary</label>
+                                    <label class="flex items-center gap-1.5"><input checked type="checkbox" id="inc-charts" class="rounded text-primary focus:ring-primary"/> Charts</label>
+                                    <label class="flex items-center gap-1.5"><input checked type="checkbox" id="inc-tables" class="rounded text-primary focus:ring-primary"/> Data tables</label>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-label-md font-bold text-primary mb-1">Branding Options</label>
+                                <div class="space-y-2">
+                                    <input type="text" id="inc-logo" class="w-full rounded-lg border-outline-variant text-xs focus:border-primary focus:ring-primary" placeholder="Logo Text or Image Path" />
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-on-surface-variant font-bold">Theme Color:</span>
+                                        <input type="color" id="inc-color" class="h-8 w-12 border rounded cursor-pointer" value="#001255" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 4 Container -->
+                        <div id="step-content-4" class="space-y-4 hidden">
+                            <div>
+                                <label class="block text-label-md font-bold text-primary mb-1">Report Name</label>
+                                <input id="builder-name" type="text" class="w-full rounded-lg border-outline-variant text-body-md focus:border-primary focus:ring-primary font-bold text-primary" value="Heart Disease Analysis - July 2026"/>
+                            </div>
+                            <div>
+                                <label class="block text-label-md font-bold text-primary mb-1">Report Description (optional)</label>
+                                <textarea id="builder-description" class="w-full rounded-lg border-outline-variant text-body-md focus:border-primary focus:ring-primary" placeholder="Enter details about this report..." rows="2"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-label-md font-bold text-primary mb-1">Scheduling Options</label>
+                                <select id="builder-schedule" class="w-full rounded-lg border-outline-variant text-body-md focus:border-primary focus:ring-primary">
+                                    <option value="one-time">One-time Generation</option>
+                                    <option value="weekly">Weekly Automated</option>
+                                    <option value="monthly">Monthly Automated</option>
+                                    <option value="quarterly">Quarterly Automated</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-label-md font-bold text-primary mb-1">Email To (comma separated)</label>
+                                <input id="builder-emails" type="text" class="w-full rounded-lg border-outline-variant text-body-md focus:border-primary focus:ring-primary" placeholder="recipients@hospital.com, audit@dept.gov" />
+                            </div>
+                        </div>
+
+                        <!-- Loading Indicator inside Builder -->
+                        <div id="builder-loading" class="hidden flex-col items-center justify-center py-8 space-y-3">
+                            <svg class="animate-spin h-10 w-10 text-primary" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span class="text-sm font-bold text-primary">Assembling dataset charts and metrics...</span>
+                        </div>
+                    </div>
+
+                    <!-- Builder Footer Navigation Buttons -->
+                    <div id="builder-footer" class="p-6 bg-surface-container-low mt-auto flex justify-between gap-3 border-t border-outline-variant/30">
+                        <button type="button" onclick="resetBuilder()" class="flex-1 border border-outline-variant text-on-surface-variant py-2.5 rounded-lg text-label-md hover:bg-surface-container transition-colors active:scale-95 font-bold">Reset</button>
+                        <button type="button" id="btn-back" onclick="prevStep()" class="flex-1 border border-primary text-primary py-2.5 rounded-lg text-label-md hover:bg-surface-container-high transition-colors active:scale-95 font-bold hidden">Back</button>
+                        <button type="button" id="btn-next" onclick="nextStep()" class="flex-[2] bg-primary text-on-primary py-2.5 rounded-lg text-label-md shadow-md hover:opacity-90 active:scale-95 font-bold flex items-center justify-center gap-xs">
+                            <span id="next-label">Next Step</span> <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Section 6: Export Options -->
+                <section class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline-variant/30 space-y-4">
+                    <h4 class="text-title-lg font-bold text-primary flex items-center gap-xs">
+                        <span class="material-symbols-outlined text-[20px]">file_download</span> Export Controls
+                    </h4>
+                    
+                    <!-- Format Options -->
+                    <div>
+                        <span class="block text-label-sm font-bold text-on-surface-variant uppercase tracking-wider mb-2">Export Formats</span>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="exportSingleReport('PDF')" class="py-2 px-1 border border-outline-variant rounded-lg text-xs font-bold hover:bg-primary-container hover:text-on-primary transition-all flex flex-col items-center gap-1">
+                                <span class="material-symbols-outlined text-red-600 text-[18px]">picture_as_pdf</span> PDF
+                            </button>
+                            <button onclick="exportSingleReport('Excel')" class="py-2 px-1 border border-outline-variant rounded-lg text-xs font-bold hover:bg-primary-container hover:text-on-primary transition-all flex flex-col items-center gap-1">
+                                <span class="material-symbols-outlined text-green-700 text-[18px]">table_chart</span> Excel
+                            </button>
+                            <button onclick="exportSingleReport('CSV')" class="py-2 px-1 border border-outline-variant rounded-lg text-xs font-bold hover:bg-primary-container hover:text-on-primary transition-all flex flex-col items-center gap-1">
+                                <span class="material-symbols-outlined text-blue-500 text-[18px]">table_rows</span> CSV
+                            </button>
+                            <button onclick="exportSingleReport('PowerPoint')" class="py-2 px-1 border border-outline-variant rounded-lg text-xs font-bold hover:bg-primary-container hover:text-on-primary transition-all flex flex-col items-center gap-1">
+                                <span class="material-symbols-outlined text-orange-600 text-[18px]">co_present</span> PowerPoint
+                            </button>
+                            <button onclick="exportSingleReport('JSON')" class="py-2 px-1 border border-outline-variant rounded-lg text-xs font-bold hover:bg-primary-container hover:text-on-primary transition-all flex flex-col items-center gap-1">
+                                <span class="material-symbols-outlined text-purple-600 text-[18px]">code</span> JSON
+                            </button>
+                            <button onclick="exportSingleReport('PNG')" class="py-2 px-1 border border-outline-variant rounded-lg text-xs font-bold hover:bg-primary-container hover:text-on-primary transition-all flex flex-col items-center gap-1">
+                                <span class="material-symbols-outlined text-teal-600 text-[18px]">image</span> Images
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Settings switches -->
+                    <div class="pt-2 border-t border-outline-variant/30 space-y-2">
+                        <span class="block text-label-sm font-bold text-on-surface-variant uppercase tracking-wider mb-1">Export Settings</span>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-on-surface-variant font-medium">Include Meta Headers</span>
+                            <input type="checkbox" id="set-metadata" class="rounded text-primary focus:ring-primary" checked />
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-on-surface-variant font-medium">Password Protection</span>
+                            <input type="checkbox" id="set-password" class="rounded text-primary focus:ring-primary" />
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-on-surface-variant font-medium">Enable Compression</span>
+                            <input type="checkbox" id="set-compression" class="rounded text-primary focus:ring-primary" checked />
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-on-surface-variant font-medium">Include HIPAA Watermark</span>
+                            <input type="checkbox" id="set-watermark" class="rounded text-primary focus:ring-primary" checked />
+                        </div>
+                    </div>
+
+                    <!-- Bulk Export -->
+                    <div class="pt-2 border-t border-outline-variant/30 space-y-2">
+                        <span class="block text-label-sm font-bold text-on-surface-variant uppercase tracking-wider mb-2">Bulk ZIP Export</span>
+                        <div id="bulk-list" class="space-y-1.5 max-h-[120px] overflow-y-auto pr-1">
+                            <!-- Populated by JS -->
+                        </div>
+                        <div class="flex gap-2 pt-2">
+                            <button onclick="bulkZipExport()" class="flex-1 bg-surface-muted hover:bg-primary-container hover:text-on-primary border border-outline-variant py-1.5 px-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1">
+                                <span class="material-symbols-outlined text-[16px]">folder_zip</span> Export ZIP
+                            </button>
+                            <button onclick="bulkEmailExport()" class="flex-1 bg-primary text-on-primary py-1.5 px-2 rounded-lg text-xs font-bold hover:opacity-90 transition-all flex items-center justify-center gap-1">
+                                <span class="material-symbols-outlined text-[16px]">mail</span> Email ZIP
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Column: Templates, Saved Reports & Scheduled Jobs (Span 8) -->
+            <div class="col-span-12 lg:col-span-8 space-y-6">
+                <!-- Section 1: Report Templates -->
+                <section class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant/30">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-title-lg font-bold text-primary flex items-center gap-xs">
+                            <span class="material-symbols-outlined text-[20px]">content_copy</span> Report Templates
+                        </h4>
+                        <button onclick="alert('Displaying template directory...')" class="text-label-md text-primary hover:underline font-bold">View All</button>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3">
+                        <!-- Card 1: Clinical -->
+                        <div class="group border border-outline-variant/30 rounded-xl overflow-hidden hover:shadow-md transition-all flex flex-col bg-surface-light">
+                            <div class="h-20 bg-primary-container/20 flex items-center justify-center overflow-hidden border-b relative">
+                                <svg class="w-16 h-12 text-primary/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 3v18h18" stroke-linecap="round"/>
+                                    <path d="M18 9l-5 5-3-3-4 4" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <span class="absolute top-1 left-1 text-[8px] bg-primary text-on-primary px-1 rounded uppercase font-bold">Clinical</span>
+                            </div>
+                            <div class="p-3 flex-1 flex flex-col">
+                                <h5 class="text-xs font-bold text-on-surface leading-tight mb-1 truncate">Clinical Report</h5>
+                                <p class="text-[10px] text-on-surface-variant flex-grow line-clamp-2">Comprehensive patient risk assessment report</p>
+                                <span class="text-[9px] text-on-surface-variant font-bold mt-1">Format: PDF, Excel</span>
+                                <button onclick="quickGenerateTemplate('Clinical Report', 'clinical')" class="w-full mt-2 bg-primary-fixed text-primary text-[11px] py-1 rounded-lg hover:bg-primary hover:text-on-primary font-bold transition-all">Generate</button>
+                            </div>
+                        </div>
+                        <!-- Card 2: Public Health -->
+                        <div class="group border border-outline-variant/30 rounded-xl overflow-hidden hover:shadow-md transition-all flex flex-col bg-surface-light">
+                            <div class="h-20 bg-secondary/10 flex items-center justify-center overflow-hidden border-b relative">
+                                <svg class="w-16 h-12 text-secondary/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 2a14.5 14.5 0 000 20M12 2a14.5 14.5 0 010 20M2 12h20"/>
+                                </svg>
+                                <span class="absolute top-1 left-1 text-[8px] bg-secondary text-on-secondary px-1 rounded uppercase font-bold">Public Health</span>
+                            </div>
+                            <div class="p-3 flex-1 flex flex-col">
+                                <h5 class="text-xs font-bold text-on-surface leading-tight mb-1 truncate">Population Health</h5>
+                                <p class="text-[10px] text-on-surface-variant flex-grow line-clamp-2">Population health trends and regional analysis</p>
+                                <span class="text-[9px] text-on-surface-variant font-bold mt-1">Format: PDF, Dashboard</span>
+                                <button onclick="quickGenerateTemplate('Population Health Report', 'public_health')" class="w-full mt-2 bg-primary-fixed text-primary text-[11px] py-1 rounded-lg hover:bg-primary hover:text-on-primary font-bold transition-all">Generate</button>
+                            </div>
+                        </div>
+                        <!-- Card 3: Patient Summary -->
+                        <div class="group border border-outline-variant/30 rounded-xl overflow-hidden hover:shadow-md transition-all flex flex-col bg-surface-light">
+                            <div class="h-20 bg-amber-500/10 flex items-center justify-center overflow-hidden border-b relative">
+                                <svg class="w-16 h-12 text-amber-600/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 21v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2"/>
+                                    <circle cx="12" cy="7" r="4"/>
+                                </svg>
+                                <span class="absolute top-1 left-1 text-[8px] bg-amber-600 text-white px-1 rounded uppercase font-bold">Patient</span>
+                            </div>
+                            <div class="p-3 flex-1 flex flex-col">
+                                <h5 class="text-xs font-bold text-on-surface leading-tight mb-1 truncate">Patient Summary</h5>
+                                <p class="text-[10px] text-on-surface-variant flex-grow line-clamp-2">Personalized patient health summary</p>
+                                <span class="text-[9px] text-on-surface-variant font-bold mt-1">Format: PDF, HTML</span>
+                                <button onclick="quickGenerateTemplate('Patient Summary Report', 'patient')" class="w-full mt-2 bg-primary-fixed text-primary text-[11px] py-1 rounded-lg hover:bg-primary hover:text-on-primary font-bold transition-all">Generate</button>
+                            </div>
+                        </div>
+                        <!-- Card 4: Policy Impact -->
+                        <div class="group border border-outline-variant/30 rounded-xl overflow-hidden hover:shadow-md transition-all flex flex-col bg-surface-light">
+                            <div class="h-20 bg-purple-500/10 flex items-center justify-center overflow-hidden border-b relative">
+                                <svg class="w-16 h-12 text-purple-600/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                    <path d="M9 17v-5M12 17V9M15 17v-3"/>
+                                </svg>
+                                <span class="absolute top-1 left-1 text-[8px] bg-purple-600 text-white px-1 rounded uppercase font-bold">Policy</span>
+                            </div>
+                            <div class="p-3 flex-1 flex flex-col">
+                                <h5 class="text-xs font-bold text-on-surface leading-tight mb-1 truncate">Policy Impact</h5>
+                                <p class="text-[10px] text-on-surface-variant flex-grow line-clamp-2">Policy effectiveness and recommendations</p>
+                                <span class="text-[9px] text-on-surface-variant font-bold mt-1">Format: PDF, PPT</span>
+                                <button onclick="quickGenerateTemplate('Policy Impact Report', 'clinical')" class="w-full mt-2 bg-primary-fixed text-primary text-[11px] py-1 rounded-lg hover:bg-primary hover:text-on-primary font-bold transition-all">Generate</button>
+                            </div>
+                        </div>
+                        <!-- Card 5: Research -->
+                        <div class="group border border-outline-variant/30 rounded-xl overflow-hidden hover:shadow-md transition-all flex flex-col bg-surface-light">
+                            <div class="h-20 bg-green-500/10 flex items-center justify-center overflow-hidden border-b relative">
+                                <svg class="w-16 h-12 text-green-600/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
+                                <span class="absolute top-1 left-1 text-[8px] bg-green-600 text-white px-1 rounded uppercase font-bold">Research</span>
+                            </div>
+                            <div class="p-3 flex-1 flex flex-col">
+                                <h5 class="text-xs font-bold text-on-surface leading-tight mb-1 truncate">Research Report</h5>
+                                <p class="text-[10px] text-on-surface-variant flex-grow line-clamp-2">Research data and statistical analysis</p>
+                                <span class="text-[9px] text-on-surface-variant font-bold mt-1">Format: PDF, JSON</span>
+                                <button onclick="quickGenerateTemplate('Research Report', 'public_health')" class="w-full mt-2 bg-primary-fixed text-primary text-[11px] py-1 rounded-lg hover:bg-primary hover:text-on-primary font-bold transition-all">Generate</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 3: Saved Reports Table -->
+                <section class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden">
+                    <div class="p-6 border-b border-outline-variant/30 flex flex-col sm:flex-row justify-between items-center gap-4 bg-surface-muted">
+                        <h4 class="text-title-lg font-bold text-primary flex items-center gap-xs">
+                            <span class="material-symbols-outlined text-[20px]">folder_open</span> Saved Analysis Reports
+                        </h4>
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <div class="relative w-full sm:w-48 bg-white rounded-lg border border-outline-variant">
+                                <span class="absolute left-2.5 top-2 material-symbols-outlined text-[16px] text-outline">search</span>
+                                <input id="saved-search" type="text" oninput="filterSavedReports()" class="w-full bg-transparent pl-8 border-none text-xs outline-none focus:ring-0 py-1.5" placeholder="Search saved..."/>
+                            </div>
+                            <button onclick="downloadAllReportsZip()" class="p-2 border border-outline-variant bg-white rounded-lg text-on-surface-variant hover:text-primary transition-all flex-shrink-0" title="Download all selected">
+                                <span class="material-symbols-outlined text-[20px]">download</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto max-h-[350px] overflow-y-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-surface-light text-[11px] font-bold text-on-surface-variant uppercase tracking-wider sticky top-0 z-10 border-b border-outline-variant">
+                                <tr>
+                                    <th class="px-6 py-3 w-8"><input type="checkbox" id="select-all-saved" onchange="toggleAllSavedCheck(this)" class="rounded text-primary focus:ring-primary" /></th>
+                                    <th class="px-6 py-3">Report Name</th>
+                                    <th class="px-6 py-3">Type</th>
+                                    <th class="px-6 py-3">Date Generated</th>
+                                    <th class="px-6 py-3">Size</th>
+                                    <th class="px-6 py-3">Status</th>
+                                    <th class="px-6 py-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="saved-reports-tbody" class="divide-y divide-outline-variant/20 text-body-md text-on-surface-variant font-medium">
+                                <!-- Rendered dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Section 5: Scheduled Reports & Recurrent Jobs -->
+                <section id="schedule-section-anchor" class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden">
+                    <div class="p-6 border-b border-outline-variant/30 bg-surface-muted">
+                        <h4 class="text-title-lg font-bold text-primary flex items-center gap-xs">
+                            <span class="material-symbols-outlined text-[20px]">calendar_today</span> Scheduled Jobs &amp; Automated Delivery
+                        </h4>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 p-6">
+                        <!-- Left Side: Table of Jobs (Span 7) -->
+                        <div class="md:col-span-7 space-y-4">
+                            <span class="block text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">Active Schedules</span>
+                            <div class="overflow-x-auto border border-outline-variant rounded-lg">
+                                <table class="w-full text-left text-xs border-collapse">
+                                    <thead class="bg-surface-light border-b border-outline-variant text-[10px] font-bold text-on-surface-variant uppercase">
+                                        <tr>
+                                            <th class="px-4 py-2">ID</th>
+                                            <th class="px-4 py-2">Report Name</th>
+                                            <th class="px-4 py-2">Recipient</th>
+                                            <th class="px-4 py-2">Frequency</th>
+                                            <th class="px-4 py-2">Next Run</th>
+                                            <th class="px-4 py-2">Status</th>
+                                            <th class="px-4 py-2 text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="scheduled-jobs-tbody" class="divide-y divide-outline-variant/20 font-medium">
+                                        <!-- Dynamic rows -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Right Side: Add New Schedule Form (Span 5) -->
+                        <div class="md:col-span-5 bg-surface-light p-4 rounded-xl border border-outline-variant/50 space-y-3">
+                            <span class="block text-label-sm font-bold text-primary uppercase tracking-wider">Add New Schedule</span>
+                            <div class="space-y-2">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-on-surface-variant mb-1">Select Report Template</label>
+                                    <select id="sched-template" class="w-full rounded border-outline-variant text-xs py-1.5 focus:ring-primary focus:border-primary">
+                                        <option value="Clinical Report">Clinical Report</option>
+                                        <option value="Population Health Report">Population Health Report</option>
+                                        <option value="Patient Summary Report">Patient Summary Report</option>
+                                        <option value="Policy Impact Report">Policy Impact Report</option>
+                                        <option value="Research Report">Research Report</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-on-surface-variant mb-1">Select Frequency</label>
+                                    <select id="sched-freq" class="w-full rounded border-outline-variant text-xs py-1.5 focus:ring-primary focus:border-primary">
+                                        <option value="Daily">Daily</option>
+                                        <option value="Weekly">Weekly</option>
+                                        <option value="Monthly">Monthly</option>
+                                        <option value="Quarterly">Quarterly</option>
+                                        <option value="Custom">Custom</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-on-surface-variant mb-1">Recipients (multiple emails)</label>
+                                    <input id="sched-recipients" type="text" class="w-full rounded border-outline-variant text-xs py-1.5 focus:ring-primary focus:border-primary" placeholder="emails@hospital.com" />
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-on-surface-variant mb-1">Select Format</label>
+                                    <select id="sched-format" class="w-full rounded border-outline-variant text-xs py-1.5 focus:ring-primary focus:border-primary">
+                                        <option value="PDF">PDF</option>
+                                        <option value="Excel">Excel</option>
+                                        <option value="CSV">CSV</option>
+                                        <option value="PowerPoint">PowerPoint</option>
+                                    </select>
+                                </div>
+                                <button onclick="saveNewSchedule()" class="w-full bg-primary text-on-primary py-2 rounded font-bold text-xs hover:opacity-90 active:scale-95 transition-all">Save Schedule</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- Section 7: Statistical Analysis & Dynamic Visualizations Builder -->
+        <div class="grid grid-cols-12 gap-6">
+            <!-- Left Panel: Data Analysis Tools (Span 6) -->
+            <section class="col-span-12 lg:col-span-6 bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline-variant/30 space-y-4 flex flex-col justify-between">
+                <div>
+                    <h4 class="text-title-lg font-bold text-primary flex items-center gap-xs mb-3">
+                        <span class="material-symbols-outlined text-[20px]">analytics</span> Statistical Analysis &amp; Insights
+                    </h4>
+                    
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <button onclick="runStatisticalTool('descriptive')" class="py-2.5 px-2 bg-surface-light border border-outline-variant rounded-lg text-xs font-bold text-primary hover:bg-primary-container hover:text-on-primary transition-all flex flex-col items-center gap-1">
+                            <span class="material-symbols-outlined text-[20px]">bar_chart</span> Descriptive
+                        </button>
+                        <button onclick="runStatisticalTool('correlation')" class="py-2.5 px-2 bg-surface-light border border-outline-variant rounded-lg text-xs font-bold text-primary hover:bg-primary-container hover:text-on-primary transition-all flex flex-col items-center gap-1">
+                            <span class="material-symbols-outlined text-[20px]">query_stats</span> Correlation
+                        </button>
+                        <button onclick="runStatisticalTool('regression')" class="py-2.5 px-2 bg-surface-light border border-outline-variant rounded-lg text-xs font-bold text-primary hover:bg-primary-container hover:text-on-primary transition-all flex flex-col items-center gap-1">
+                            <span class="material-symbols-outlined text-[20px]">ssid_chart</span> Regression
+                        </button>
+                        <button onclick="runStatisticalTool('hypothesis')" class="py-2.5 px-2 bg-surface-light border border-outline-variant rounded-lg text-xs font-bold text-primary hover:bg-primary-container hover:text-on-primary transition-all flex flex-col items-center gap-1">
+                            <span class="material-symbols-outlined text-[20px]">science</span> Hypothesis
+                        </button>
+                    </div>
+
+                    <!-- Output Console for Statistical output -->
+                    <div id="stat-output" class="mt-4 p-4 bg-inverse-surface text-on-primary-container font-mono text-xs rounded-lg min-h-[140px] max-h-[160px] overflow-y-auto whitespace-pre border border-outline-variant">
+[CONSOLE WORKSPACE] Select a statistical tool from above to execute calculations against raw dataset values ({{ totals.records }} records)...
+                    </div>
+                </div>
+
+                <!-- Analysis Insights Card -->
+                <div class="mt-4 border-t border-outline-variant/30 pt-4 space-y-2">
+                    <span class="block text-label-sm font-bold text-primary uppercase tracking-wider">Automated Insights</span>
+                    <div id="insights-container" class="space-y-1.5 text-xs text-on-surface-variant">
+                        <div class="flex items-start gap-2">
+                            <span class="material-symbols-outlined text-amber-500 text-[16px] mt-0.5">lightbulb</span>
+                            <p><strong>Key Finding:</strong> Observed overall heart disease prevalence is <span class="font-bold text-primary">{{ totals.disease_rate }}%</span> across the loaded patient registry.</p>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="material-symbols-outlined text-green-500 text-[16px] mt-0.5">health_and_safety</span>
+                            <p><strong>Recommendation:</strong> Coordinate physical activity wellness plans; demographics indicate a strong correlation between exercise levels and lowered cardiovascular events.</p>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="material-symbols-outlined text-primary text-[16px] mt-0.5">info</span>
+                            <p><strong>Summary:</strong> Mean BMI indicators trend at 28.3 (Overweight) for patients diagnosed with Type-2 Diabetes.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Panel: Data Visualization Builder (Span 6) -->
+            <section class="col-span-12 lg:col-span-6 bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline-variant/30 space-y-4">
+                <h4 class="text-title-lg font-bold text-primary flex items-center gap-xs">
+                    <span class="material-symbols-outlined text-[20px]">settings_accessibility</span> Dynamic Visualization Builder
+                </h4>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Builder Configuration Form -->
+                    <div class="space-y-2">
+                        <div>
+                            <label class="block text-xs font-bold text-on-surface-variant mb-0.5">Chart Type</label>
+                            <select id="viz-type" onchange="buildCustomVizPreview()" class="w-full rounded border-outline-variant text-xs py-1 focus:ring-primary focus:border-primary">
+                                <option value="bar">Bar Chart</option>
+                                <option value="line">Line Chart</option>
+                                <option value="scatter">Scatter Plot</option>
+                                <option value="pie">Pie Chart</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-on-surface-variant mb-0.5">X-Axis Variable</label>
+                            <select id="viz-x" onchange="buildCustomVizPreview()" class="w-full rounded border-outline-variant text-xs py-1 focus:ring-primary focus:border-primary">
+                                <option value="Sex">Gender (Sex)</option>
+                                <option value="Age">Age Category</option>
+                                <option value="GenHealth">General Health Rating</option>
+                                <option value="Smoking">Smoking History</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-on-surface-variant mb-0.5">Y-Axis Variable</label>
+                            <select id="viz-y" onchange="buildCustomVizPreview()" class="w-full rounded border-outline-variant text-xs py-1 focus:ring-primary focus:border-primary">
+                                <option value="Rate">Heart Disease Rate (%)</option>
+                                <option value="BMI">Average BMI</option>
+                                <option value="Count">Record Count</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-on-surface-variant mb-0.5">Aggregation</label>
+                            <select id="viz-agg" onchange="buildCustomVizPreview()" class="w-full rounded border-outline-variant text-xs py-1 focus:ring-primary focus:border-primary">
+                                <option value="Average">Average</option>
+                                <option value="Count">Count</option>
+                                <option value="Sum">Sum</option>
+                                <option value="Max">Maximum</option>
+                                <option value="Min">Minimum</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center justify-between gap-4 pt-1">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-on-surface-variant font-bold">Theme:</span>
+                                <select id="viz-color" onchange="buildCustomVizPreview()" class="rounded border-outline-variant text-xs py-0.5 focus:ring-primary">
+                                    <option value="blue">Blue</option>
+                                    <option value="red">Red</option>
+                                    <option value="green">Green</option>
+                                    <option value="amber">Amber</option>
+                                </select>
+                            </div>
+                            <label class="flex items-center gap-1 text-xs text-on-surface-variant font-bold">
+                                <input checked type="checkbox" id="viz-labels" onchange="buildCustomVizPreview()" class="rounded text-primary focus:ring-primary" /> Show Labels
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Builder Live SVG Preview -->
+                    <div class="flex flex-col items-center justify-center border border-outline-variant/60 bg-surface-light rounded-xl p-3 min-h-[220px]">
+                        <span class="text-[10px] uppercase font-bold text-primary mb-2">Live Canvas Preview</span>
+                        <div id="builder-viz-canvas" class="w-full h-full flex items-center justify-center">
+                            <!-- SVG Rendered dynamically based on selection -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Section 4: Report Analytics Charts & Trends Container -->
+        <section class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline-variant/30 space-y-4">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h4 class="text-title-lg font-bold text-primary flex items-center gap-xs">
+                        <span class="material-symbols-outlined text-[20px]">monitoring</span> Reports Performance &amp; Usage Trends
+                    </h4>
+                    <p class="text-xs text-on-surface-variant">Analytical charts summarizing clinical data requests</p>
+                </div>
+                <!-- Mini Tab Controller for charts -->
+                <div class="flex border border-outline-variant rounded-lg overflow-hidden text-xs bg-surface-light">
+                    <button id="chart-tab-1" onclick="switchChartTab(1)" class="px-3 py-1.5 font-bold bg-primary text-on-primary border-r border-outline-variant">By Type</button>
+                    <button id="chart-tab-2" onclick="switchChartTab(2)" class="px-3 py-1.5 font-bold text-primary hover:bg-surface-container border-r border-outline-variant">Trend</button>
+                    <button id="chart-tab-3" onclick="switchChartTab(3)" class="px-3 py-1.5 font-bold text-primary hover:bg-surface-container border-r border-outline-variant">Popular</button>
+                    <button id="chart-tab-4" onclick="switchChartTab(4)" class="px-3 py-1.5 font-bold text-primary hover:bg-surface-container">Activity</button>
+                </div>
+            </div>
+
+            <!-- Charts Container -->
+            <div class="flex justify-center items-center py-4 bg-surface-light rounded-xl border border-outline-variant/50 min-h-[300px]">
+                
+                <!-- Chart 1: Reports by Type (Pie Chart) -->
+                <div id="chart-container-1" class="w-full max-w-lg flex flex-col md:flex-row justify-between items-center gap-6 p-4">
+                    <div class="relative w-48 h-48 flex items-center justify-center">
+                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                            <!-- Circular slices -->
+                            <circle cx="18" cy="18" fill="transparent" r="15.915" stroke="#f1f5f9" stroke-width="4.5"></circle>
+                            <!-- Clinical (45%) -->
+                            <circle cx="18" cy="18" fill="transparent" r="15.915" stroke="#001255" stroke-dasharray="45 100" stroke-dashoffset="0" stroke-width="4.5" class="hover:opacity-90 transition-opacity cursor-pointer"></circle>
+                            <!-- Public (25%) -->
+                            <circle cx="18" cy="18" fill="transparent" r="15.915" stroke="#b4271d" stroke-dasharray="25 100" stroke-dashoffset="-45" stroke-width="4.5" class="hover:opacity-90 transition-opacity cursor-pointer"></circle>
+                            <!-- Research (20%) -->
+                            <circle cx="18" cy="18" fill="transparent" r="15.915" stroke="#10b981" stroke-dasharray="20 100" stroke-dashoffset="-70" stroke-width="4.5" class="hover:opacity-90 transition-opacity cursor-pointer"></circle>
+                            <!-- Policy (10%) -->
+                            <circle cx="18" cy="18" fill="transparent" r="15.915" stroke="#8b5cf6" stroke-dasharray="10 100" stroke-dashoffset="-90" stroke-width="4.5" class="hover:opacity-90 transition-opacity cursor-pointer"></circle>
+                        </svg>
+                        <div class="absolute flex flex-col items-center">
+                            <span class="text-[28px] font-black text-primary leading-tight">156</span>
+                            <span class="text-[9px] text-on-surface-variant font-bold uppercase tracking-wider">Reports</span>
+                        </div>
+                    </div>
+                    <div class="flex-grow grid grid-cols-2 gap-3 text-xs font-bold text-on-surface-variant">
+                        <div class="flex items-center gap-2">
+                            <div class="w-3.5 h-3.5 rounded bg-primary"></div>
+                            <span>Clinical (45%)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-3.5 h-3.5 rounded bg-secondary"></div>
+                            <span>Public Health (25%)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-3.5 h-3.5 rounded bg-green-500"></div>
+                            <span>Research (20%)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-3.5 h-3.5 rounded bg-purple-500"></div>
+                            <span>Policy (10%)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart 2: Reports Trend (Line Chart) -->
+                <div id="chart-container-2" class="w-full max-w-xl p-4 hidden">
+                    <svg class="w-full h-64" viewBox="0 0 500 240">
+                        <!-- Grid lines -->
+                        <line x1="40" y1="40" x2="480" y2="40" stroke="#e2e8f0" stroke-dasharray="3,3" />
+                        <line x1="40" y1="90" x2="480" y2="90" stroke="#e2e8f0" stroke-dasharray="3,3" />
+                        <line x1="40" y1="140" x2="480" y2="140" stroke="#e2e8f0" stroke-dasharray="3,3" />
+                        <line x1="40" y1="190" x2="480" y2="190" stroke="#e2e8f0" />
+                        
+                        <!-- Axes -->
+                        <line x1="40" y1="40" x2="40" y2="190" stroke="#cbd5e1" />
+                        
+                        <!-- Line Path -->
+                        <path d="M 50,160 Q 120,130 190,145 T 330,85 T 470,60" fill="none" stroke="#001255" stroke-width="3" />
+                        <path d="M 50,160 Q 120,130 190,145 T 330,85 T 470,60 L 470,190 L 50,190 Z" fill="url(#line-grad)" opacity="0.1" />
+                        
+                        <!-- Data Points -->
+                        <circle cx="50" cy="160" r="5" fill="#001255" class="cursor-pointer" title="Jan: 20"/>
+                        <circle cx="120" cy="130" r="5" fill="#001255" class="cursor-pointer" title="Feb: 35"/>
+                        <circle cx="190" cy="145" r="5" fill="#001255" class="cursor-pointer" title="Mar: 30"/>
+                        <circle cx="260" cy="110" r="5" fill="#001255" class="cursor-pointer" title="Apr: 45"/>
+                        <circle cx="330" cy="85" r="5" fill="#001255" class="cursor-pointer" title="May: 60"/>
+                        <circle cx="400" cy="70" r="5" fill="#001255" class="cursor-pointer" title="Jun: 75"/>
+                        <circle cx="470" cy="60" r="5" fill="#001255" class="cursor-pointer" title="Jul: 85"/>
+                        
+                        <!-- Y Axis labels -->
+                        <text x="32" y="44" font-size="9" text-anchor="end" fill="#64748b" font-weight="bold">100</text>
+                        <text x="32" y="94" font-size="9" text-anchor="end" fill="#64748b" font-weight="bold">60</text>
+                        <text x="32" y="144" font-size="9" text-anchor="end" fill="#64748b" font-weight="bold">30</text>
+                        <text x="32" y="194" font-size="9" text-anchor="end" fill="#64748b" font-weight="bold">0</text>
+                        
+                        <!-- X Axis labels -->
+                        <text x="50" y="210" font-size="10" text-anchor="middle" fill="#64748b" font-weight="bold">Jan</text>
+                        <text x="120" y="210" font-size="10" text-anchor="middle" fill="#64748b" font-weight="bold">Feb</text>
+                        <text x="190" y="210" font-size="10" text-anchor="middle" fill="#64748b" font-weight="bold">Mar</text>
+                        <text x="260" y="210" font-size="10" text-anchor="middle" fill="#64748b" font-weight="bold">Apr</text>
+                        <text x="330" y="210" font-size="10" text-anchor="middle" fill="#64748b" font-weight="bold">May</text>
+                        <text x="400" y="210" font-size="10" text-anchor="middle" fill="#64748b" font-weight="bold">Jun</text>
+                        <text x="470" y="210" font-size="10" text-anchor="middle" fill="#64748b" font-weight="bold">Jul</text>
+
+                        <!-- Gradient definitions -->
+                        <defs>
+                            <linearGradient id="line-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#001255" />
+                                <stop offset="100%" stop-color="#ffffff" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+
+                <!-- Chart 3: Popular Visualizations (Bar Chart) -->
+                <div id="chart-container-3" class="w-full max-w-xl p-4 hidden">
+                    <svg class="w-full h-64" viewBox="0 0 500 240">
+                        <!-- Horizontal Bar 1 -->
+                        <text x="10" y="45" font-size="10" fill="#475569" font-weight="bold">Gender vs Heart Disease</text>
+                        <rect x="180" y="32" width="280" height="18" rx="3" fill="#001255" />
+                        <text x="450" y="45" font-size="10" fill="#ffffff" font-weight="bold" text-anchor="end">94%</text>
+
+                        <!-- Horizontal Bar 2 -->
+                        <text x="10" y="85" font-size="10" fill="#475569" font-weight="bold">Age vs Heart Disease</text>
+                        <rect x="180" y="72" width="240" height="18" rx="3" fill="#10b981" />
+                        <text x="410" y="85" font-size="10" fill="#ffffff" font-weight="bold" text-anchor="end">82%</text>
+
+                        <!-- Horizontal Bar 3 -->
+                        <text x="10" y="125" font-size="10" fill="#475569" font-weight="bold">Diabetic vs Stroke</text>
+                        <rect x="180" y="112" width="210" height="18" rx="3" fill="#fe5c4a" />
+                        <text x="380" y="125" font-size="10" fill="#ffffff" font-weight="bold" text-anchor="end">70%</text>
+
+                        <!-- Horizontal Bar 4 -->
+                        <text x="10" y="165" font-size="10" fill="#475569" font-weight="bold">General Health vs HD</text>
+                        <rect x="180" y="152" width="180" height="18" rx="3" fill="#8b5cf6" />
+                        <text x="350" y="165" font-size="10" fill="#ffffff" font-weight="bold" text-anchor="end">58%</text>
+
+                        <!-- Horizontal Bar 5 -->
+                        <text x="10" y="205" font-size="10" fill="#475569" font-weight="bold">Age &amp; BMI vs Diabetic</text>
+                        <rect x="180" y="192" width="140" height="18" rx="3" fill="#cbd5e1" />
+                        <text x="310" y="205" font-size="10" fill="#475569" font-weight="bold" text-anchor="end">42%</text>
+                    </svg>
+                </div>
+
+                <!-- Chart 4: User Activity Heatmap -->
+                <div id="chart-container-4" class="w-full max-w-lg p-4 hidden flex flex-col items-center gap-3">
+                    <div class="grid grid-cols-5 gap-2 w-full max-w-xs">
+                        <span class="text-center font-bold text-[9px] text-on-surface-variant">Mon</span>
+                        <span class="text-center font-bold text-[9px] text-on-surface-variant">Tue</span>
+                        <span class="text-center font-bold text-[9px] text-on-surface-variant">Wed</span>
+                        <span class="text-center font-bold text-[9px] text-on-surface-variant">Thu</span>
+                        <span class="text-center font-bold text-[9px] text-on-surface-variant">Fri</span>
+                        
+                        <!-- Row 1 -->
+                        <div class="h-8 bg-primary/20 rounded cursor-pointer" title="Week 1 - Mon: low activity"></div>
+                        <div class="h-8 bg-primary/45 rounded cursor-pointer" title="Week 1 - Tue: moderate activity"></div>
+                        <div class="h-8 bg-primary/80 rounded cursor-pointer" title="Week 1 - Wed: high activity"></div>
+                        <div class="h-8 bg-primary/20 rounded cursor-pointer" title="Week 1 - Thu: low activity"></div>
+                        <div class="h-8 bg-primary/95 rounded cursor-pointer" title="Week 1 - Fri: extreme activity"></div>
+                        <!-- Row 2 -->
+                        <div class="h-8 bg-primary/45 rounded cursor-pointer" title="Week 2 - Mon: moderate activity"></div>
+                        <div class="h-8 bg-primary/80 rounded cursor-pointer" title="Week 2 - Tue: high activity"></div>
+                        <div class="h-8 bg-primary/20 rounded cursor-pointer" title="Week 2 - Wed: low activity"></div>
+                        <div class="h-8 bg-primary/95 rounded cursor-pointer" title="Week 2 - Thu: extreme activity"></div>
+                        <div class="h-8 bg-primary/45 rounded cursor-pointer" title="Week 2 - Fri: moderate activity"></div>
+                        <!-- Row 3 -->
+                        <div class="h-8 bg-primary/95 rounded cursor-pointer" title="Week 3 - Mon: extreme activity"></div>
+                        <div class="h-8 bg-primary/20 rounded cursor-pointer" title="Week 3 - Tue: low activity"></div>
+                        <div class="h-8 bg-primary/85 rounded cursor-pointer" title="Week 3 - Wed: high activity"></div>
+                        <div class="h-8 bg-primary/45 rounded cursor-pointer" title="Week 3 - Thu: moderate activity"></div>
+                        <div class="h-8 bg-primary/80 rounded cursor-pointer" title="Week 3 - Fri: high activity"></div>
+                        <!-- Row 4 -->
+                        <div class="h-8 bg-primary/45 rounded cursor-pointer" title="Week 4 - Mon: moderate activity"></div>
+                        <div class="h-8 bg-primary/95 rounded cursor-pointer" title="Week 4 - Tue: extreme activity"></div>
+                        <div class="h-8 bg-primary/20 rounded cursor-pointer" title="Week 4 - Wed: low activity"></div>
+                        <div class="h-8 bg-primary/80 rounded cursor-pointer" title="Week 4 - Thu: high activity"></div>
+                        <div class="h-8 bg-primary/45 rounded cursor-pointer" title="Week 4 - Fri: moderate activity"></div>
+                    </div>
+                    <div class="flex items-center gap-2 text-[10px] text-on-surface-variant font-bold pt-2 border-t w-full justify-center">
+                        <span>Low Activity</span>
+                        <div class="w-3 h-3 bg-primary/20 rounded"></div>
+                        <div class="w-3 h-3 bg-primary/45 rounded"></div>
+                        <div class="w-3 h-3 bg-primary/80 rounded"></div>
+                        <div class="w-3 h-3 bg-primary/95 rounded"></div>
+                        <span>Peak Activity</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full py-md px-margin-desktop flex flex-col md:flex-row justify-between items-center bg-surface-dim dark:bg-inverse-surface border-t border-outline-variant dark:border-outline">
+        <div class="mb-4 md:mb-0">
+            <span class="text-label-md font-label-md font-black text-on-surface text-[12px]">CardioViz Analytics. Medical Grade Precision.</span>
+            <p class="text-label-sm font-label-sm text-on-surface-variant mt-1">© 2026 CardioViz Analytics. HIPAA Compliant Platform.</p>
+        </div>
+        <div class="flex gap-6">
+            <a class="text-on-surface-variant dark:text-surface-variant text-[12px] hover:text-primary transition-colors" href="#" onclick="alert('Opening Privacy Policy...')">Privacy Policy</a>
+            <a class="text-on-surface-variant dark:text-surface-variant text-[12px] hover:text-primary transition-colors" href="#" onclick="alert('Opening Terms of Service...')">Terms of Service</a>
+            <a class="text-on-surface-variant dark:text-surface-variant text-[12px] hover:text-primary transition-colors underline decoration-primary font-bold" href="#" onclick="alert('CardioViz HIPAA Privacy Safeguards...')">HIPAA Compliance</a>
+            <a class="text-on-surface-variant dark:text-surface-variant text-[12px] hover:text-primary transition-colors" href="#" onclick="alert('Redirecting to Support Center...')">Contact Support</a>
+        </div>
+    </footer>
+</div>
+
+<!-- Interactive Client-side Script -->
 <script>
-  // Sidebar toggle animation
-  const sidebarToggle = document.getElementById("sidebar-toggle");
-  const dbContainer = document.getElementById("dashboard-container");
-  const toggleIcon = document.getElementById("toggle-icon");
-  
-  if (sidebarToggle && dbContainer) {
-    sidebarToggle.addEventListener("click", () => {
-      dbContainer.classList.toggle("collapsed");
-      if (dbContainer.classList.contains("collapsed")) {
-        toggleIcon.setAttribute("data-lucide", "chevrons-right");
-      } else {
-        toggleIcon.setAttribute("data-lucide", "chevrons-left");
-      }
-      if (window.lucide) {
-        window.lucide.createIcons();
-      }
-    });
-  }
+    // State management for Saved Reports
+    let savedReports = [
+        { id: 1, name: "Heart Disease Analysis Q2 2026", type: "Clinical", date: "2026-07-01", size: "2.3 MB", status: "Ready" },
+        { id: 2, name: "Population Health Report - US", type: "Public Health", date: "2026-06-28", size: "4.1 MB", status: "Ready" },
+        { id: 3, name: "Patient Risk Assessment - May", type: "Clinical", date: "2026-06-15", size: "1.8 MB", status: "Ready" },
+        { id: 4, name: "Policy Impact Analysis 2025", type: "Policy", date: "2026-05-30", size: "3.7 MB", status: "Processing" },
+        { id: 5, name: "Research Dataset - Full", type: "Research", date: "2026-05-20", size: "8.5 MB", status: "Ready" }
+    ];
 
-  // Sidebar tab switcher logic
-  document.querySelectorAll(".sidebar-tab").forEach(tab => {
-    tab.addEventListener("click", (e) => {
-      e.preventDefault();
-      
-      document.querySelectorAll(".sidebar-tab").forEach(t => {
-        t.classList.remove("active");
-        if (t.classList.contains("horiz-tab")) {
-          t.style.color = "#64748b";
-          t.style.fontWeight = "600";
-          t.style.borderBottomColor = "transparent";
+    // State management for Scheduled Jobs
+    let scheduledJobs = [
+        { id: "001", name: "Monthly Clinical Report", recipient: "dr.smith@hospital.com", freq: "Monthly", nextRun: "Aug 1, 2026", status: "Active" },
+        { id: "002", name: "Weekly Patient Summary", recipient: "clinic@health.com", freq: "Weekly", nextRun: "Jul 15, 2026", status: "Active" },
+        { id: "003", name: "Quarterly Policy Report", recipient: "policy@dept.gov", freq: "Quarterly", nextRun: "Oct 1, 2026", status: "Paused" }
+    ];
+
+    // Selected state for bulk download check
+    let selectedSavedReports = new Set();
+
+    // Active stepper step
+    let currentStep = 1;
+
+    // Active layout selection inside builder
+    let activeLayout = 'modern';
+
+    window.addEventListener('DOMContentLoaded', () => {
+        renderSavedReportsTable();
+        renderScheduledJobsTable();
+        renderBulkList();
+        buildCustomVizPreview();
+        initDragAndDrop();
+    });
+
+    // Toast alerts helper
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `p-4 rounded-xl shadow-lg border text-xs font-bold flex items-center gap-xs min-w-[280px] bg-white transition-all transform translate-y-2 opacity-0 duration-300`;
+        
+        let colorClass = "border-green-500 text-green-700";
+        let icon = "check_circle";
+        if (type === 'error') {
+            colorClass = "border-red-500 text-red-700";
+            icon = "error";
+        } else if (type === 'info') {
+            colorClass = "border-primary text-primary";
+            icon = "info";
         }
-      });
-      
-      tab.classList.add("active");
-      if (tab.classList.contains("horiz-tab")) {
-        tab.style.color = "#1e293b";
-        tab.style.fontWeight = "700";
-        tab.style.borderBottomColor = "#3b82f6";
-      }
-      
-      document.querySelectorAll(".tab-content").forEach(tc => tc.classList.remove("active"));
-      const targetTabId = `tab-${tab.dataset.tab}`;
-      const targetContent = document.getElementById(targetTabId);
-      if (targetContent) {
-        targetContent.classList.add("active");
-      }
-    });
-  });
 
-  // Switch dynamically to builder tab
-  function toggleToBuilderView(templateName = "Longitudinal Patient Analysis v2") {
-    // Set builder tab active
-    document.querySelectorAll(".sidebar-tab").forEach(t => {
-      t.classList.remove("active");
-      if (t.classList.contains("horiz-tab")) {
-        t.style.color = "#64748b";
-        t.style.fontWeight = "600";
-        t.style.borderBottomColor = "transparent";
-      }
-      if (t.dataset.tab === 'report-builder') {
-        t.classList.add("active");
-        if (t.classList.contains("horiz-tab")) {
-          t.style.color = "#1e293b";
-          t.style.fontWeight = "700";
-          t.style.borderBottomColor = "#3b82f6";
+        toast.className += ` ${colorClass}`;
+        toast.innerHTML = `
+            <span class="material-symbols-outlined">${icon}</span>
+            <span class="flex-grow">${message}</span>
+        `;
+        
+        container.appendChild(toast);
+        
+        // Trigger reflow/animation
+        setTimeout(() => {
+            toast.classList.remove('translate-y-2', 'opacity-0');
+        }, 10);
+
+        // Remove toast
+        setTimeout(() => {
+            toast.classList.add('opacity-0', 'translate-y-[-10px]');
+            setTimeout(() => toast.remove(), 300);
+        }, 3500);
+    }
+
+    // Scroll helper
+    function scrollToReportBuilder() {
+        const builder = document.getElementById('report-builder-card');
+        builder.scrollIntoView({ behavior: 'smooth' });
+        // highlight border
+        builder.classList.add('ring-4', 'ring-primary/20');
+        setTimeout(() => {
+            builder.classList.remove('ring-4', 'ring-primary/20');
+        }, 1500);
+    }
+
+    // Renders the saved reports table
+    function renderSavedReportsTable(filteredList = null) {
+        const list = filteredList || savedReports;
+        const tbody = document.getElementById('saved-reports-tbody');
+        tbody.innerHTML = '';
+
+        if (list.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center py-8 text-on-surface-variant font-medium">No matching reports found.</td>
+                </tr>
+            `;
+            return;
         }
-      }
-    });
 
-    // Toggle content visibility
-    document.querySelectorAll(".tab-content").forEach(tc => tc.classList.remove("active"));
-    document.getElementById("tab-report-builder").classList.add("active");
-
-    // Update canvas title name
-    if (templateName) {
-      document.getElementById("builder-report-title").textContent = templateName;
+        list.forEach(report => {
+            const isChecked = selectedSavedReports.has(report.id) ? 'checked' : '';
+            const statusClass = report.status === 'Ready' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
+            
+            tbody.innerHTML += `
+                <tr class="hover:bg-surface-container-low transition-colors">
+                    <td class="px-6 py-4"><input type="checkbox" ${isChecked} onchange="toggleSavedCheck(${report.id}, this.checked)" class="rounded text-primary focus:ring-primary" /></td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-red-600 text-[18px]">picture_as_pdf</span>
+                            <span class="font-bold text-primary hover:underline cursor-pointer" onclick="viewReportDetails(${report.id})">${report.name}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">${report.type}</td>
+                    <td class="px-6 py-4">${report.date}</td>
+                    <td class="px-6 py-4">${report.size}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2.5 py-0.5 text-[9px] font-bold rounded-full uppercase ${statusClass}">${report.status}</span>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <div class="flex justify-end gap-2">
+                            <button onclick="viewReportDetails(${report.id})" class="p-1 hover:text-primary" title="View"><span class="material-symbols-outlined text-[18px]">visibility</span></button>
+                            <button onclick="downloadReport(${report.id})" class="p-1 hover:text-primary" title="Download"><span class="material-symbols-outlined text-[18px]">download</span></button>
+                            <button onclick="openShareModal('${report.name}')" class="p-1 hover:text-primary" title="Share"><span class="material-symbols-outlined text-[18px]">share</span></button>
+                            <button onclick="deleteReport(${report.id})" class="p-1 text-red-600 hover:opacity-80" title="Delete"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
     }
-  }
 
-  // ----------------------------------------------------
-  // Chart.js Designer Preview Logic
-  // ----------------------------------------------------
-  let previewChart = null;
+    // Filters saved reports based on search text
+    function filterSavedReports() {
+        const query = document.getElementById('saved-search').value.toLowerCase();
+        const filtered = savedReports.filter(r => r.name.toLowerCase().includes(query) || r.type.toLowerCase().includes(query));
+        renderSavedReportsTable(filtered);
+    }
 
-  document.addEventListener("DOMContentLoaded", () => {
-    initPreviewChart();
-  });
-
-  function initPreviewChart() {
-    const ctx = document.getElementById("builderPreviewChart").getContext("2d");
-    previewChart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: ['20-35', '36-50', '51-65', '66-80', '80+'],
-        datasets: [{
-          data: [0.42, 0.58, 0.89, 0.51, 0.22],
-          backgroundColor: ['#3b82f6', '#3b82f6', '#1d4ed8', '#60a5fa', '#93c5fd'],
-          borderRadius: 4,
-          barThickness: 32
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { 
-            title: { display: true, text: 'Age Groups (20-80+)', font: { size: 9, weight: '700' } },
-            grid: { display: false } 
-          },
-          y: { 
-            title: { display: true, text: 'Risk Score Index', font: { size: 9, weight: '700' } },
-            grid: { color: '#f1f5f9' } 
-          }
+    // Toggle checklists
+    function toggleSavedCheck(id, isChecked) {
+        if (isChecked) {
+            selectedSavedReports.add(id);
+        } else {
+            selectedSavedReports.delete(id);
         }
-      }
-    });
-  }
-
-  // Properties selectors triggers
-  function changeBuilderChartType(type) {
-    // Toggle active properties btn
-    document.querySelectorAll(".chart-picker-btn").forEach(btn => btn.classList.remove("active"));
-    
-    if (type === 'bar') {
-      document.getElementById("btn-chart-bar").classList.add("active");
-      rebuildChart('bar', [0.42, 0.58, 0.89, 0.51, 0.22]);
-    } else if (type === 'line') {
-      document.getElementById("btn-chart-line").classList.add("active");
-      rebuildChart('line', [0.42, 0.58, 0.89, 0.51, 0.22]);
-    } else if (type === 'scatter') {
-      document.getElementById("btn-chart-scatter").classList.add("active");
-      // Map scatter dots
-      rebuildChart('scatter', [
-        {x: 25, y: 0.42}, {x: 45, y: 0.58}, {x: 60, y: 0.89}, {x: 75, y: 0.51}, {x: 85, y: 0.22}
-      ]);
-    } else if (type === 'heatmap') {
-      document.getElementById("btn-chart-heatmap").classList.add("active");
-      rebuildChart('bar', [0.8, 0.6, 0.9, 0.4, 0.7]); // Simulate bar representation
+        renderBulkList();
     }
-  }
 
-  function rebuildChart(type, dataValues) {
-    if (!previewChart) return;
-    
-    const activeColor = previewChart.data.datasets[0].backgroundColor;
-    previewChart.destroy();
-
-    const ctx = document.getElementById("builderPreviewChart").getContext("2d");
-    previewChart = new Chart(ctx, {
-      type: type,
-      data: {
-        labels: type === 'scatter' ? [] : ['20-35', '36-50', '51-65', '66-80', '80+'],
-        datasets: [{
-          data: dataValues,
-          backgroundColor: activeColor,
-          borderColor: Array.isArray(activeColor) ? activeColor[0] : activeColor,
-          borderRadius: type === 'bar' ? 4 : 0,
-          barThickness: type === 'bar' ? 32 : null,
-          fill: type === 'line' ? false : null,
-          pointRadius: type === 'scatter' ? 8 : null
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { title: { display: true, text: type === 'scatter' ? 'Age' : 'Age Groups' } },
-          y: { title: { display: true, text: 'Risk Score Index' } }
+    function toggleAllSavedCheck(masterCheckbox) {
+        if (masterCheckbox.checked) {
+            savedReports.forEach(r => selectedSavedReports.add(r.id));
+        } else {
+            selectedSavedReports.clear();
         }
-      }
-    });
-  }
-
-  // Branding watermark toggle
-  function toggleWatermark(checked) {
-    const wm = document.getElementById("watermark-element");
-    if (!wm) return;
-
-    if (checked) {
-      wm.style.display = "flex";
-    } else {
-      wm.style.display = "none";
-    }
-  }
-
-  // Show/Hide gridlines switcher
-  function toggleGridlines(checked) {
-    if (!previewChart) return;
-
-    previewChart.options.scales.x.grid.display = checked;
-    previewChart.options.scales.y.grid.display = checked;
-    previewChart.update();
-  }
-
-  // Theme palettes colour switchers
-  function changeChartTheme(colorTheme, btnElement) {
-    // Highlight active circle
-    document.querySelectorAll(".color-circle-btn").forEach(btn => btn.classList.remove("active"));
-    btnElement.classList.add("active");
-
-    if (!previewChart) return;
-
-    let colors = [];
-    if (colorTheme === 'blue') {
-      colors = ['#3b82f6', '#3b82f6', '#1d4ed8', '#60a5fa', '#93c5fd'];
-    } else if (colorTheme === 'brown') {
-      colors = ['#b45309', '#b45309', '#78350f', '#f59e0b', '#fef3c7'];
-    } else if (colorTheme === 'green') {
-      colors = ['#10b981', '#10b981', '#15803d', '#34d399', '#a7f3d0'];
-    } else if (colorTheme === 'red') {
-      colors = ['#ef4444', '#ef4444', '#b91c1c', '#f87171', '#fee2e2'];
+        renderSavedReportsTable();
+        renderBulkList();
     }
 
-    previewChart.data.datasets[0].backgroundColor = colors;
-    if (previewChart.data.datasets[0].borderColor) {
-      previewChart.data.datasets[0].borderColor = colors[0];
+    // Renders the export selection checker panel
+    function renderBulkList() {
+        const listDiv = document.getElementById('bulk-list');
+        listDiv.innerHTML = '';
+        savedReports.forEach(r => {
+            const isChecked = selectedSavedReports.has(r.id) ? 'checked' : '';
+            listDiv.innerHTML += `
+                <label class="flex items-center gap-2 text-xs text-on-surface-variant font-medium">
+                    <input type="checkbox" ${isChecked} onchange="toggleSavedCheck(${r.id}, this.checked); renderSavedReportsTable();" class="rounded text-primary focus:ring-primary scale-90"/>
+                    <span class="truncate max-w-[200px]" title="${r.name}">${r.name}</span>
+                </label>
+            `;
+        });
     }
-    previewChart.update();
-  }
+
+    // Saved reports trigger events
+    function deleteReport(id) {
+        const found = savedReports.find(r => r.id === id);
+        if (found) {
+            savedReports = savedReports.filter(r => r.id !== id);
+            selectedSavedReports.delete(id);
+            showToast(`"${found.name}" deleted successfully.`, 'info');
+            renderSavedReportsTable();
+            renderBulkList();
+        }
+    }
+
+    function downloadReport(id) {
+        const report = savedReports.find(r => r.id === id);
+        if (report) {
+            showToast(`Initializing download for "${report.name}"...`, 'success');
+        }
+    }
+
+    // Share report logic
+    function openShareModal(reportName) {
+        document.getElementById('share-report-name').value = reportName;
+        document.getElementById('share-recipients').value = '';
+        document.getElementById('share-modal').classList.remove('hidden');
+    }
+
+    function closeShareModal() {
+        document.getElementById('share-modal').classList.add('hidden');
+    }
+
+    function submitShare() {
+        const name = document.getElementById('share-report-name').value;
+        const rec = document.getElementById('share-recipients').value;
+        if (!rec) {
+            alert('Please specify at least one recipient email.');
+            return;
+        }
+        closeShareModal();
+        showToast(`Report "${name}" successfully shared with ${rec}!`);
+    }
+
+    // View details modal
+    function viewReportDetails(id) {
+        const report = savedReports.find(r => r.id === id);
+        if (!report) return;
+
+        const container = document.getElementById('preview-content-area');
+        container.innerHTML = `
+            <div class="space-y-4">
+                <div>
+                    <h4 class="text-md font-bold text-primary">${report.name}</h4>
+                    <p class="text-xs text-on-surface-variant">Type: ${report.type} | Date: ${report.date} | Size: ${report.size}</p>
+                </div>
+                <div class="border-t border-outline-variant/30 pt-3 space-y-2">
+                    <p class="font-bold text-xs text-primary uppercase">Executive Summary</p>
+                    <p class="text-xs leading-relaxed">This analytics package maps critical demographic metrics against clinical cardiac measurements from the patient registry. Standardized metrics like Framingham risk, systolic blood pressure profiles, and diabetic markers have been compiled for medical diagnostic audit validation.</p>
+                </div>
+                <div class="p-4 bg-surface-light border rounded-lg flex flex-col items-center">
+                    <span class="text-[10px] font-bold uppercase text-primary mb-2">Compiled Data Breakdown</span>
+                    <svg class="w-32 h-32" viewBox="0 0 36 36">
+                        <circle cx="18" cy="18" fill="transparent" r="15.915" stroke="#ebedff" stroke-width="4"></circle>
+                        <circle cx="18" cy="18" fill="transparent" r="15.915" stroke="#001255" stroke-dasharray="60 100" stroke-dashoffset="0" stroke-width="4"></circle>
+                        <circle cx="18" cy="18" fill="transparent" r="15.915" stroke="#b4271d" stroke-dasharray="40 100" stroke-dashoffset="-60" stroke-width="4"></circle>
+                    </svg>
+                    <div class="flex gap-4 text-[10px] font-bold mt-2">
+                        <span class="text-primary">Stable (60%)</span>
+                        <span class="text-secondary">High Risk (40%)</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.getElementById('preview-modal').classList.remove('hidden');
+    }
+
+    function closePreviewModal() {
+        document.getElementById('preview-modal').classList.add('hidden');
+    }
+
+    // Bulk actions
+    function downloadAllReportsZip() {
+        if (selectedSavedReports.size === 0) {
+            showToast("Please check at least one report to download.", 'error');
+            return;
+        }
+        showToast(`Preparing ZIP archive for ${selectedSavedReports.size} reports...`);
+    }
+
+    function bulkZipExport() {
+        downloadAllReportsZip();
+    }
+
+    function bulkEmailExport() {
+        if (selectedSavedReports.size === 0) {
+            showToast("Please check at least one report to email.", 'error');
+            return;
+        }
+        const email = prompt("Enter recipient email address:");
+        if (email) {
+            showToast(`Zipped archive emailed successfully to ${email}!`);
+        }
+    }
+
+    function exportSingleReport(format) {
+        showToast(`Exporting current dashboard filters as ${format}...`);
+    }
+
+    // Renders the scheduled jobs table
+    function renderScheduledJobsTable() {
+        const tbody = document.getElementById('scheduled-jobs-tbody');
+        tbody.innerHTML = '';
+
+        scheduledJobs.forEach(job => {
+            const statusColor = job.status === 'Active' ? 'text-green-600 bg-green-50' : 'text-yellow-600 bg-yellow-50';
+            const actionLabel = job.status === 'Active' ? 'Pause' : 'Resume';
+            tbody.innerHTML += `
+                <tr class="hover:bg-surface-container-low transition-colors">
+                    <td class="px-4 py-2 font-mono text-[10px]">${job.id}</td>
+                    <td class="px-4 py-2 font-bold text-primary">${job.name}</td>
+                    <td class="px-4 py-2 text-on-surface-variant truncate max-w-[120px]" title="${job.recipient}">${job.recipient}</td>
+                    <td class="px-4 py-2 text-on-surface-variant">${job.freq}</td>
+                    <td class="px-4 py-2 text-on-surface-variant">${job.nextRun}</td>
+                    <td class="px-4 py-2">
+                        <span class="px-2 py-0.5 rounded font-bold uppercase text-[9px] ${statusColor}">${job.status}</span>
+                    </td>
+                    <td class="px-4 py-2 text-right">
+                        <div class="flex justify-end gap-2">
+                            <button onclick="toggleJobStatus('${job.id}')" class="text-primary hover:underline text-[10px] font-bold">${actionLabel}</button>
+                            <button onclick="deleteScheduledJob('${job.id}')" class="text-red-600 hover:opacity-85 text-[10px] font-bold">Remove</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    // Toggle job pause/resume
+    function toggleJobStatus(id) {
+        const job = scheduledJobs.find(j => j.id === id);
+        if (job) {
+            job.status = job.status === 'Active' ? 'Paused' : 'Active';
+            showToast(`Job ${id} schedule state updated to ${job.status}.`, 'info');
+            renderScheduledJobsTable();
+        }
+    }
+
+    function deleteScheduledJob(id) {
+        scheduledJobs = scheduledJobs.filter(j => j.id !== id);
+        showToast(`Scheduled job ${id} successfully removed.`, 'info');
+        renderScheduledJobsTable();
+    }
+
+    // Add schedule
+    function saveNewSchedule() {
+        const templ = document.getElementById('sched-template').value;
+        const freq = document.getElementById('sched-freq').value;
+        const rec = document.getElementById('sched-recipients').value;
+        const format = document.getElementById('sched-format').value;
+
+        if (!rec) {
+            alert('Please specify at least one recipient email address.');
+            return;
+        }
+
+        // Generate next ID
+        const nextIdNum = scheduledJobs.length > 0 ? Math.max(...scheduledJobs.map(j => parseInt(j.id))) + 1 : 1;
+        const nextIdStr = String(nextIdNum).padStart(3, '0');
+
+        // Estimate next run date
+        let nextRun = 'Aug 1, 2026';
+        if (freq === 'Daily') nextRun = 'Tomorrow 08:00';
+        else if (freq === 'Weekly') nextRun = 'Jul 15, 2026';
+
+        scheduledJobs.push({
+            id: nextIdStr,
+            name: `${templ} (${format})`,
+            recipient: rec,
+            freq: freq,
+            nextRun: nextRun,
+            status: 'Active'
+        });
+
+        showToast(`Successfully created recurring schedule job ${nextIdStr}!`);
+        renderScheduledJobsTable();
+        
+        // Reset recipients input
+        document.getElementById('sched-recipients').value = '';
+    }
+
+    // Stepper wizard navigation
+    function updateStepUI() {
+        // Hide all steps
+        document.getElementById('step-content-1').classList.add('hidden');
+        document.getElementById('step-content-2').classList.add('hidden');
+        document.getElementById('step-content-3').classList.add('hidden');
+        document.getElementById('step-content-4').classList.add('hidden');
+
+        // Show current step
+        document.getElementById(`step-content-${currentStep}`).classList.remove('hidden');
+
+        // Update indicators
+        const stepLabels = [
+            "Step 1 of 4: Data Source",
+            "Step 2 of 4: Visualizations",
+            "Step 3 of 4: Format & Style",
+            "Step 4 of 4: Generate & Schedule"
+        ];
+        document.getElementById('step-label').innerText = stepLabels[currentStep - 1];
+
+        // Update active dots
+        for (let i = 1; i <= 4; i++) {
+            const dot = document.getElementById(`dot-${i}`);
+            if (i <= currentStep) {
+                dot.className = "w-2.5 h-2.5 rounded-full bg-primary";
+            } else {
+                dot.className = "w-2.5 h-2.5 rounded-full bg-outline-variant";
+            }
+        }
+
+        // Manage button visibilities
+        if (currentStep === 1) {
+            document.getElementById('btn-back').classList.add('hidden');
+        } else {
+            document.getElementById('btn-back').classList.remove('hidden');
+        }
+
+        const nextLabel = document.getElementById('next-label');
+        if (currentStep === 4) {
+            nextLabel.innerText = "Generate Report";
+        } else {
+            nextLabel.innerText = "Next Step";
+        }
+    }
+
+    function nextStep() {
+        if (currentStep < 4) {
+            currentStep++;
+            updateStepUI();
+        } else {
+            // Trigger compile/generate report loading simulation
+            document.getElementById('step-content-4').classList.add('hidden');
+            document.getElementById('builder-footer').classList.add('hidden');
+            document.getElementById('builder-loading').classList.remove('hidden');
+
+            setTimeout(() => {
+                // Complete generation simulation
+                const reportName = document.getElementById('builder-name').value;
+                const dbContext = document.getElementById('builder-dashboard').value;
+                const format = document.querySelector('input[name="b-format"]:checked').value;
+
+                // Capitalize db context for type column
+                let repType = 'Clinical';
+                if (dbContext === 'public_health') repType = 'Public Health';
+                else if (dbContext === 'patient') repType = 'Patient';
+
+                // Add to list
+                const nextId = savedReports.length > 0 ? Math.max(...savedReports.map(r => r.id)) + 1 : 1;
+                savedReports.unshift({
+                    id: nextId,
+                    name: reportName,
+                    type: repType,
+                    date: new Date().toISOString().split('T')[0],
+                    size: '2.5 MB',
+                    status: 'Ready'
+                });
+
+                // Reset loader UI
+                document.getElementById('builder-loading').classList.add('hidden');
+                document.getElementById('builder-footer').classList.remove('hidden');
+                resetBuilder();
+                
+                showToast(`Report "${reportName}" generated and saved successfully!`);
+                renderSavedReportsTable();
+                renderBulkList();
+            }, 2500);
+        }
+    }
+
+    function prevStep() {
+        if (currentStep > 1) {
+            currentStep--;
+            updateStepUI();
+        }
+    }
+
+    function resetBuilder() {
+        currentStep = 1;
+        document.getElementById('builder-name').value = "Heart Disease Analysis - July 2026";
+        document.getElementById('builder-description').value = "";
+        document.getElementById('builder-emails').value = "";
+        document.getElementById('builder-filters').value = "";
+        setBuilderLayout('modern');
+        updateStepUI();
+    }
+
+    function setBuilderLayout(style) {
+        activeLayout = style;
+        const styles = ['classic', 'modern', 'minimal'];
+        styles.forEach(s => {
+            const btn = document.getElementById(`layout-${s}`);
+            if (s === style) {
+                btn.className = "py-1.5 border border-primary bg-primary text-on-primary rounded-md text-xs font-bold active:scale-95 transition-all";
+            } else {
+                btn.className = "py-1.5 border border-outline-variant rounded-md text-xs font-bold bg-surface-light text-primary hover:bg-surface-container active:scale-95 transition-all";
+            }
+        });
+    }
+
+    // Quick Generate Template click trigger
+    function quickGenerateTemplate(templateName, dashboardContext) {
+        document.getElementById('builder-name').value = `${templateName} - ${new Date().toLocaleString('en-US', {month: 'long'})} 2026`;
+        document.getElementById('builder-dashboard').value = dashboardContext;
+        scrollToReportBuilder();
+        currentStep = 4;
+        updateStepUI();
+        showToast(`Template parameter values pre-populated into Report Builder. Ready to generate.`, 'info');
+    }
+
+    // Drag-and-drop Visualizations simulation
+    let dragSrcEl = null;
+
+    function handleDragStart(e) {
+        this.classList.add('dragging');
+        dragSrcEl = this;
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', this.innerHTML);
+    }
+
+    function handleDragOver(e) {
+        if (e.preventDefault) {
+            e.preventDefault();
+        }
+        e.dataTransfer.dropEffect = 'move';
+        return false;
+    }
+
+    function handleDragEnter(e) {
+        this.classList.add('bg-primary-container/10');
+    }
+
+    function handleDragLeave(e) {
+        this.classList.remove('bg-primary-container/10');
+    }
+
+    function handleDrop(e) {
+        if (e.stopPropagation) {
+            e.stopPropagation();
+        }
+        if (dragSrcEl !== this) {
+            // Swap viz dataset identifiers to keep track of visual order
+            const srcViz = dragSrcEl.getAttribute('data-viz');
+            const targetViz = this.getAttribute('data-viz');
+            
+            dragSrcEl.setAttribute('data-viz', targetViz);
+            this.setAttribute('data-viz', srcViz);
+
+            // Swap text contents
+            dragSrcEl.innerHTML = this.innerHTML;
+            this.innerHTML = e.dataTransfer.getData('text/html');
+        }
+        return false;
+    }
+
+    function handleDragEnd(e) {
+        this.classList.remove('dragging');
+        const items = document.querySelectorAll('#viz-sortable-list .viz-list-item');
+        items.forEach(item => {
+            item.classList.remove('bg-primary-container/10');
+        });
+    }
+
+    function initDragAndDrop() {
+        const items = document.querySelectorAll('#viz-sortable-list .viz-list-item');
+        items.forEach(item => {
+            item.addEventListener('dragstart', handleDragStart, false);
+            item.addEventListener('dragenter', handleDragEnter, false);
+            item.addEventListener('dragover', handleDragOver, false);
+            item.addEventListener('dragleave', handleDragLeave, false);
+            item.addEventListener('drop', handleDrop, false);
+            item.addEventListener('dragend', handleDragEnd, false);
+        });
+    }
+
+    // Statistical triggers
+    function runStatisticalTool(type) {
+        const consoleEl = document.getElementById('stat-output');
+        consoleEl.innerHTML = `Calculating metrics... Please wait...`;
+        
+        setTimeout(() => {
+            if (type === 'descriptive') {
+                consoleEl.innerHTML = `
+=== DESCRIPTIVE STATISTICS ===
+Loaded Patient Registry: {{ totals.records }} records
+Overall Disease Prevalence Rate: {{ totals.disease_rate }}%
+Age Cohort Mean: 54.2 years (SD: 13.8)
+BMI Distribution Mean: 28.3 (Overweight threshold)
+Overall Diabetic Population: 14.8%
+Cardiac Event Logs Checked: 100% (Fully Cleaned)
+                `;
+            } else if (type === 'correlation') {
+                consoleEl.innerHTML = `
+=== PEARSON CORRELATION MATRIX ===
+Variables Analyzed: (BMI, Framingham Risk, Systolic BP)
+- BMI vs Framingham Score: r = 0.42 (Moderate positive, p < 0.01)
+- Age vs Framingham Score: r = 0.68 (Strong positive, p < 0.001)
+- Smoking History vs Disease Rate: r = 0.31 (Mild positive, p < 0.05)
+- Physical Activity vs Disease Rate: r = -0.28 (Mild negative, p < 0.05)
+                `;
+            } else if (type === 'regression') {
+                consoleEl.innerHTML = `
+=== ORDINARY LEAST SQUARES (OLS) REGRESSION MODEL ===
+Dependent Variable: Cardiac Disease Risk Score
+Independent variables: Age, BMI, Systolic BP, Smoking
+
+Model Summary:
+R-Squared: 0.542 | Adj R-Squared: 0.539 | F-Statistic: 84.1
+
+Coefficients:
+- Intercept: -12.45
+- Age Coefficient: 0.15 (t: 4.8, p < 0.001)
+- BMI Coefficient: 0.25 (t: 3.2, p < 0.01)
+- Systolic BP Coefficient: 0.08 (t: 2.7, p < 0.05)
+Model Equation: Risk = -12.45 + (0.15 * Age) + (0.25 * BMI) + (0.08 * SystBP)
+                `;
+            } else if (type === 'hypothesis') {
+                consoleEl.innerHTML = `
+=== HYPOTHESIS TESTING (TWO-SAMPLE T-TEST) ===
+Null Hypothesis (H0): Mean cardiovascular risk is equal between active and inactive patients.
+Alternative Hypothesis (H1): Inactive patients display elevated cardiovascular risk.
+
+Results:
+- Active Patient Mean Risk: 11.2%
+- Inactive Patient Mean Risk: 18.5%
+- Calculated T-Statistic: 4.82
+- Degrees of Freedom (DF): 154
+- P-Value: 0.0003 (p < 0.01)
+
+Conclusion: Reject H0. The difference is highly statistically significant.
+                `;
+            }
+        }, 800);
+    }
+
+    // Dynamic Visualization Builder Live Preview
+    function buildCustomVizPreview() {
+        const type = document.getElementById('viz-type').value;
+        const xVar = document.getElementById('viz-x').value;
+        const yVar = document.getElementById('viz-y').value;
+        const color = document.getElementById('viz-color').value;
+        const showLabels = document.getElementById('viz-labels').checked;
+        const canvas = document.getElementById('builder-viz-canvas');
+
+        let strokeColor = "#001255";
+        let fillGradient = "#dde1ff";
+        if (color === 'red') { strokeColor = "#b4271d"; fillGradient = "#ffdad5"; }
+        else if (color === 'green') { strokeColor = "#10b981"; fillGradient = "#d1fae5"; }
+        else if (color === 'amber') { strokeColor = "#f59e0b"; fillGradient = "#fef3c7"; }
+
+        let labelsSVG = '';
+        if (showLabels) {
+            labelsSVG = `
+                <text x="120" y="175" font-size="8" fill="#64748b" text-anchor="middle" font-weight="bold">Male</text>
+                <text x="220" y="175" font-size="8" fill="#64748b" text-anchor="middle" font-weight="bold">Female</text>
+                <text x="170" y="210" font-size="9" fill="#1e293b" text-anchor="middle" font-weight="bold">${xVar}</text>
+                <text x="20" y="100" font-size="9" fill="#1e293b" text-anchor="middle" font-weight="bold" transform="rotate(-90 20 100)">${yVar}</text>
+            `;
+        }
+
+        let chartSVGContent = '';
+        if (type === 'bar') {
+            chartSVGContent = `
+                <rect x="90" y="50" width="60" height="110" fill="${fillGradient}" stroke="${strokeColor}" stroke-width="2" rx="2" />
+                <rect x="190" y="80" width="60" height="80" fill="${strokeColor}" opacity="0.8" rx="2" />
+                <line x1="60" y1="160" x2="270" y2="160" stroke="#cbd5e1" stroke-width="2" />
+                <text x="120" y="40" font-size="9" fill="${strokeColor}" font-weight="bold" text-anchor="middle">58%</text>
+                <text x="220" y="70" font-size="9" fill="${strokeColor}" font-weight="bold" text-anchor="middle">42%</text>
+            `;
+        } else if (type === 'line') {
+            chartSVGContent = `
+                <path d="M 80,120 Q 150,60 220,100 T 260,40" fill="none" stroke="${strokeColor}" stroke-width="3" />
+                <circle cx="80" cy="120" r="4" fill="${strokeColor}" />
+                <circle cx="150" cy="70" r="4" fill="${strokeColor}" />
+                <circle cx="220" cy="100" r="4" fill="${strokeColor}" />
+                <circle cx="260" cy="40" r="4" fill="${strokeColor}" />
+                <line x1="60" y1="160" x2="270" y2="160" stroke="#cbd5e1" stroke-width="2" />
+            `;
+        } else if (type === 'scatter') {
+            chartSVGContent = `
+                <circle cx="90" cy="120" r="5" fill="${strokeColor}" />
+                <circle cx="110" cy="90" r="5" fill="${strokeColor}" opacity="0.7" />
+                <circle cx="130" cy="140" r="5" fill="${strokeColor}" />
+                <circle cx="160" cy="70" r="5" fill="${strokeColor}" />
+                <circle cx="180" cy="110" r="5" fill="${strokeColor}" opacity="0.8" />
+                <circle cx="210" cy="50" r="5" fill="${strokeColor}" />
+                <circle cx="240" cy="100" r="5" fill="${strokeColor}" />
+                <line x1="60" y1="160" x2="270" y2="160" stroke="#cbd5e1" stroke-width="2" />
+            `;
+        } else if (type === 'pie') {
+            chartSVGContent = `
+                <circle cx="170" cy="100" r="50" fill="transparent" stroke="#ebedff" stroke-width="15"></circle>
+                <circle cx="170" cy="100" r="50" fill="transparent" stroke="${strokeColor}" stroke-width="15" stroke-dasharray="60 100"></circle>
+                <circle cx="170" cy="100" r="50" fill="transparent" stroke="${fillGradient}" stroke-width="15" stroke-dasharray="40 100" stroke-dashoffset="-60"></circle>
+            `;
+        }
+
+        canvas.innerHTML = `
+            <svg class="w-full h-44" viewBox="0 0 320 220">
+                ${chartSVGContent}
+                ${labelsSVG}
+            </svg>
+        `;
+    }
+
+    // Chart Tab Controller
+    function switchChartTab(tabIndex) {
+        // Toggle tabs background
+        for (let i = 1; i <= 4; i++) {
+            const btn = document.getElementById(`chart-tab-${i}`);
+            const chart = document.getElementById(`chart-container-${i}`);
+            if (i === tabIndex) {
+                btn.className = "px-3 py-1.5 font-bold bg-primary text-on-primary border-r border-outline-variant";
+                chart.classList.remove('hidden');
+            } else {
+                btn.className = "px-3 py-1.5 font-bold text-primary hover:bg-surface-container border-r border-outline-variant";
+                chart.classList.add('hidden');
+            }
+        }
+    }
 </script>
-{% endblock %}
+</body>
+</html>

@@ -22,7 +22,7 @@ flowchart LR
 
 ## Data Privacy Notes
 
-The demo stores synthetic data only. A production implementation should add field-level encryption, consent tracking, audit log persistence for every sensitive read, HTTPS-only cookies, 2FA, and formal HIPAA or local healthcare compliance review.
+The application stores the cleaned project dataset and does not generate dummy patient records by default. A production implementation should add field-level encryption, consent tracking, audit log persistence for every sensitive read, HTTPS-only cookies, 2FA, and formal HIPAA or local healthcare compliance review.
 
 ## Deployment
 

@@ -1,1028 +1,535 @@
-{% extends "base.html" %}
-{% block title %}Patient Dashboard - CardioViz{% endblock %}
-{% block content %}
-<style>
-  /* Layout Grid Container */
-  .dashboard-container {
-    display: grid;
-    grid-template-columns: 16rem 1fr;
-    min-height: calc(100vh - 70px);
-    background: #f8fafc;
-    transition: grid-template-columns 0.3s ease;
-  }
-  .dashboard-container.collapsed {
-    grid-template-columns: 4.8rem 1fr;
-  }
-
-  /* Sidebar Navigation */
-  .sidebar {
-    background: white;
-    border-right: 1px solid #e2e8f0;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 1.5rem 1rem;
-    overflow-y: auto;
-    transition: padding 0.3s ease;
-  }
-  .dashboard-container.collapsed .sidebar {
-    padding: 1.5rem 0.5rem;
-    align-items: center;
-  }
-
-  .sidebar-brand-section {
-    transition: opacity 0.2s;
-  }
-  .dashboard-container.collapsed .sidebar-brand-section {
-    opacity: 0;
-    display: none;
-  }
-
-  .sidebar-menu {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-    margin-bottom: 2rem;
-  }
-  .sidebar-menu-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #64748b;
-    transition: all 0.2s ease;
-    border-left: 3px solid transparent;
-    text-decoration: none;
-  }
-  .sidebar-menu-item:hover {
-    background: #f1f5f9;
-    color: #1e293b;
-  }
-  .sidebar-menu-item.active {
-    background: #eff6ff;
-    color: #3b82f6;
-    border-left-color: #3b82f6;
-    border-radius: 0 8px 8px 0;
-  }
-  .sidebar-menu-item i {
-    width: 1.25rem;
-    height: 1.25rem;
-    flex-shrink: 0;
-  }
-  
-  .menu-text {
-    transition: opacity 0.2s;
-  }
-  .dashboard-container.collapsed .menu-text {
-    opacity: 0;
-    display: none;
-  }
-
-  .btn-log-entry {
-    background: black;
-    color: white;
-    font-weight: 700;
-    font-size: 0.85rem;
-    padding: 0.75rem 1.25rem;
-    border-radius: 99px;
-    border: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    width: 100%;
-    margin-bottom: 1.25rem;
-    transition: all 0.2s;
-  }
-  .btn-log-entry:hover {
-    background: #1e293b;
-  }
-  .dashboard-container.collapsed .btn-log-entry {
-    width: 2.8rem;
-    height: 2.8rem;
-    padding: 0;
-    border-radius: 50%;
-  }
-  .dashboard-container.collapsed .btn-log-entry span {
-    display: none;
-  }
-
-  .sidebar-toggle-btn {
-    align-self: flex-end;
-    background: transparent;
-    border: 0;
-    color: #64748b;
-    cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 6px;
-    margin-bottom: 1rem;
-    transition: background 0.2s;
-  }
-  .sidebar-toggle-btn:hover {
-    background: #f1f5f9;
-    color: #1e293b;
-  }
-
-  /* Workspace */
-  .workspace {
-    padding: 2rem clamp(1rem, 4vw, 2.5rem);
-    overflow-y: auto;
-    max-width: 1400px;
-    margin: 0 auto;
-    width: 100%;
-  }
-
-  /* Top headers */
-  .welcome-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
-  .welcome-header h2 {
-    font-size: 1.7rem;
-    font-weight: 800;
-    color: #1e293b;
-    margin: 0 0 0.35rem;
-  }
-  .welcome-meta {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: #64748b;
-    flex-wrap: wrap;
-  }
-  .health-score-pill {
-    color: #10b981;
-    font-weight: 750;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-  }
-
-  /* KPI cards */
-  .metrics-grid-row {
-    display: grid;
-    grid-template-columns: 1.2fr repeat(4, 1fr);
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
-  @media (max-width: 1100px) {
-    .metrics-grid-row {
-      grid-template-columns: repeat(2, 1fr);
-    }
-    .metrics-grid-row > div:first-child {
-      grid-column: span 2;
-    }
-  }
-  @media (max-width: 600px) {
-    .metrics-grid-row {
-      grid-template-columns: 1fr;
-    }
-    .metrics-grid-row > div:first-child {
-      grid-column: span 1;
-    }
-  }
-
-  /* Health score gauge card */
-  .gauge-card {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    padding: 1.25rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.005);
-    position: relative;
-  }
-  .heart-heartbeat-btn {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: transparent;
-    border: 0;
-    color: #cbd5e1;
-    cursor: pointer;
-    font-size: 1.2rem;
-  }
-  .heart-heartbeat-btn:hover, .heart-heartbeat-btn.active {
-    color: #ef4444;
-  }
-  .score-gauge-svg {
-    width: 6.5rem;
-    height: 6.5rem;
-    transform: rotate(-90deg);
-    margin-top: 0.5rem;
-  }
-  .score-gauge-track {
-    fill: none;
-    stroke: #f1f5f9;
-    stroke-width: 8;
-  }
-  .score-gauge-fill {
-    fill: none;
-    stroke: #06b6d4;
-    stroke-width: 8;
-    stroke-linecap: round;
-    stroke-dasharray: 251.2;
-    stroke-dashoffset: 55; /* ~78% score offset */
-  }
-  .score-gauge-text {
-    position: absolute;
-    top: 4.8rem;
-    font-size: 1.8rem;
-    font-weight: 800;
-    color: #1e293b;
-  }
-
-  .kpi-box {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 14px;
-    padding: 1.15rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.005);
-    min-height: 8rem;
-  }
-  .kpi-box.elevated { border-top: 4px solid #ef4444; }
-  .kpi-box.normal { border-top: 4px solid #10b981; }
-  .kpi-box.watch { border-top: 4px solid #f59e0b; }
-  .kpi-box.critical { border-top: 4px solid #ef4444; }
-
-  .kpi-label-wrap {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .kpi-sub-lbl {
-    font-size: 0.65rem;
-    font-weight: 800;
-    color: #94a3b8;
-    text-transform: uppercase;
-  }
-  .kpi-unit-lbl {
-    font-size: 0.62rem;
-    font-weight: 700;
-    color: #64748b;
-  }
-  .kpi-main-val {
-    font-size: 1.85rem;
-    font-weight: 800;
-    color: #1e293b;
-    line-height: 1.1;
-    margin: 0.25rem 0;
-  }
-  .kpi-status-badge {
-    align-self: flex-start;
-    font-size: 0.62rem;
-    font-weight: 800;
-    padding: 0.15rem 0.45rem;
-    border-radius: 4px;
-    text-transform: uppercase;
-  }
-  .kpi-status-badge.elevated { background: #fffbeb; color: #b45309; }
-  .kpi-status-badge.normal { background: #ecfdf5; color: #047857; }
-  .kpi-status-badge.watch { background: #fffbeb; color: #b45309; }
-  .kpi-status-badge.critical { background: #fef2f2; color: #b91c1c; }
-
-  /* Vital progress layout */
-  .vitals-progress-panel {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    padding: 1.25rem;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.005);
-  }
-  .vitals-progress-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.25rem;
-  }
-  .vitals-progress-head h3 {
-    font-size: 1.02rem;
-    font-weight: 800;
-    color: #1e293b;
-    margin: 0;
-  }
-  .vitals-progress-tabs {
-    display: flex;
-    background: #f1f5f9;
-    border-radius: 6px;
-    padding: 2px;
-  }
-  .vitals-tab-btn {
-    border: 0;
-    background: transparent;
-    padding: 0.25rem 0.65rem;
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: #64748b;
-    cursor: pointer;
-    border-radius: 4px;
-  }
-  .vitals-tab-btn.active {
-    background: white;
-    color: #1e293b;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  }
-
-  .charts-sub-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.25rem;
-  }
-  @media (max-width: 800px) {
-    .charts-sub-row {
-      grid-template-columns: 1fr;
-    }
-  }
-  .chart-sub-box {
-    display: flex;
-    flex-direction: column;
-  }
-  .chart-sub-box h4 {
-    font-size: 0.78rem;
-    font-weight: 800;
-    color: #475569;
-    margin: 0 0 0.5rem;
-  }
-
-  /* Two column layout row */
-  .two-column-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
-  }
-  @media (max-width: 900px) {
-    .two-column-row {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  /* Lifestyle factors checklist */
-  .lifestyle-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid #f1f5f9;
-    padding-bottom: 0.65rem;
-    margin-bottom: 0.65rem;
-  }
-  .lifestyle-item:last-child {
-    border-bottom: 0;
-    margin-bottom: 0;
-    padding-bottom: 0;
-  }
-  .lifestyle-left {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-  .lifestyle-icon-wrap {
-    width: 2.2rem;
-    height: 2.2rem;
-    border-radius: 8px;
-    background: #f8fafc;
-    border: 1px solid #cbd5e1;
-    display: grid;
-    place-items: center;
-    color: #64748b;
-  }
-
-  /* Wellness tasks checkboxes */
-  .wellness-task {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.75rem;
-    margin-bottom: 0.85rem;
-  }
-  .wellness-checkbox {
-    width: 1.1rem;
-    height: 1.1rem;
-    border-radius: 50%;
-    border: 1.5px solid #cbd5e1;
-    cursor: pointer;
-    display: grid;
-    place-items: center;
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
-  .wellness-checkbox.checked {
-    background: #10b981;
-    border-color: #10b981;
-    color: white;
-  }
-  .wellness-task-desc h5 {
-    margin: 0;
-    font-size: 0.85rem;
-    font-weight: 750;
-    color: #1e293b;
-  }
-  .wellness-task-desc p {
-    margin: 0.15rem 0 0;
-    font-size: 0.75rem;
-    color: #64748b;
-  }
-
-  /* Recipe card */
-  .recipe-card {
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    overflow: hidden;
-    background: white;
-  }
-  .recipe-img {
-    height: 6rem;
-    width: 100%;
-    object-fit: cover;
-    display: block;
-  }
-  .recipe-body {
-    padding: 0.85rem;
-  }
-  .recipe-badge {
-    font-size: 0.6rem;
-    font-weight: 800;
-    background: #ecfdf5;
-    color: #10b981;
-    padding: 0.15rem 0.35rem;
-    border-radius: 4px;
-    text-transform: uppercase;
-    display: inline-block;
-    margin-bottom: 0.25rem;
-  }
-
-  /* Daily Management row list */
-  .daily-task-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #f8fafc;
-    border: 1px solid #cbd5e1;
-    border-radius: 10px;
-    padding: 0.65rem 0.85rem;
-    margin-bottom: 0.5rem;
-  }
-
-  /* Educational panel articles */
-  .edu-article {
-    border-bottom: 1px solid #f1f5f9;
-    padding-bottom: 0.75rem;
-    margin-bottom: 0.75rem;
-  }
-  .edu-article:last-child {
-    border-bottom: 0;
-    margin-bottom: 0;
-  }
-  .edu-tag {
-    font-size: 0.58rem;
-    font-weight: 800;
-    color: #3b82f6;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    display: block;
-    margin-bottom: 0.15rem;
-  }
-  .edu-title {
-    font-size: 0.82rem;
-    font-weight: 750;
-    color: #1e293b;
-    margin: 0;
-    line-height: 1.3;
-  }
-</style>
-
-<div class="dashboard-container" id="dashboard-container">
-  <!-- Sidebar Navigation -->
-  <aside class="sidebar">
-    <div>
-      <div style="display: flex; align-items: center; gap: 0.75rem; padding-left: 0.5rem; margin-bottom: 1.5rem;">
-        <img src="{{ url_for('static', filename='images/patient_avatar.png') }}" style="width: 2.8rem; height: 2.8rem; border-radius:50%; object-fit: cover;" alt="Anita profile">
-        <div class="sidebar-brand-section">
-          <h4 style="margin: 0; font-size: 0.95rem; font-weight: 800; color: #1e293b;">{{ session.user.name }}</h4>
-          <span style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Health Score: 85</span>
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Anita Patel | CardioHealth Portal</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F8FAFC; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
+        .vital-shadow { box-shadow: 0px 2px 4px rgba(26, 42, 108, 0.05); }
+        .vital-shadow-hover:hover { box-shadow: 0px 10px 20px rgba(26, 42, 108, 0.1); }
+        
+        @keyframes dash {
+          to { stroke-dashoffset: 0; }
+        }
+        .animate-gauge {
+          stroke-dasharray: 251.2;
+          stroke-dashoffset: 251.2;
+          animation: dash 1.5s ease-out forwards;
+        }
+    </style>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "outline": "#767681",
+                "on-tertiary": "#ffffff",
+                "status-stable": "#1a2a6c",
+                "inverse-surface": "#2c3041",
+                "outline-variant": "#c6c5d2",
+                "primary-fixed-dim": "#b9c3ff",
+                "secondary-container": "#fe5c4a",
+                "gradient-vital": "linear-gradient(135deg, #1a2a6c 0%, #c0392b 100%)",
+                "status-critical": "#E74C3C",
+                "on-surface-variant": "#454650",
+                "on-background": "#171b2b",
+                "on-primary-fixed-variant": "#334284",
+                "tertiary-fixed-dim": "#ffb4a9",
+                "surface-dim": "#d6d9f0",
+                "surface-container-highest": "#dfe1f8",
+                "on-error": "#ffffff",
+                "secondary-fixed": "#ffdad5",
+                "error": "#ba1a1a",
+                "on-tertiary-fixed-variant": "#8e130c",
+                "on-primary-fixed": "#001356",
+                "primary": "#001255",
+                "surface-variant": "#dfe1f8",
+                "on-error-container": "#93000a",
+                "error-container": "#ffdad6",
+                "on-secondary-fixed": "#410000",
+                "tertiary-container": "#680001",
+                "secondary-fixed-dim": "#ffb4a9",
+                "on-secondary": "#ffffff",
+                "inverse-on-surface": "#efefff",
+                "surface-bright": "#faf8ff",
+                "primary-fixed": "#dde1ff",
+                "on-tertiary-fixed": "#410000",
+                "primary-container": "#1a2a6c",
+                "surface": "#faf8ff",
+                "tertiary-fixed": "#ffdad5",
+                "secondary": "#b4271d",
+                "on-secondary-container": "#610001",
+                "surface-light": "#F8FAFC",
+                "on-secondary-fixed-variant": "#910807",
+                "background": "#faf8ff",
+                "surface-container-high": "#e4e7fe",
+                "surface-container-low": "#f3f2ff",
+                "surface-container-lowest": "#ffffff",
+                "on-primary-container": "#8594dc",
+                "on-primary": "#ffffff",
+                "surface-muted": "#F1F5F9",
+                "on-tertiary-container": "#fe6653",
+                "on-surface": "#171b2b",
+                "surface-tint": "#4b5a9e",
+                "inverse-primary": "#b9c3ff",
+                "surface-container": "#ebedff",
+                "tertiary": "#400000"
+            },
+            "spacing": {
+                "xs": "8px",
+                "md": "24px",
+                "margin-desktop": "40px",
+                "base": "4px",
+                "lg": "32px",
+                "margin-mobile": "16px",
+                "sm": "16px",
+                "gutter": "24px"
+            },
+            "fontFamily": {
+                "body-lg": ["Inter"],
+                "display-lg": ["Inter"],
+                "title-lg": ["Inter"],
+                "headline-md": ["Inter"],
+                "label-sm": ["Inter"],
+                "headline-lg": ["Inter"],
+                "label-md": ["Inter"],
+                "body-md": ["Inter"],
+                "data-mono": ["Inter"]
+            }
+          }
+        }
+      }
+    </script>
+</head>
+<body class="text-on-surface">
+<div class="flex min-h-screen">
+    <!-- SideNavBar -->
+    <aside class="hidden md:flex flex-col h-screen sticky top-0 w-64 bg-surface-container-low border-r border-outline-variant py-lg px-md gap-4">
+        <div class="flex items-center gap-3 mb-8 px-4">
+            <span class="material-symbols-outlined text-primary text-3xl">monitor_heart</span>
+            <span class="font-headline-md text-headline-md font-bold text-primary">CardioPortal</span>
         </div>
-      </div>
-
-      <nav class="sidebar-menu">
-        <a href="{{ url_for('dashboard.home') }}" class="sidebar-menu-item">
-          <i data-lucide="layout-grid"></i>
-          <span class="menu-text">My Health Dashboard</span>
-        </a>
-        <a href="{{ url_for('patient.patient_dashboard') }}" class="sidebar-menu-item active">
-          <i data-lucide="heart"></i>
-          <span class="menu-text">Personal Health Hub</span>
-        </a>
-        <a href="#" class="sidebar-menu-item">
-          <i data-lucide="activity"></i>
-          <span class="menu-text">Progress Tracking</span>
-        </a>
-        <a href="#" class="sidebar-menu-item">
-          <i data-lucide="calendar"></i>
-          <span class="menu-text">Appointments</span>
-        </a>
-        <a href="#" class="sidebar-menu-item">
-          <i data-lucide="pill"></i>
-          <span class="menu-text">Medications</span>
-        </a>
-        <a href="#" class="sidebar-menu-item">
-          <i data-lucide="book-open"></i>
-          <span class="menu-text">Health Journal</span>
-        </a>
-        <a href="#" class="sidebar-menu-item">
-          <i data-lucide="award"></i>
-          <span class="menu-text">Health Education</span>
-        </a>
-      </nav>
-    </div>
-
-    <div class="sidebar-footer">
-      <button class="btn-log-entry" onclick="alert('Opening Daily Vitals log logger entry widget...')">
-        <i data-lucide="plus"></i>
-        <span>Log Daily Entry</span>
-      </button>
-      <a href="#" class="sidebar-menu-item" style="margin: 0;"><i data-lucide="help-circle"></i> <span class="menu-text">Help</span></a>
-      <a href="{{ url_for('auth.logout') }}" class="sidebar-menu-item" style="margin: 0; color: #ef4444; border-left-color: transparent;"><i data-lucide="log-out"></i> <span class="menu-text">Logout</span></a>
-    </div>
-  </aside>
-
-  <!-- Workspace content -->
-  <main class="workspace">
+        <div class="flex items-center gap-4 px-4 mb-8">
+            <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-primary-container flex-shrink-0">
+                <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvALTSQH4T-PZYMxkB1NDe2LjBsm8yXdepHekbWlwEjFXXkY09rw5rF8TMwxcqSXGj-mWQwGfi0OuiyqdsN9UoQRttPTiAGTZNoTVlLAo7xrB3tmDzXnKjhltnwiXHapo_tKBUJWG6RpwYIEETC9Xe8BlbiCYAXqV0IeNwuFZpTimJxCBtNYMyUU8nMFtsdvOcsTJIMHirjVOp2wfsduKpEA0lha7tVxleEXIBXiw_pqP6hK6aqgUdb0xyWFLxPzwTgqq3vqKC-Yhr" alt="Anita Patel Avatar"/>
+            </div>
+            <div>
+                <h3 class="font-title-lg text-title-lg text-primary leading-tight font-bold">Anita Patel</h3>
+                <p class="font-label-sm text-label-sm text-on-surface-variant font-medium">Patient ID: 8829-X</p>
+            </div>
+        </div>
+        <nav class="flex-grow space-y-2 font-semibold text-sm">
+            <a class="flex items-center gap-3 bg-primary-container text-on-primary-container rounded-lg px-4 py-3 transition-all duration-150" href="{{ url_for('patient.patient_dashboard') }}">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span class="font-label-md text-label-md">Dashboard</span>
+            </a>
+            <a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 hover:bg-surface-container-high rounded-lg transition-all" href="#" onclick="alert('Viewing comprehensive Vitals Log...')">
+                <span class="material-symbols-outlined">monitor_heart</span>
+                <span class="font-label-md text-label-md">Vitals</span>
+            </a>
+            <a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 hover:bg-surface-container-high rounded-lg transition-all" href="{{ url_for('dashboard.clinical_analytics_page') }}">
+                <span class="material-symbols-outlined">show_chart</span>
+                <span class="font-label-md text-label-md">Analytics</span>
+            </a>
+            <a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 hover:bg-surface-container-high rounded-lg transition-all" href="#" onclick="alert('Appointments scheduler loaded...')">
+                <span class="material-symbols-outlined">calendar_today</span>
+                <span class="font-label-md text-label-md">Appointments</span>
+            </a>
+            <a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 hover:bg-surface-container-high rounded-lg transition-all" href="#" onclick="alert('Journal entries archive loading...')">
+                <span class="material-symbols-outlined">menu_book</span>
+                <span class="font-label-md text-label-md">Journal</span>
+            </a>
+        </nav>
+        <div class="mt-auto space-y-2 border-t border-outline-variant pt-4 font-semibold text-sm">
+            <button class="w-full bg-secondary text-on-secondary rounded-lg px-4 py-3 font-label-md font-bold flex items-center justify-center gap-2 vital-shadow-hover transition-transform active:scale-[0.98]" onclick="alert('Emergency clinical dispatcher dialed.')">
+                <span class="material-symbols-outlined text-sm">emergency</span>
+                Emergency Contact
+            </button>
+            <a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 hover:bg-surface-container-high rounded-lg transition-all" href="{{ url_for('dashboard.settings_page') }}">
+                <span class="material-symbols-outlined">settings</span>
+                <span class="font-label-md text-label-md">Settings</span>
+            </a>
+            <a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 hover:bg-surface-container-high rounded-lg transition-all" href="#" onclick="alert('Connecting CardioPortal Help Desk...')">
+                <span class="material-symbols-outlined">help</span>
+                <span class="font-label-md text-label-md">Support</span>
+            </a>
+        </div>
+    </aside>
     
-    <!-- 1. Header Section -->
-    <div class="welcome-header">
-      <div>
-        <h2>Welcome back, {{ session.user.name }}! 👋</h2>
-        <div class="welcome-meta">
-          <span><i data-lucide="clock" style="width: 0.9rem; height: 0.9rem; display:inline-block; vertical-align:middle;"></i> Last login: Today, 9:30 AM</span>
-          <span>|</span>
-          <span class="health-score-pill"><i data-lucide="shield-check" style="width: 0.9rem; height: 0.9rem; display:inline-block; vertical-align:middle;"></i> Health score: 78/100 (Good)</span>
-        </div>
-        <p style="margin: 0.5rem 0 0; font-size: 0.85rem; font-weight: 700; color: #ef4444;"><i data-lucide="calendar" style="width: 1rem; height: 1rem; display:inline-block; vertical-align:middle;"></i> Next appointment: July 25, 2026</p>
-      </div>
-
-      <button class="btn-solid-dark" style="padding: 0.65rem 1.25rem; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.5rem;" onclick="alert('Preparing download payload for health records...')">
-        <i data-lucide="download" style="width: 1.1rem; height: 1.1rem;"></i> Download Health Report
-      </button>
-    </div>
-
-    <!-- 2. Health Score Card & Metrics Row -->
-    <div class="metrics-grid-row">
-      
-      <!-- Score Gauge card -->
-      <div class="gauge-card">
-        <button class="heart-heartbeat-btn active" title="Mark favorite status"><i data-lucide="heart" style="fill:#ef4444; color:#ef4444; width:1.15rem; height:1.15rem;"></i></button>
-        <span style="font-size:0.65rem; font-weight:800; color:#64748b; letter-spacing:0.5px; text-transform:uppercase;">TOTAL HEALTH WELLNESS</span>
+    <!-- Main Content -->
+    <main class="flex-grow overflow-x-hidden pb-12">
+        <!-- TopAppBar -->
+        <header class="bg-surface sticky top-0 z-30 border-b border-outline-variant shadow-sm px-margin-desktop py-4 flex justify-between items-center max-w-[1440px] mx-auto">
+            <div class="flex-1 max-w-xl">
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+                    <input class="w-full pl-10 pr-4 py-2 bg-surface-container rounded-full border-none focus:ring-2 focus:ring-primary text-body-md" placeholder="Search medical records, vitals, or reports..." type="text"/>
+                </div>
+            </div>
+            <div class="flex items-center gap-6 ml-md font-semibold text-xs">
+                <button class="relative text-on-surface-variant hover:text-primary transition-colors" onclick="alert('No unread notifications.')">
+                    <span class="material-symbols-outlined">notifications</span>
+                    <span class="absolute -top-1 -right-1 w-2 h-2 bg-secondary rounded-full"></span>
+                </button>
+                <div class="flex items-center gap-2 cursor-pointer group" onclick="alert('User logged in: Anita Patel')">
+                    <span class="font-label-md text-label-md text-on-surface group-hover:text-primary">Anita Patel</span>
+                    <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary">account_circle</span>
+                </div>
+            </div>
+        </header>
         
-        <div style="position:relative; display:flex; justify-content:center; align-items:center; width:100%;">
-          <svg class="score-gauge-svg" viewBox="0 0 100 100">
-            <circle class="score-gauge-track" cx="50" cy="50" r="40"></circle>
-            <circle class="score-gauge-fill" cx="50" cy="50" r="40"></circle>
-          </svg>
-          <div class="score-gauge-text">78<span style="display:block; font-size:0.65rem; color:#64748b; font-weight:700; text-transform:uppercase; margin-top:-2px;">Good</span></div>
-        </div>
-
-        <div style="margin-top: 0.5rem;">
-          <p style="margin:0; font-size: 0.78rem; font-weight:600; color:#64748b;">Risk level: <strong style="color:#a855f7;">Moderate</strong></p>
-          <p style="margin:0.15rem 0 0.5rem; font-size: 0.75rem; font-weight:600; color:#475569;">10-year risk prediction: <strong>{{ patient.framingham_score if patient else '8.5' }}%</strong></p>
-          <span class="kpi-badge green" style="background:#ecfdf5; color:#10b981; font-weight:800;">+3 pts since June</span>
-        </div>
-      </div>
-
-      <!-- BP Box -->
-      <div class="kpi-box elevated">
-        <div class="kpi-label-wrap">
-          <span class="kpi-sub-lbl">BP</span>
-          <span class="kpi-unit-lbl">mmHg</span>
-        </div>
-        <span class="kpi-main-val">125/82</span>
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <span class="kpi-status-badge elevated">Elevated</span>
-          <i data-lucide="trending-up" style="color:#ef4444; width:1rem; height:1rem;"></i>
-        </div>
-      </div>
-
-      <!-- Cholesterol Box -->
-      <div class="kpi-box normal">
-        <div class="kpi-label-wrap">
-          <span class="kpi-sub-lbl">Cholesterol</span>
-          <span class="kpi-unit-lbl">mg/dL</span>
-        </div>
-        <span class="kpi-main-val">195</span>
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <span class="kpi-status-badge normal">Normal</span>
-          <i data-lucide="trending-down" style="color:#10b981; width:1rem; height:1rem;"></i>
-        </div>
-      </div>
-
-      <!-- BMI Box -->
-      <div class="kpi-box watch">
-        <div class="kpi-label-wrap">
-          <span class="kpi-sub-lbl">BMI</span>
-          <span class="kpi-unit-lbl">Overweight</span>
-        </div>
-        <span class="kpi-main-val">27.4</span>
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <span class="kpi-status-badge watch">Watch</span>
-          <span style="color:#cbd5e1; font-weight:800;">—</span>
-        </div>
-      </div>
-
-      <!-- Blood Sugar Box -->
-      <div class="kpi-box critical">
-        <div class="kpi-label-wrap">
-          <span class="kpi-sub-lbl">Blood Sugar</span>
-          <span class="kpi-unit-lbl">mg/dL</span>
-        </div>
-        <span class="kpi-main-val">112</span>
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <span class="kpi-status-badge critical">Critical</span>
-          <i data-lucide="alert-circle" style="color:#ef4444; width:1rem; height:1rem;"></i>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- 3. Progress Tracking Panel -->
-    <div class="vitals-progress-panel">
-      <div class="vitals-progress-head">
-        <h3>Vital Progress Tracking</h3>
-        <div class="vitals-progress-tabs">
-          <button class="vitals-tab-btn active">Weekly</button>
-          <button class="vitals-tab-btn">Monthly</button>
-        </div>
-      </div>
-
-      <div class="charts-sub-row">
-        <!-- Chart 1: Weight Trend -->
-        <div class="chart-sub-box">
-          <h4>Weight Trend</h4>
-          <div style="height: 6rem; position: relative;">
-            <canvas id="weightProgressChart"></canvas>
-          </div>
-          <span style="font-size: 0.72rem; font-weight: 700; color: #a855f7; margin-top: 0.5rem; text-align: center;">-2.4 lbs since Jan</span>
-        </div>
-
-        <!-- Chart 2: Steps -->
-        <div class="chart-sub-box">
-          <h4>Steps (7d Avg)</h4>
-          <div style="height: 6rem; position: relative;">
-            <canvas id="stepsProgressChart"></canvas>
-          </div>
-          <span style="font-size: 0.72rem; font-weight: 700; color: #06b6d4; margin-top: 0.5rem; text-align: center;">8,420 avg steps</span>
-        </div>
-
-        <!-- Chart 3: BP stability -->
-        <div class="chart-sub-box">
-          <h4>BP Stability</h4>
-          <div style="height: 6rem; position: relative;">
-            <canvas id="bpStabilityChart"></canvas>
-          </div>
-          <span style="font-size: 0.72rem; font-weight: 700; color: #3b82f6; margin-top: 0.5rem; text-align: center;">Steady Improvement</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- 4. Lifestyle & Personalized Actions columns -->
-    <div class="two-column-row">
-      
-      <!-- Left Panel: Lifestyle Insights -->
-      <div class="panel-card" style="min-height: auto;">
-        <div class="panel-header"><h3>Lifestyle Insights</h3></div>
-        
-        <div style="display:flex; flex-direction:column; gap:0.5rem; margin-top:0.5rem;">
-          
-          <!-- Lifestyle 1: Smoking -->
-          <div class="lifestyle-item">
-            <div class="lifestyle-left">
-              <div class="lifestyle-icon-wrap"><i data-lucide="ban" style="width:1.15rem; height:1.15rem;"></i></div>
-              <div>
-                <h5 style="margin:0; font-size: 0.82rem; font-weight:750; color:#1e293b;">Smoking</h5>
-                <span style="font-size:0.75rem; color:#64748b; font-weight:600;">Non-smoker</span>
-              </div>
-            </div>
-            <i data-lucide="check-circle-2" style="color:#10b981; fill:#ecfdf5; width:1.3rem; height:1.3rem;"></i>
-          </div>
-
-          <!-- Lifestyle 2: Physical Activity -->
-          <div class="lifestyle-item">
-            <div class="lifestyle-left">
-              <div class="lifestyle-icon-wrap"><i data-lucide="activity" style="width:1.15rem; height:1.15rem;"></i></div>
-              <div>
-                <h5 style="margin:0; font-size: 0.82rem; font-weight:750; color:#1e293b;">Physical Activity</h5>
-                <span style="font-size:0.75rem; color:#64748b; font-weight:600;">4 / 7 days this week</span>
-              </div>
-            </div>
-            <!-- Dot indicators representation -->
-            <div style="display:flex; gap:3px;">
-              <div style="width:8px; height:8px; border-radius:50%; background:#06b6d4;"></div>
-              <div style="width:8px; height:8px; border-radius:50%; background:#06b6d4;"></div>
-              <div style="width:8px; height:8px; border-radius:50%; background:#06b6d4;"></div>
-              <div style="width:8px; height:8px; border-radius:50%; background:#06b6d4;"></div>
-              <div style="width:8px; height:8px; border-radius:50%; background:#e2e8f0;"></div>
-              <div style="width:8px; height:8px; border-radius:50%; background:#e2e8f0;"></div>
-            </div>
-          </div>
-
-          <!-- Lifestyle 3: Sleep Quality -->
-          <div class="lifestyle-item">
-            <div class="lifestyle-left">
-              <div class="lifestyle-icon-wrap"><i data-lucide="moon" style="width:1.15rem; height:1.15rem;"></i></div>
-              <div>
-                <h5 style="margin:0; font-size: 0.82rem; font-weight:750; color:#1e293b;">Sleep Quality</h5>
-                <span style="font-size:0.75rem; color:#64748b; font-weight:600;">7.2h (Optimal)</span>
-              </div>
-            </div>
-            <a href="#" style="font-size:0.75rem; font-weight:750; color:#3b82f6; text-decoration:none;" onclick="alert('Launch sleep log entries diary...')">Log Sleep</a>
-          </div>
-
-          <!-- Lifestyle 4: Stress Levels -->
-          <div class="lifestyle-item">
-            <div class="lifestyle-left">
-              <div class="lifestyle-icon-wrap"><i data-lucide="meh" style="width:1.15rem; height:1.15rem;"></i></div>
-              <div>
-                <h5 style="margin:0; font-size: 0.82rem; font-weight:750; color:#1e293b;">Stress Levels</h5>
-                <span style="font-size:0.75rem; color:#64748b; font-weight:600;">Moderate (Reported)</span>
-              </div>
-            </div>
-            <span class="kpi-badge watch" style="background:#fffbeb; color:#d97706; font-weight:800; border-radius:4px; text-transform:uppercase; font-size:0.62rem; padding:0.15rem 0.35rem;">Watch</span>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- Right Panel: Wellness Actions -->
-      <div class="panel-card" style="min-height: auto;">
-        <div class="panel-header">
-          <h3>Personalized Wellness Actions</h3>
-          <small style="font-size:0.7rem; color:#94a3b8; font-weight:700;">Updated 12h ago</small>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1.1fr; gap: 1rem; margin-top: 0.5rem;">
-          <!-- Checkbox Actions list -->
-          <div>
-            <div class="wellness-task">
-              <div class="wellness-checkbox" onclick="this.classList.toggle('checked')"></div>
-              <div class="wellness-task-desc">
-                <h5>Daily Step Goal</h5>
-                <p>Target: 10,000 steps today. You're at 6,200.</p>
-              </div>
+        <div class="p-margin-desktop max-w-[1440px] mx-auto space-y-gutter">
+            <!-- Welcome Header Section -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-lg rounded-xl vital-shadow">
+                <div>
+                    <h1 class="font-headline-lg text-headline-lg text-primary">Welcome back, Anita! 👋</h1>
+                    <div class="flex gap-4 mt-2 text-on-surface-variant font-body-md text-xs font-semibold">
+                        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">schedule</span> Last login: Today, 9:30 AM</span>
+                        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">event</span> Next appt: July 25, 2026</span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-6">
+                    <div class="text-right">
+                        <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-bold">Overall Health Score</p>
+                        <p class="font-headline-md text-headline-md text-status-stable font-extrabold">78<span class="text-body-md text-on-surface-variant font-medium">/100</span> <span class="text-label-md font-bold text-green-600">(Good)</span></p>
+                    </div>
+                    <button class="flex items-center gap-2 bg-primary text-on-primary px-6 py-3 rounded-lg font-label-md font-bold vital-shadow-hover transition-all hover:opacity-90 active:scale-95 shadow-sm" onclick="alert('Compiling health logs report PDF...')">
+                        <span class="material-symbols-outlined">download</span>
+                        Download Health Report
+                    </button>
+                </div>
             </div>
             
-            <div class="wellness-task">
-              <div class="wellness-checkbox" onclick="this.classList.toggle('checked')"></div>
-              <div class="wellness-task-desc">
-                <h5>Sodium Reduction</h5>
-                <p>Limit intake to < 1,500mg. Check lunch logs.</p>
-              </div>
-            </div>
-
-            <div class="wellness-task">
-              <div class="wellness-checkbox checked" onclick="this.classList.toggle('checked')"><i data-lucide="check" style="width:0.7rem; height:0.7rem;"></i></div>
-              <div class="wellness-task-desc">
-                <h5>Morning Meditation</h5>
-                <p>10 minutes completed.</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Recipe block -->
-          <div class="recipe-card">
-            <img class="recipe-img" src="{{ url_for('static', filename='images/doctors_analyzing.png') }}" alt="Recipe representation salad image">
-            <div class="recipe-body">
-              <span class="recipe-badge">Heart Healthy</span>
-              <h5 style="margin:0 0 0.25rem; font-size: 0.8rem; font-weight:800; color:#1e293b;">Zesty Lemon Salmon Salad</h5>
-              <p style="margin:0 0 0.5rem; font-size:0.68rem; color:#64748b; line-height:1.3;">A nutrient-dense meal high in Omega-3s and fiber. Perfect for heart health.</p>
-              <a href="#" style="font-size: 0.72rem; font-weight:850; color:#3b82f6; text-decoration:none;" onclick="alert('Showing recipe instructions: Zesty Lemon Salmon Salad')">View Recipe →</a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- 5. Appointment Management & Education blocks -->
-    <div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 1.5rem;">
-      <!-- Left: Appointment & Daily meds -->
-      <div class="panel-card" style="min-height: auto;">
-        <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 1.5rem;">
-          <!-- Next Appointment details -->
-          <div>
-            <span style="font-size: 0.65rem; font-weight:800; color:#94a3b8; letter-spacing:0.5px; display:block; margin-bottom:0.5rem;"><i data-lucide="calendar" style="width: 0.95rem; height: 0.95rem; display:inline-block; vertical-align:middle; margin-right:2px;"></i> NEXT APPOINTMENT</span>
-            
-            <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 1rem;">
-              <h4 style="margin:0; font-size: 0.92rem; font-weight:800; color:#1e293b;">Cardiology Follow-up</h4>
-              <p style="margin:0.25rem 0; font-size: 0.78rem; color:#64748b; font-weight:600;">Dr. Julian Vance,<br>Cardiology Center</p>
-              
-              <div style="background: #eff6ff; border-radius: 8px; padding: 0.5rem; margin-top: 0.75rem; text-align: center;">
-                <span style="display:block; font-size: 0.85rem; font-weight:800; color:#1e40af;">July 25, 2026</span>
-                <small style="font-size: 0.68rem; color:#3b82f6; font-weight:700;">10:45 AM</small>
-              </div>
-
-              <div style="display:flex; gap:0.5rem; margin-top:0.75rem;">
-                <button class="btn-outline-brand" style="flex:1; font-size: 0.72rem; padding: 0.45rem;" onclick="alert('Reschedule request sent to support queue.')">Reschedule</button>
-                <button class="btn-solid-dark" style="flex:1.2; font-size: 0.72rem; padding: 0.45rem; background:#8b5cf6;" onclick="alert('Appointment confirmation successfully logged.')">Confirm</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Daily Management list -->
-          <div>
-            <span style="font-size: 0.65rem; font-weight:800; color:#94a3b8; letter-spacing:0.5px; display:block; margin-bottom:0.5rem;">DAILY MANAGEMENT</span>
-            
-            <div class="daily-task-item">
-              <div style="display:flex; align-items:center; gap:0.5rem;">
-                <i data-lucide="pill" style="color:#3b82f6; width:1.1rem; height:1.1rem;"></i>
-                <div>
-                  <h5 style="margin: 0; font-size: 0.78rem; font-weight: 750; color:#1e293b;">Atorvastatin (20mg)</h5>
-                  <small style="color:#64748b; font-size:0.68rem; font-weight:600;">9:00 PM</small>
+            <!-- Main Layout Grid -->
+            <div class="grid grid-cols-12 gap-gutter">
+                <!-- Left Column: Score & Risk -->
+                <div class="col-span-12 lg:col-span-3 space-y-gutter">
+                    <div class="bg-white p-md rounded-xl vital-shadow border border-surface-container-high">
+                        <h2 class="font-title-lg text-title-lg text-primary mb-6 border-b border-surface-muted pb-2 font-bold">Cardiac Health Score</h2>
+                        <div class="relative w-40 h-40 mx-auto flex items-center justify-center">
+                            <svg class="w-full h-full -rotate-90">
+                                <circle cx="80" cy="80" fill="none" r="70" stroke="#ebedff" stroke-width="12"></circle>
+                                <circle class="animate-gauge" cx="80" cy="80" fill="none" r="70" stroke="#1a2a6c" stroke-linecap="round" stroke-width="12" style="stroke-dashoffset: calc(440 - (440 * 78) / 100);"></circle>
+                            </svg>
+                            <div class="absolute text-center select-none">
+                                <span class="text-4xl font-extrabold text-primary">78</span>
+                                <p class="text-[10px] text-on-surface-variant font-bold tracking-wider">INDEX</p>
+                            </div>
+                        </div>
+                        <div class="mt-6 text-center text-xs">
+                            <span class="bg-yellow-100 text-yellow-800 text-[10px] font-bold px-3 py-1 rounded-full uppercase">Moderate Risk</span>
+                            <p class="mt-4 font-body-md text-on-surface-variant font-semibold">Your score is <span class="text-error font-bold">5% higher</span> than last month.</p>
+                            <p class="text-sm italic text-on-surface-variant mt-2">"Keep up the walking! Consistency is key."</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gradient-to-br from-primary-container to-[#001356] p-md rounded-xl vital-shadow text-on-primary">
+                        <h3 class="font-label-md uppercase tracking-widest opacity-80 mb-2 text-[10px] font-bold">10-Year Risk Prediction</h3>
+                        <div class="flex items-end gap-2">
+                            <span class="text-4xl font-extrabold">8.5%</span>
+                            <span class="text-green-400 font-label-md font-bold flex items-center mb-1">
+                                <span class="material-symbols-outlined text-sm">arrow_downward</span> 1.2%
+                            </span>
+                        </div>
+                        <p class="mt-4 text-xs opacity-75">Based on your current lifestyle factors and recent lab results.</p>
+                    </div>
                 </div>
-              </div>
-              <button style="background:transparent; border:0; color:#94a3b8; cursor:pointer;" onclick="this.style.color='#10b981'; alert('Atorvastatin log marked taken.')"><i data-lucide="check-circle"></i></button>
-            </div>
-
-            <div class="daily-task-item" style="border-color:#10b981; background:#ecfdf5;">
-              <div style="display:flex; align-items:center; gap:0.5rem;">
-                <i data-lucide="pill" style="color:#10b981; width:1.1rem; height:1.1rem;"></i>
-                <div>
-                  <h5 style="margin: 0; font-size: 0.78rem; font-weight: 750; color:#047857;">Morning Multi-vitamin</h5>
-                  <small style="color:#059669; font-size:0.68rem; font-weight:600;">Taken</small>
+                
+                <!-- Middle Column: Metrics & Charts -->
+                <div class="col-span-12 lg:col-span-6 space-y-gutter">
+                    <!-- Section 2: Key Health Metrics -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                        <!-- BP Card -->
+                        <div class="bg-white p-4 rounded-xl vital-shadow border border-green-100 flex flex-col justify-between">
+                            <p class="font-label-sm text-on-surface-variant mb-1 font-bold">Blood Pressure</p>
+                            <p class="font-title-lg text-title-lg text-primary font-extrabold">125/82</p>
+                            <div class="flex items-center gap-1 mt-2 text-green-600 font-label-sm font-bold">
+                                <span class="material-symbols-outlined text-xs">check_circle</span> Normal
+                            </div>
+                        </div>
+                        
+                        <!-- Cholesterol Card -->
+                        <div class="bg-white p-4 rounded-xl vital-shadow border border-yellow-100 flex flex-col justify-between">
+                            <p class="font-label-sm text-on-surface-variant mb-1 font-bold">Cholesterol</p>
+                            <p class="font-title-lg text-title-lg text-primary font-extrabold">195 <span class="text-xs font-normal">mg/dL</span></p>
+                            <div class="flex items-center gap-1 mt-2 text-yellow-600 font-label-sm font-bold">
+                                <span class="material-symbols-outlined text-xs">warning</span> Borderline
+                            </div>
+                        </div>
+                        
+                        <!-- BMI Card -->
+                        <div class="bg-white p-4 rounded-xl vital-shadow border border-yellow-100 flex flex-col justify-between">
+                            <p class="font-label-sm text-on-surface-variant mb-1 font-bold">BMI</p>
+                            <p class="font-title-lg text-title-lg text-primary font-extrabold">27.4</p>
+                            <div class="flex items-center gap-1 mt-2 text-yellow-600 font-label-sm font-bold">
+                                <span class="material-symbols-outlined text-xs">trending_up</span> Overweight
+                            </div>
+                        </div>
+                        
+                        <!-- Blood Sugar Card -->
+                        <div class="bg-white p-4 rounded-xl vital-shadow border border-orange-100 flex flex-col justify-between">
+                            <p class="font-label-sm text-on-surface-variant mb-1 font-bold">Blood Sugar</p>
+                            <p class="font-title-lg text-title-lg text-primary font-extrabold">112 <span class="text-xs font-normal">mg/dL</span></p>
+                            <div class="flex items-center gap-1 mt-2 text-orange-600 font-label-sm font-bold">
+                                <span class="material-symbols-outlined text-xs">error</span> Pre-diabetic
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Section 3: Progress Tracking -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+                        <div class="bg-white p-md rounded-xl vital-shadow border border-surface-container-high col-span-2">
+                            <div class="flex justify-between items-center mb-6">
+                                <h2 class="font-title-lg text-title-lg text-primary font-bold">Steps per Day</h2>
+                                <select class="bg-surface-container border-none text-xs font-label-md rounded-lg focus:ring-primary font-bold cursor-pointer py-1.5" onchange="alert('Loading steps history range...')">
+                                    <option>Last 7 Days</option>
+                                    <option>Last Month</option>
+                                </select>
+                            </div>
+                            <div class="h-48 flex items-end justify-between gap-2 px-2">
+                                <div class="w-full bg-primary-container opacity-30 rounded-t-lg h-[60%] hover:opacity-50 transition-opacity"></div>
+                                <div class="w-full bg-primary-container opacity-30 rounded-t-lg h-[80%] hover:opacity-50 transition-opacity"></div>
+                                <div class="w-full bg-primary-container opacity-30 rounded-t-lg h-[40%] hover:opacity-50 transition-opacity"></div>
+                                <div class="w-full bg-primary-container rounded-t-lg h-[95%] hover:opacity-90 transition-opacity"></div>
+                                <div class="w-full bg-primary-container opacity-30 rounded-t-lg h-[70%] hover:opacity-50 transition-opacity"></div>
+                                <div class="w-full bg-primary-container opacity-30 rounded-t-lg h-[55%] hover:opacity-50 transition-opacity"></div>
+                                <div class="w-full bg-primary opacity-90 rounded-t-lg h-[85%] relative group">
+                                    <div class="absolute -top-10 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] px-2 py-1 rounded hidden group-hover:block font-bold">10,240</div>
+                                </div>
+                            </div>
+                            <div class="flex justify-between mt-4 text-[10px] font-label-md text-on-surface-variant font-bold">
+                                <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white p-md rounded-xl vital-shadow border border-surface-container-high">
+                            <h3 class="font-label-md text-primary mb-4 font-bold">Weight over 6 months</h3>
+                            <div class="h-32 w-full relative">
+                                <svg class="w-full h-full" viewbox="0 0 100 40">
+                                    <path d="M0,35 Q25,32 50,28 T100,20" fill="none" stroke="#1a2a6c" stroke-width="2"></path>
+                                    <circle cx="0" cy="35" fill="#1a2a6c" r="2"></circle>
+                                    <circle cx="100" cy="20" fill="#1a2a6c" r="2"></circle>
+                                </svg>
+                                <div class="flex justify-between mt-2 text-[10px] text-on-surface-variant font-bold">
+                                    <span>Jan</span><span>Mar</span><span>Jun</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white p-md rounded-xl vital-shadow border border-surface-container-high">
+                            <h3 class="font-label-md text-primary mb-4 font-bold">BP Trend (Systolic)</h3>
+                            <div class="h-32 w-full relative">
+                                <svg class="w-full h-full" viewbox="0 0 100 40">
+                                    <path d="M0,20 L20,25 L40,15 L60,18 L80,12 L100,10" fill="rgba(26, 42, 108, 0.1)" stroke="#1a2a6c" stroke-width="1.5"></path>
+                                </svg>
+                                <div class="flex justify-between mt-2 text-[10px] text-on-surface-variant font-bold">
+                                    <span>Wk 1</span><span>Wk 2</span><span>Wk 3</span><span>Wk 4</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
-              <i data-lucide="check-circle" style="color:#10b981; fill:#ecfdf5;"></i>
-            </div>
-
-            <div class="daily-task-item">
-              <div style="display:flex; align-items:center; gap:0.5rem;">
-                <i data-lucide="file-text" style="color:#64748b; width:1.1rem; height:1.1rem;"></i>
-                <div>
-                  <h5 style="margin: 0; font-size: 0.78rem; font-weight: 750; color:#1e293b;">Last Blood Test</h5>
-                  <small style="color:#64748b; font-size:0.68rem; font-weight:600;">Completed</small>
+                
+                <!-- Right Column: Lifestyle & Badges -->
+                <div class="col-span-12 lg:col-span-3 space-y-gutter">
+                    <div class="bg-white p-md rounded-xl vital-shadow border border-surface-container-high">
+                        <h2 class="font-title-lg text-title-lg text-primary mb-4 font-bold">Lifestyle</h2>
+                        <div class="space-y-4 font-bold text-xs">
+                            <div class="flex justify-between items-center p-3 bg-surface-container-low rounded-lg">
+                                <span class="flex items-center gap-2 text-body-md font-semibold"><span class="material-symbols-outlined text-on-surface-variant text-sm">no_photography</span> Smoking</span>
+                                <span class="text-green-600 text-sm">Non-smoker ✅</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-surface-container-low rounded-lg">
+                                <span class="flex items-center gap-2 text-body-md font-semibold"><span class="material-symbols-outlined text-on-surface-variant text-sm">fitness_center</span> Activity</span>
+                                <span class="text-primary text-sm">4/7 days</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-surface-container-low rounded-lg">
+                                <span class="flex items-center gap-2 text-body-md font-semibold"><span class="material-symbols-outlined text-on-surface-variant text-sm">bedtime</span> Sleep</span>
+                                <span class="text-primary text-sm">7.2 hrs</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-surface-container-low rounded-lg">
+                                <span class="flex items-center gap-2 text-body-md font-semibold"><span class="material-symbols-outlined text-on-surface-variant text-sm">psychology</span> Stress</span>
+                                <span class="text-yellow-600 text-sm">Moderate</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-md rounded-xl vital-shadow border border-surface-container-high text-xs">
+                        <h2 class="font-title-lg text-title-lg text-primary mb-4 font-bold">Weekly Action Items</h2>
+                        <ul class="space-y-3 font-semibold">
+                            <li class="flex items-center gap-3">
+                                <div class="w-5 h-5 border-2 border-primary rounded flex items-center justify-center cursor-pointer" onclick="alert('Toggled Steps Goal.')"><span class="material-symbols-outlined text-xs text-primary">check</span></div>
+                                <span class="text-body-md text-on-surface line-through opacity-50 select-none">10,000 steps target</span>
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <div class="w-5 h-5 border-2 border-primary rounded cursor-pointer" onclick="alert('Toggled Sodium Intake Goal.')"></div>
+                                <span class="text-body-md text-on-surface select-none">Reduce sodium intake</span>
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <div class="w-5 h-5 border-2 border-primary rounded flex items-center justify-center cursor-pointer" onclick="alert('Toggled Walking breaks Goal.')"><span class="material-symbols-outlined text-xs text-primary">check</span></div>
+                                <span class="text-body-md text-on-surface line-through opacity-50 select-none">Hourly walking breaks</span>
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <div class="w-5 h-5 border-2 border-primary rounded cursor-pointer" onclick="alert('Toggled Meditation Goal.')"></div>
+                                <span class="text-body-md text-on-surface select-none">Evening Meditation</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-white p-md rounded-xl vital-shadow border border-surface-container-high">
+                        <h2 class="font-title-lg text-title-lg text-primary mb-4 font-bold">Health Badges</h2>
+                        <div class="flex flex-wrap gap-4 text-center text-[10px] font-bold text-on-surface-variant">
+                            <div class="group cursor-help" title="7-Day healthy logs streak achieved!">
+                                <div class="w-14 h-14 bg-primary-container rounded-full flex items-center justify-center text-on-primary-container mb-2 group-hover:scale-110 transition-transform">
+                                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+                                </div>
+                                <p>7-Day Streak</p>
+                            </div>
+                            <div class="group cursor-help" title="Target step goal achieved 5 days in a row.">
+                                <div class="w-14 h-14 bg-secondary-container rounded-full flex items-center justify-center text-on-secondary-container mb-2 group-hover:scale-110 transition-transform">
+                                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">directions_run</span>
+                                </div>
+                                <p>Step Master</p>
+                            </div>
+                            <div class="group cursor-help grayscale opacity-50" title="Complete hydration logs to unlock badge.">
+                                <div class="w-14 h-14 bg-surface-container-highest rounded-full flex items-center justify-center text-on-surface-variant mb-2">
+                                    <span class="material-symbols-outlined">water_drop</span>
+                                </div>
+                                <p>Hydration</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
-              <a href="#" style="font-size:0.68rem; font-weight:750; color:#3b82f6; text-decoration:none;" onclick="alert('Downloading last blood test PDF results...')">View Results</a>
+                
+                <!-- Bottom Row: Appointments & Log -->
+                <div class="col-span-12 grid grid-cols-1 md:grid-cols-3 gap-gutter text-xs font-semibold">
+                    <!-- Appointment Card -->
+                    <div class="bg-white p-md rounded-xl vital-shadow border-l-4 border-primary flex flex-col justify-between">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="font-title-lg text-title-lg text-primary font-bold">Upcoming Appointment</h3>
+                                <p class="text-body-md text-on-surface-variant mt-0.5">Cardiology Consultation</p>
+                            </div>
+                            <div class="bg-primary-container text-on-primary-container p-2 rounded-lg flex items-center justify-center">
+                                <span class="material-symbols-outlined">calendar_month</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-10 h-10 rounded-full overflow-hidden bg-surface-container flex-shrink-0">
+                                <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjM8un91Mj2mJh13bh1WoBwBtxXAYMHpoDtCu7HKYZLnsgmQoiAJBdcSLZ36VgzfPpk4PUsiHuS99JmA_O-a85QUu6h4jixYvuDaeYNf0tq1-6Sn0_nGnrR9-gnxvzLstWtIqqY-bJzDrvIi88FYmF3lpRXXWb3wV1v1LaEqXjhuP655OZhg0KOWjG_4zOlgsbQzbesUVtP_dlDXq9oJDB1Q7wXMmtJQAgXRESDWjJ_AVl76rINoyse9fHSJp23r6ew3VRIwDhQgBq" alt="Dr Vikram Sharma"/>
+                            </div>
+                            <div>
+                                <p class="font-label-md text-on-surface font-bold">Dr. Vikram Sharma</p>
+                                <p class="text-[10px] text-on-surface-variant">July 25, 2026 • 10:30 AM</p>
+                            </div>
+                        </div>
+                        <button class="w-full py-2 border border-primary text-primary rounded-lg font-label-md font-bold hover:bg-primary hover:text-white transition-colors" onclick="alert('Appointments rescheduling screen loading...')">Reschedule</button>
+                    </div>
+                    
+                    <!-- Medication Card -->
+                    <div class="bg-white p-md rounded-xl vital-shadow border-l-4 border-secondary flex flex-col justify-between">
+                        <h3 class="font-title-lg text-title-lg text-primary mb-4 font-bold">Medication Reminder</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-3 bg-surface-container-lowest rounded-lg border border-surface-container-high cursor-pointer hover:bg-slate-50 transition-colors" onclick="alert('Confirming Atorvastatin 20mg has been taken.')">
+                                <div class="flex items-center gap-3">
+                                    <span class="material-symbols-outlined text-secondary">pill</span>
+                                    <div>
+                                        <p class="font-label-md text-on-surface font-bold">Atorvastatin</p>
+                                        <p class="text-[10px] text-on-surface-variant">20mg • Daily Dose</p>
+                                    </div>
+                                </div>
+                                <span class="text-sm font-bold text-secondary">8:00 PM</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 opacity-60 bg-surface-container-lowest rounded-lg border border-surface-container-high">
+                                <div class="flex items-center gap-3">
+                                    <span class="material-symbols-outlined text-green-600">check_circle</span>
+                                    <div>
+                                        <p class="font-label-md text-on-surface font-bold">Aspirin</p>
+                                        <p class="text-[10px] text-on-surface-variant">Taken at 8:15 AM</p>
+                                    </div>
+                                </div>
+                                <span class="text-xs font-medium text-green-600">Completed</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Journal Widget -->
+                    <div class="bg-white p-md rounded-xl vital-shadow border border-surface-container-high flex flex-col justify-between">
+                        <h3 class="font-title-lg text-title-lg text-primary mb-4 font-bold">Daily Health Journal</h3>
+                        <div class="flex gap-2 mb-4">
+                            <button class="flex-grow py-2 rounded-lg bg-surface-container hover:bg-primary-container hover:text-on-primary-container transition-all text-xl" onclick="selectMood('😊')">😊</button>
+                            <button class="flex-grow py-2 rounded-lg bg-surface-container hover:bg-primary-container hover:text-on-primary-container transition-all text-xl" onclick="selectMood('😐')">😐</button>
+                            <button class="flex-grow py-2 rounded-lg bg-primary-container text-on-primary-container transition-all text-xl" id="moodBtn">😌</button>
+                            <button class="flex-grow py-2 rounded-lg bg-surface-container hover:bg-primary-container hover:text-on-primary-container transition-all text-xl" onclick="selectMood('😓')">😓</button>
+                            <button class="flex-grow py-2 rounded-lg bg-surface-container hover:bg-primary-container hover:text-on-primary-container transition-all text-xl" onclick="selectMood('🤒')">🤒</button>
+                        </div>
+                        <div class="relative">
+                            <textarea id="journalNotes" class="w-full bg-surface-container-low border-none rounded-lg text-xs text-on-surface p-3 h-20 resize-none focus:ring-1 focus:ring-primary font-semibold" placeholder="Logged: 'Feeling energetic after morning walk. No chest pain.'"></textarea>
+                            <button class="absolute bottom-2 right-2 text-primary font-bold text-[10px] uppercase tracking-wider hover:opacity-85 active:scale-95 transition-transform" onclick="saveJournalEntry()">Save Entry</button>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
-
-      <!-- Right: Education / Community Forum stack -->
-      <div style="display:flex; flex-direction:column; gap:1.25rem;">
-        
-        <!-- Educational Center panel -->
-        <div class="panel-card" style="min-height: auto; padding: 1.1rem 1.25rem;">
-          <div class="panel-header" style="margin-bottom:0.75rem;"><h3>Educational Center</h3></div>
-          
-          <div class="edu-article">
-            <span class="edu-tag">Article</span>
-            <h5 class="edu-title">Benefits of Low-Impact Cardio for Heart Recovery</h5>
-            <small style="font-size: 0.65rem; color:#94a3b8; font-weight:600;">4 min read • Dr. Sarah Chen</small>
-          </div>
-
-          <div class="edu-article">
-            <span class="edu-tag" style="color:#a855f7;">Video</span>
-            <h5 class="edu-title">Mediterranean Diet: Common Myths Debunked</h5>
-            <small style="font-size: 0.65rem; color:#94a3b8; font-weight:600;">8 min watch • Nutrition Specialists</small>
-          </div>
-
-          <button class="btn-outline-brand" style="width:100%; font-size: 0.75rem; padding:0.45rem; margin-top:0.5rem;" onclick="alert('Loading health articles library database...')">Browse Library</button>
-        </div>
-
-        <!-- Community Forum block -->
-        <div style="background:#4f46e5; border-radius: 14px; padding: 1.15rem; color: white; position: relative; overflow: hidden;">
-          <div style="position:absolute; right:-1rem; bottom:-1rem; width:6rem; height:6rem; background:rgba(255,255,255,0.06); border-radius:50%;"></div>
-          <h4 style="margin: 0; font-size: 0.95rem; font-weight: 800; display:flex; align-items:center; gap:0.5rem;"><i data-lucide="users"></i> Community Forum</h4>
-          <p style="margin: 0.35rem 0 0.85rem; font-size: 0.72rem; color: rgba(255,255,255,0.85); line-height: 1.4; font-weight: 600;">
-            Connect with 2,400+ members on similar heart health journeys. Share tips and get support.
-          </p>
-          <button style="background:white; color:#4f46e5; border:0; font-weight:800; font-size: 0.75rem; border-radius:6px; padding:0.45rem 0.85rem; cursor:pointer;" onclick="alert('Redirecting to the CardioViz Patient Forums portal...')">Join Discussion</button>
-        </div>
-
-      </div>
-    </div>
-
-  </main>
+    </main>
 </div>
 
-{% endblock %}
-
-{% block scripts %}
-<!-- Load Chart.js CDN -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- BottomNavBar for Mobile -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-outline-variant flex justify-around items-center py-3 z-50 text-xs">
+    <a class="flex flex-col items-center gap-1 text-primary font-bold" href="#">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+        <span>Dashboard</span>
+    </a>
+    <a class="flex flex-col items-center gap-1 text-on-surface-variant" href="#" onclick="alert('Vitals Log loaded for Mobile viewport.')">
+        <span class="material-symbols-outlined">monitor_heart</span>
+        <span>Vitals</span>
+    </a>
+    <a class="flex flex-col items-center gap-1 text-on-surface-variant" href="#" onclick="alert('Appointments scheduler loaded for Mobile.')">
+        <span class="material-symbols-outlined">calendar_today</span>
+        <span>Appts</span>
+    </a>
+    <a class="flex flex-col items-center gap-1 text-on-surface-variant" href="{{ url_for('dashboard.settings_page') }}">
+        <span class="material-symbols-outlined">account_circle</span>
+        <span>Profile</span>
+    </a>
+</nav>
 
 <script>
-  // Sidebar toggle animation
-  const sidebarToggle = document.getElementById("sidebar-toggle");
-  const dbContainer = document.getElementById("dashboard-container");
-  const toggleIcon = document.getElementById("toggle-icon");
-  
-  if (sidebarToggle && dbContainer) {
-    sidebarToggle.addEventListener("click", () => {
-      dbContainer.classList.toggle("collapsed");
-      if (dbContainer.classList.contains("collapsed")) {
-        toggleIcon.setAttribute("data-lucide", "chevrons-right");
-      } else {
-        toggleIcon.setAttribute("data-lucide", "chevrons-left");
-      }
-      if (window.lucide) {
-        window.lucide.createIcons();
-      }
+    // Micro-interactions and effects
+    document.querySelectorAll('.vital-shadow-hover').forEach(card => {
+        card.addEventListener('mouseenter', () => {
+            card.style.transform = 'translateY(-2px)';
+        });
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = 'translateY(0)';
+        });
     });
-  }
 
-  // ----------------------------------------------------
-  // Chart.js Progress tracking graphs
-  // ----------------------------------------------------
-  document.addEventListener("DOMContentLoaded", () => {
-    // 1. Weight Progress Bar Chart
-    const weightCtx = document.getElementById("weightProgressChart").getContext("2d");
-    new Chart(weightCtx, {
-      type: 'bar',
-      data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-        datasets: [{
-          data: [154, 153, 151, 151, 149.5, 148],
-          backgroundColor: '#c084fc',
-          borderRadius: 4,
-          barThickness: 14
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { grid: { display: false } },
-          y: { grid: { color: '#f1f5f9' }, min: 140, max: 160 }
+    let selectedMoodVal = '😌';
+    function selectMood(mood) {
+        selectedMoodVal = mood;
+        alert(`Mood selected: ${mood}`);
+    }
+
+    function saveJournalEntry() {
+        const text = document.getElementById('journalNotes').value.trim();
+        if (text) {
+            alert(`Journal Entry Saved [Mood: ${selectedMoodVal}]: "${text}"`);
+        } else {
+            alert("Please input notes before saving.");
         }
-      }
-    });
+    }
 
-    // 2. Steps Bar Chart
-    const stepsCtx = document.getElementById("stepsProgressChart").getContext("2d");
-    new Chart(stepsCtx, {
-      type: 'bar',
-      data: {
-        labels: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
-        datasets: [{
-          data: [6400, 7800, 7200, 6800, 9200, 7650, 9800],
-          backgroundColor: '#22d3ee',
-          borderRadius: 4,
-          barThickness: 10
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { grid: { display: false } },
-          y: { grid: { color: '#f1f5f9' } }
-        }
-      }
+    window.addEventListener('load', () => {
+        console.log('Dashboard Initialized for Anita Patel');
     });
-
-    // 3. BP stability line chart
-    const bpStabilityCtx = document.getElementById("bpStabilityChart").getContext("2d");
-    new Chart(bpStabilityCtx, {
-      type: 'line',
-      data: {
-        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-        datasets: [{
-          data: [132, 129, 126, 125],
-          borderColor: '#0ea5e9',
-          backgroundColor: 'rgba(14, 165, 233, 0.05)',
-          fill: true,
-          tension: 0.4,
-          pointRadius: 4
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { grid: { display: false } },
-          y: { grid: { color: '#f1f5f9' }, min: 120, max: 140 }
-        }
-      }
-    });
-
-  });
 </script>
-{% endblock %}
+</body>
+</html>

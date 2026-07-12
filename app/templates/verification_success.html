@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Account Verified | CardioViz</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed": "#dde1ff",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary-container": "#610001",
+                    "primary-fixed-dim": "#b9c3ff",
+                    "secondary-container": "#fe5c4a",
+                    "on-surface": "#171b2b",
+                    "tertiary-container": "#680001",
+                    "primary": "#001255",
+                    "surface-muted": "#F1F5F9",
+                    "surface-light": "#F8FAFC",
+                    "tertiary-fixed-dim": "#ffb4a9",
+                    "on-primary": "#ffffff",
+                    "surface-container": "#ebedff",
+                    "error-container": "#ffdad6",
+                    "on-primary-fixed": "#001356",
+                    "on-tertiary-fixed": "#410000",
+                    "gradient-vital": "linear-gradient(135deg, #1a2a6c 0%, #c0392b 100%)",
+                    "surface-dim": "#d6d9f0",
+                    "secondary-fixed-dim": "#ffb4a9",
+                    "surface-variant": "#dfe1f8",
+                    "on-tertiary-fixed-variant": "#8e130c",
+                    "status-stable": "#1a2a6c",
+                    "status-critical": "#E74C3C",
+                    "on-primary-fixed-variant": "#334284",
+                    "on-primary-container": "#8594dc",
+                    "on-error": "#ffffff",
+                    "background": "#faf8ff",
+                    "on-background": "#171b2b",
+                    "surface-bright": "#faf8ff",
+                    "secondary": "#b4271d",
+                    "on-error-container": "#93000a",
+                    "on-tertiary-container": "#fe6653",
+                    "surface-container-high": "#e4e7fe",
+                    "primary-container": "#1a2a6c",
+                    "inverse-surface": "#2c3041",
+                    "secondary-fixed": "#ffdad5",
+                    "on-secondary": "#ffffff",
+                    "surface-container-highest": "#dfe1f8",
+                    "on-secondary-fixed-variant": "#910807",
+                    "on-surface-variant": "#454650",
+                    "inverse-primary": "#b9c3ff",
+                    "surface-container-low": "#f3f2ff",
+                    "surface-tint": "#4b5a9e",
+                    "surface": "#faf8ff",
+                    "outline": "#767681",
+                    "outline-variant": "#c6c5d2",
+                    "error": "#ba1a1a",
+                    "tertiary-fixed": "#ffdad5",
+                    "on-secondary-fixed": "#410000",
+                    "tertiary": "#400000",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-on-surface": "#efefff"
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #faf8ff; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .vital-pulse-bg { background-image: radial-gradient(circle at 2px 2px, #dde1ff 1px, transparent 0); background-size: 24px 24px; }
+        .check-glow { box-shadow: 0 0 40px rgba(26, 42, 108, 0.15); animation: pulse-glow 2s infinite ease-in-out; }
+        @keyframes pulse-glow { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in-up { animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6 relative">
+    
+    <!-- Background Layer -->
+    <div class="absolute inset-0 vital-pulse-bg opacity-40 pointer-events-none"></div>
+
+    <!-- Main Content Card -->
+    <main class="relative z-10 w-full max-w-md">
+        <div class="bg-surface-container-lowest rounded-3xl shadow-xl p-8 md:p-12 border border-outline-variant flex flex-col items-center text-center fade-in-up">
+            <!-- Branding -->
+            <div class="mb-8 flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-[32px]" style="font-variation-settings: 'FILL' 1;">monitor_heart</span>
+                <span class="text-title-lg font-bold text-primary tracking-tight">CardioViz</span>
+            </div>
+
+            <!-- Success Icon -->
+            <div class="relative mb-8">
+                <div class="w-28 h-28 rounded-full bg-surface-muted flex items-center justify-center check-glow border border-emerald-200">
+                    <span class="material-symbols-outlined text-[64px] text-emerald-600" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                </div>
+            </div>
+
+            <!-- Header Content -->
+            <h1 class="text-3xl font-extrabold text-on-surface mb-2">Account Verified!</h1>
+            
+            <div class="inline-flex items-center px-4 py-1.5 bg-surface-container rounded-full border border-outline-variant mb-6 text-sm font-semibold text-primary">
+                <span class="material-symbols-outlined text-[18px] text-primary mr-1">verified</span>
+                <span>Account Type: <span class="capitalize font-bold">{{ role }}</span></span>
+            </div>
+
+            <p class="font-medium text-sm text-slate-500 mb-8 leading-relaxed">
+                Welcome to CardioViz, <span class="font-bold text-slate-800">{{ name }}</span>! Your secure authentication profile is now active.
+            </p>
+
+            <!-- Countdown Text -->
+            <p class="text-xs font-semibold text-slate-400 mb-4">
+                Redirecting to dashboard in <span id="timer" class="font-extrabold text-slate-800">3</span>...
+            </p>
+
+            <!-- Manual Redirect Button -->
+            <a href="{{ url_for('dashboard.home') }}" class="w-full py-4 bg-primary text-white rounded-xl font-semibold text-sm shadow-md hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                <span>Go to Dashboard Now</span>
+                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+            </a>
+        </div>
+    </main>
+
+    <script>
+        let timeLeft = 3;
+        const timerSpan = document.getElementById('timer');
+        const redirectUrl = "{{ url_for('dashboard.home') }}";
+
+        const interval = setInterval(() => {
+            timeLeft--;
+            timerSpan.textContent = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(interval);
+                window.location.href = redirectUrl;
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

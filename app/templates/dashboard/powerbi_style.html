@@ -1,0 +1,874 @@
+{% extends "base.html" %}
+{% block title %}Power BI Analytics - CardioViz{% endblock %}
+{% block content %}
+<style>
+  /* Power BI Color Palette & Theme Override */
+  :root {
+    --pbi-yellow: #f2c811;
+    --pbi-yellow-hover: #d9b30f;
+    --pbi-black: #111111;
+    --pbi-gray-bg: #eaeaea;
+    --pbi-canvas-bg: #f3f2f1;
+    --pbi-sidebar-dark: #252423;
+    --pbi-accent-blue: #118d95;
+    --pbi-accent-purple: #8064a2;
+    --pbi-accent-orange: #e66c37;
+  }
+
+  /* Page Layout & Container */
+  .dashboard-container {
+    display: grid;
+    grid-template-columns: 16rem 1fr;
+    min-height: calc(100vh - 70px);
+    background: var(--pbi-canvas-bg);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  }
+
+  /* Sidebar Navigation */
+  .sidebar {
+    background: white;
+    border-right: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1.5rem 1rem;
+    overflow-y: auto;
+  }
+
+  .sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 2rem;
+  }
+
+  .sidebar-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #64748b;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+    text-decoration: none;
+  }
+
+  .sidebar-menu-item:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+  }
+
+  .sidebar-menu-item.active {
+    background: #fef08a; /* Soft Power BI yellow highlight */
+    color: #854d0e;
+    border-left-color: var(--pbi-yellow);
+  }
+
+  /* Main Workspace */
+  .workspace {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  /* Power BI Action Bar */
+  .pbi-action-bar {
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 0.5rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+
+  .pbi-actions-left {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  .pbi-action-btn {
+    background: none;
+    border: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #323130;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    transition: background 0.15s;
+  }
+
+  .pbi-action-btn:hover {
+    background: #f3f2f1;
+  }
+
+  .pbi-action-btn i {
+    width: 0.95rem;
+    height: 0.95rem;
+  }
+
+  .pbi-brand-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #605e5c;
+    background: #f3f2f1;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+  }
+
+  .pbi-yellow-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--pbi-yellow);
+    border-radius: 50%;
+  }
+
+  /* Power BI Live Frame Container */
+  .pbi-embed-shell {
+    flex: 1;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    min-height: 580px;
+    position: relative;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    overflow: hidden;
+  }
+
+  .pbi-iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  /* Power BI Simulated Canvas */
+  .pbi-simulated-canvas {
+    display: grid;
+    grid-template-columns: 1fr 14.5rem;
+    height: 100%;
+    min-height: 580px;
+    background: #eaeaea;
+  }
+
+  .pbi-report-page {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background: #f3f2f1;
+    overflow-y: auto;
+  }
+
+  /* KPI Grid */
+  .pbi-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+  }
+
+  .pbi-kpi-card {
+    background: white;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    padding: 0.75rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  }
+
+  .pbi-kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--pbi-yellow);
+  }
+
+  .pbi-kpi-title {
+    font-size: 0.72rem;
+    color: #605e5c;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  .pbi-kpi-value {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #201f1e;
+    margin: 0.25rem 0;
+  }
+
+  .pbi-kpi-subtext {
+    font-size: 0.65rem;
+    color: #797775;
+  }
+
+  /* Report Body Layout */
+  .pbi-report-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    flex: 1;
+  }
+
+  .pbi-chart-card {
+    background: white;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .pbi-chart-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #201f1e;
+    border-bottom: 1px solid #f3f2f1;
+    padding-bottom: 0.4rem;
+  }
+
+  /* Right Filter Pane */
+  .pbi-filter-pane {
+    background: #eaeaea;
+    border-left: 1px solid #cbd5e1;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .pbi-filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #cbd5e1;
+    padding-bottom: 0.5rem;
+  }
+
+  .pbi-filter-header h3 {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #201f1e;
+    margin: 0;
+  }
+
+  .pbi-filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .pbi-filter-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #605e5c;
+  }
+
+  .pbi-filter-select {
+    width: 100%;
+    background: white;
+    border: 1px solid #a19f9d;
+    border-radius: 2px;
+    padding: 0.35rem 0.5rem;
+    font-size: 0.8rem;
+    color: #201f1e;
+    outline: none;
+  }
+
+  /* Bottom Report Navigation Tabs */
+  .pbi-report-tabs {
+    background: #eaeaea;
+    border-top: 1px solid #cbd5e1;
+    padding: 0.25rem 1rem;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .pbi-tab {
+    background: #f3f2f1;
+    border: 1px solid #cbd5e1;
+    border-bottom: none;
+    font-size: 0.78rem;
+    padding: 0.4rem 0.85rem;
+    font-weight: 600;
+    color: #323130;
+    cursor: pointer;
+    border-radius: 4px 4px 0 0;
+    transition: all 0.1s ease;
+  }
+
+  .pbi-tab.active {
+    background: white;
+    font-weight: 700;
+    border-top: 3px solid var(--pbi-yellow);
+    color: #111111;
+  }
+
+  /* Customized CSS Charts */
+  .pbi-bar-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    justify-content: center;
+    height: 100%;
+    min-height: 200px;
+  }
+
+  .pbi-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .pbi-bar-label {
+    width: 6.5rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #323130;
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .pbi-bar-track {
+    flex: 1;
+    height: 1rem;
+    background: #eaeaea;
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .pbi-bar-fill {
+    height: 100%;
+    background: var(--pbi-accent-blue);
+    width: 0;
+    transition: width 0.6s cubic-bezier(0.1, 0.8, 0.2, 1);
+  }
+
+  .pbi-bar-val {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #323130;
+  }
+
+  .pbi-donut-chart {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    min-height: 200px;
+  }
+
+  .pbi-donut-svg {
+    transform: rotate(-90deg);
+  }
+
+  .pbi-donut-segment {
+    fill: none;
+    stroke-width: 8px;
+    transition: stroke-dasharray 0.6s ease;
+  }
+
+  .pbi-donut-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .pbi-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+
+  .pbi-legend-color {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+  }
+
+  /* Table styles inside dashboard */
+  .pbi-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.75rem;
+    text-align: left;
+  }
+
+  .pbi-table th {
+    background: #f3f2f1;
+    color: #323130;
+    font-weight: 700;
+    padding: 0.5rem;
+    border-bottom: 2px solid #cbd5e1;
+  }
+
+  .pbi-table td {
+    padding: 0.5rem;
+    border-bottom: 1px solid #cbd5e1;
+    color: #201f1e;
+  }
+
+  .pbi-table tr:hover {
+    background: #f3f2f1;
+  }
+
+  .pbi-table .badge-case {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 0.1rem 0.35rem;
+    border-radius: 2px;
+    font-weight: 700;
+  }
+
+  .pbi-table .badge-no {
+    background: #dcfce7;
+    color: #166534;
+    padding: 0.1rem 0.35rem;
+    border-radius: 2px;
+    font-weight: 700;
+  }
+</style>
+
+<div class="dashboard-container">
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <div>
+      <div class="sidebar-brand-section" style="padding-left: 1rem; margin-bottom: 1.5rem; margin-top: 0.5rem;">
+        <span style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.5px;">Power BI Suite</span>
+        <span style="font-size: 1.25rem; font-weight: 800; color: #3b82f6; display: block; font-family: Poppins, sans-serif; margin-top: 0.15rem; letter-spacing: -0.5px;">ANALYTICS HUB</span>
+      </div>
+
+      <nav class="sidebar-menu">
+        <a href="{{ url_for('dashboard.home') }}" class="sidebar-menu-item">
+          <i data-lucide="layout-grid"></i>
+          <span class="menu-text">Dashboard Overview</span>
+        </a>
+        {% if session.user.persona in ['clinical', 'admin'] %}
+        <a href="{{ url_for('clinical.clinical_dashboard') }}#clinical-notes" class="sidebar-menu-item">
+          <i data-lucide="users"></i>
+          <span class="menu-text">Patient Management</span>
+        </a>
+        <a href="{{ url_for('clinical.clinical_dashboard') }}#risk-review" class="sidebar-menu-item">
+          <i data-lucide="activity"></i>
+          <span class="menu-text">Analytics Overview</span>
+        </a>
+        {% endif %}
+        {% if session.user.persona == 'public_health' %}
+        <a href="{{ url_for('public_health.public_health_dashboard') }}" class="sidebar-menu-item">
+          <i data-lucide="map"></i>
+          <span class="menu-text">Regional Health Map</span>
+        </a>
+        {% endif %}
+        <a href="{{ url_for('dashboard.powerbi_style_dashboard') }}" class="sidebar-menu-item active">
+          <i data-lucide="pie-chart"></i>
+          <span class="menu-text">Power BI Report</span>
+        </a>
+        <a href="{{ url_for('dashboard.tableau_style_dashboard') }}" class="sidebar-menu-item">
+          <i data-lucide="line-chart"></i>
+          <span class="menu-text">Clinical Tableau View</span>
+        </a>
+        {% if session.user.persona in ['clinical', 'admin'] %}
+        <a href="{{ url_for('dashboard.sql_console') }}" class="sidebar-menu-item">
+          <i data-lucide="database"></i>
+          <span class="menu-text">SQL Query Console</span>
+        </a>
+        {% endif %}
+      </nav>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="{{ url_for('dashboard.settings_page') }}" class="sidebar-menu-item" style="margin: 0;"><i data-lucide="settings"></i> <span class="menu-text">Settings</span></a>
+      <a href="{{ url_for('auth.logout') }}" class="sidebar-menu-item" style="margin: 0; color: #ef4444;"><i data-lucide="log-out"></i> <span class="menu-text">Sign Out</span></a>
+    </div>
+  </aside>
+
+  <!-- Workspace content -->
+  <main class="workspace">
+    <!-- Action Bar -->
+    <div class="pbi-action-bar">
+      <div class="pbi-actions-left">
+        <button class="pbi-action-btn" onclick="window.print()"><i data-lucide="printer"></i> Print</button>
+        <button class="pbi-action-btn" onclick="exportData()"><i data-lucide="download"></i> Export Data</button>
+        <button class="pbi-action-btn" onclick="resetFilters()"><i data-lucide="refresh-ccw"></i> Reset Filters</button>
+      </div>
+      <div class="pbi-brand-indicator">
+        <div class="pbi-yellow-dot"></div>
+        <span>POWER BI EMBEDDED</span>
+      </div>
+    </div>
+
+    <!-- Power BI Embed Shell -->
+    <div class="pbi-embed-shell">
+      {% if powerbi.configured %}
+        <iframe class="pbi-iframe" src="{{ powerbi.url }}" title="Live Power BI Heart Disease Report" allowFullScreen="true"></iframe>
+      {% else %}
+        <!-- Realistic Simulated Power BI Canvas -->
+        <div class="pbi-simulated-canvas">
+          <!-- Main Canvas Area -->
+          <div class="pbi-report-page">
+            
+            <!-- KPI Cards -->
+            <div class="pbi-kpi-grid">
+              <div class="pbi-kpi-card">
+                <span class="pbi-kpi-title">Total Records Analyzed</span>
+                <span class="pbi-kpi-value" id="kpi-records">{{ totals.records }}</span>
+                <span class="pbi-kpi-subtext">Active dataset population</span>
+              </div>
+              <div class="pbi-kpi-card">
+                <span class="pbi-kpi-title">Heart Disease Cases</span>
+                <span class="pbi-kpi-value" id="kpi-cases">{{ totals.heart_cases }}</span>
+                <span class="pbi-kpi-subtext">Clinical positives detected</span>
+              </div>
+              <div class="pbi-kpi-card">
+                <span class="pbi-kpi-title">Heart Disease Rate</span>
+                <span class="pbi-kpi-value" id="kpi-rate">{{ totals.disease_rate }}%</span>
+                <span class="pbi-kpi-subtext">Weighted disease prevalence</span>
+              </div>
+              <div class="pbi-kpi-card">
+                <span class="pbi-kpi-title">Average Patient BMI</span>
+                <span class="pbi-kpi-value" id="kpi-bmi">{{ totals.avg_bmi }}</span>
+                <span class="pbi-kpi-subtext">Healthy weight index target</span>
+              </div>
+            </div>
+
+            <!-- Report Body -->
+            <div class="pbi-report-grid">
+              <!-- Left Chart -->
+              <div class="pbi-chart-card">
+                <span class="pbi-chart-title" id="left-chart-title">Heart Disease Cases by Gender</span>
+                <div id="chart-gender-box">
+                  <div class="pbi-donut-chart">
+                    <svg class="pbi-donut-svg" width="140" height="140" viewBox="0 0 42 42">
+                      <circle class="pbi-donut-hole" cx="21" cy="21" r="15.915" fill="white"></circle>
+                      <circle class="pbi-donut-ring" cx="21" cy="21" r="15.915" fill="transparent" stroke="#f3f2f1" stroke-width="8"></circle>
+                      
+                      <!-- Segment 1: Male -->
+                      <circle id="donut-segment-male" class="pbi-donut-segment" cx="21" cy="21" r="15.915" fill="transparent" stroke="var(--pbi-accent-blue)" stroke-dasharray="58.2 41.8" stroke-dashoffset="0"></circle>
+                      <!-- Segment 2: Female -->
+                      <circle id="donut-segment-female" class="pbi-donut-segment" cx="21" cy="21" r="15.915" fill="transparent" stroke="var(--pbi-accent-orange)" stroke-dasharray="41.8 58.2" stroke-dashoffset="58.2"></circle>
+                    </svg>
+                    
+                    <div class="pbi-donut-legend">
+                      <div class="pbi-legend-item">
+                        <div class="pbi-legend-color" style="background: var(--pbi-accent-blue);"></div>
+                        <span id="legend-male">Male: 58.2%</span>
+                      </div>
+                      <div class="pbi-legend-item">
+                        <div class="pbi-legend-color" style="background: var(--pbi-accent-orange);"></div>
+                        <span id="legend-female">Female: 41.8%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right Chart -->
+              <div class="pbi-chart-card">
+                <span class="pbi-chart-title" id="right-chart-title">Heart Disease Rate by General Health Profile</span>
+                <div class="pbi-bar-chart" id="bar-chart-health">
+                  {% for row in gen_health %}
+                  <div class="pbi-bar-row">
+                    <div class="pbi-bar-label">{{ row.gen_health }}</div>
+                    <div class="pbi-bar-track">
+                      <div class="pbi-bar-fill" style="width: {{ row.disease_rate }}%; background: var(--pbi-accent-purple);"></div>
+                      <div class="pbi-bar-val">{{ row.disease_rate }}%</div>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+
+              <!-- Bottom Data Grid / Profile Breakdown -->
+              <div class="pbi-chart-card" style="grid-column: span 2;">
+                <span class="pbi-chart-title">Interactive Patient Demographics & Cohort Analysis</span>
+                <div style="overflow-x: auto; max-height: 160px;">
+                  <table class="pbi-table" id="data-grid-table">
+                    <thead>
+                      <tr>
+                        <th>Age Category</th>
+                        <th>Race / Ethnicity</th>
+                        <th>Biological Sex</th>
+                        <th>Physical Activity</th>
+                        <th>Heart Disease Case?</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>70-74</td>
+                        <td>White</td>
+                        <td>Male</td>
+                        <td>Yes</td>
+                        <td><span class="badge-case">Yes</span></td>
+                      </tr>
+                      <tr>
+                        <td>55-59</td>
+                        <td>Hispanic</td>
+                        <td>Female</td>
+                        <td>Yes</td>
+                        <td><span class="badge-no">No</span></td>
+                      </tr>
+                      <tr>
+                        <td>80 or older</td>
+                        <td>Black</td>
+                        <td>Male</td>
+                        <td>No</td>
+                        <td><span class="badge-case">Yes</span></td>
+                      </tr>
+                      <tr>
+                        <td>65-69</td>
+                        <td>Asian</td>
+                        <td>Female</td>
+                        <td>Yes</td>
+                        <td><span class="badge-no">No</span></td>
+                      </tr>
+                      <tr>
+                        <td>60-64</td>
+                        <td>Other</td>
+                        <td>Male</td>
+                        <td>Yes</td>
+                        <td><span class="badge-no">No</span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Report Footer Tabs inside Simulated Canvas -->
+            <div class="pbi-report-tabs">
+              <div class="pbi-tab active" onclick="switchReportTab(1, this)">Overview Dashboard</div>
+              <div class="pbi-tab" onclick="switchReportTab(2, this)">Risk Factor Exploration</div>
+              <div class="pbi-tab" onclick="switchReportTab(3, this)">Demographic Matrix</div>
+            </div>
+
+          </div>
+
+          <!-- Right Filters Panel -->
+          <div class="pbi-filter-pane">
+            <div class="pbi-filter-header">
+              <h3>Filters</h3>
+              <i data-lucide="filter" style="width: 1rem; height: 1rem; color: #323130;"></i>
+            </div>
+            
+            <div class="pbi-filter-group">
+              <label class="pbi-filter-label">Age Category</label>
+              <select class="pbi-filter-select" id="filter-age" onchange="applyFilters()">
+                <option value="All">All Ages</option>
+                <option value="Young">Younger (< 55)</option>
+                <option value="Middle">Middle-aged (55-69)</option>
+                <option value="Senior">Senior (70+)</option>
+              </select>
+            </div>
+
+            <div class="pbi-filter-group">
+              <label class="pbi-filter-label">Smoking Status</label>
+              <select class="pbi-filter-select" id="filter-smoking" onchange="applyFilters()">
+                <option value="All">All Smoking History</option>
+                <option value="Yes">Yes (Smoker)</option>
+                <option value="No">No (Non-smoker)</option>
+              </select>
+            </div>
+
+            <div class="pbi-filter-group">
+              <label class="pbi-filter-label">Physical Activity</label>
+              <select class="pbi-filter-select" id="filter-activity" onchange="applyFilters()">
+                <option value="All">All Activity Levels</option>
+                <option value="Yes">Yes (Active)</option>
+                <option value="No">No (Sedentary)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </main>
+</div>
+
+<script>
+  // Simple Mock Dataset logic for filters
+  const mockDataset = {
+    "All": {
+      "All": {
+        "All": { records: 320, cases: 96, rate: 30.0, bmi: 28.3, maleRate: 58, femaleRate: 42, healthRates: [26.3, 14.5, 8.2, 4.1, 1.8] }
+      }
+    }
+  };
+
+  // Switch between tabs
+  function switchReportTab(tabIndex, el) {
+    document.querySelectorAll('.pbi-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    
+    const leftTitle = document.getElementById('left-chart-title');
+    const rightTitle = document.getElementById('right-chart-title');
+    const genderBox = document.getElementById('chart-gender-box');
+    const healthBox = document.getElementById('bar-chart-health');
+    
+    if (tabIndex === 1) {
+      leftTitle.textContent = "Heart Disease Cases by Gender";
+      rightTitle.textContent = "Heart Disease Rate by General Health Profile";
+      
+      // Reset to original view
+      genderBox.style.display = "block";
+      healthBox.style.display = "flex";
+      applyFilters();
+    } else if (tabIndex === 2) {
+      leftTitle.textContent = "Lifestyle Risk Factors Prevalence";
+      rightTitle.textContent = "Average BMI by Activity Level";
+      
+      // Update with mock data visuals
+      genderBox.innerHTML = `
+        <div style="padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+          <div style="font-size:0.75rem; color:#605e5c;">Smoking Rate: <strong>39%</strong></div>
+          <div style="font-size:0.75rem; color:#605e5c;">Alcohol Consumption: <strong>23%</strong></div>
+          <div style="font-size:0.75rem; color:#605e5c;">High Stress Reports: <strong>31%</strong></div>
+        </div>
+      `;
+      healthBox.innerHTML = `
+        <div class="pbi-bar-row">
+          <div class="pbi-bar-label">Sedentary</div>
+          <div class="pbi-bar-track"><div class="pbi-bar-fill" style="width: 82%; background: var(--pbi-accent-orange);"></div><div class="pbi-bar-val">30.1</div></div>
+        </div>
+        <div class="pbi-bar-row">
+          <div class="pbi-bar-label">Active</div>
+          <div class="pbi-bar-track"><div class="pbi-bar-fill" style="width: 68%; background: var(--pbi-accent-blue);"></div><div class="pbi-bar-val">25.4</div></div>
+        </div>
+      `;
+    } else if (tabIndex === 3) {
+      leftTitle.textContent = "Racial Distribution Breakdown";
+      rightTitle.textContent = "Heart Disease Rates by Age Groups";
+      
+      genderBox.innerHTML = `
+        <div class="pbi-bar-chart">
+          <div class="pbi-bar-row"><div class="pbi-bar-label">White</div><div class="pbi-bar-track"><div class="pbi-bar-fill" style="width: 76%; background: var(--pbi-accent-blue);"></div><div class="pbi-bar-val">76%</div></div></div>
+          <div class="pbi-bar-row"><div class="pbi-bar-label">Black</div><div class="pbi-bar-track"><div class="pbi-bar-fill" style="width: 12%; background: var(--pbi-accent-blue);"></div><div class="pbi-bar-val">12%</div></div></div>
+          <div class="pbi-bar-row"><div class="pbi-bar-label">Hispanic</div><div class="pbi-bar-track"><div class="pbi-bar-fill" style="width: 8%; background: var(--pbi-accent-blue);"></div><div class="pbi-bar-val">8%</div></div></div>
+        </div>
+      `;
+      healthBox.innerHTML = `
+        <div class="pbi-bar-chart">
+          <div class="pbi-bar-row"><div class="pbi-bar-label"><55</div><div class="pbi-bar-track"><div class="pbi-bar-fill" style="width: 14%; background: var(--pbi-accent-purple);"></div><div class="pbi-bar-val">14.2%</div></div></div>
+          <div class="pbi-bar-row"><div class="pbi-bar-label">55-69</div><div class="pbi-bar-track"><div class="pbi-bar-fill" style="width: 32%; background: var(--pbi-accent-purple);"></div><div class="pbi-bar-val">32.6%</div></div></div>
+          <div class="pbi-bar-row"><div class="pbi-bar-label">70+</div><div class="pbi-bar-track"><div class="pbi-bar-fill" style="width: 58%; background: var(--pbi-accent-purple);"></div><div class="pbi-bar-val">58.4%</div></div></div>
+        </div>
+      `;
+    }
+  }
+
+  // Interactive dynamic filtering simulation
+  function applyFilters() {
+    const age = document.getElementById('filter-age').value;
+    const smoking = document.getElementById('filter-smoking').value;
+    const activity = document.getElementById('filter-activity').value;
+    
+    // Base figures
+    let records = 320;
+    let cases = 96;
+    let rate = 30.0;
+    let bmi = 28.3;
+    let malePct = 58;
+    let femalePct = 42;
+    let healthRates = [26.3, 14.5, 8.2, 4.1, 1.8];
+    
+    // Simple mock adjustments
+    if (age === 'Young') {
+      records = Math.round(records * 0.35);
+      cases = Math.round(cases * 0.15);
+      rate = 14.2;
+      bmi = 26.5;
+    } else if (age === 'Senior') {
+      records = Math.round(records * 0.25);
+      cases = Math.round(cases * 0.55);
+      rate = 58.4;
+      bmi = 29.1;
+    }
+    
+    if (smoking === 'Yes') {
+      rate += 8.5;
+      cases = Math.round(records * (rate/100));
+      bmi += 0.4;
+    } else if (smoking === 'No') {
+      rate -= 5.2;
+      cases = Math.round(records * (rate/100));
+    }
+    
+    if (activity === 'Yes') {
+      rate -= 6.0;
+      cases = Math.round(records * (rate/100));
+      bmi -= 2.1;
+    } else if (activity === 'No') {
+      rate += 9.5;
+      cases = Math.round(records * (rate/100));
+      bmi += 1.8;
+    }
+
+    // Clip ranges
+    rate = Math.max(1.0, Math.min(99.0, rate)).toFixed(1);
+    
+    // Update DOM
+    document.getElementById('kpi-records').textContent = records;
+    document.getElementById('kpi-cases').textContent = cases;
+    document.getElementById('kpi-rate').textContent = rate + '%';
+    document.getElementById('kpi-bmi').textContent = bmi.toFixed(1);
+    
+    // Update charts dynamically (SVG redraw)
+    const donutMale = document.getElementById('donut-segment-male');
+    const donutFemale = document.getElementById('donut-segment-female');
+    const legendMale = document.getElementById('legend-male');
+    const legendFemale = document.getElementById('legend-female');
+    
+    if (donutMale && donutFemale) {
+      // Vary gender ratio slightly based on smoking filter
+      let mRatio = smoking === 'Yes' ? 62 : 55;
+      let fRatio = 100 - mRatio;
+      
+      donutMale.setAttribute('stroke-dasharray', `${mRatio} ${fRatio}`);
+      donutFemale.setAttribute('stroke-dasharray', `${fRatio} ${mRatio}`);
+      donutFemale.setAttribute('stroke-dashoffset', `${mRatio}`);
+      
+      legendMale.textContent = `Male: ${mRatio}%`;
+      legendFemale.textContent = `Female: ${fRatio}%`;
+    }
+  }
+
+  function resetFilters() {
+    document.getElementById('filter-age').value = 'All';
+    document.getElementById('filter-smoking').value = 'All';
+    document.getElementById('filter-activity').value = 'All';
+    applyFilters();
+  }
+
+  function exportData() {
+    // Generate simple alert mock for export
+    alert("Power BI Data Export: CSV data package for " + document.getElementById('kpi-records').textContent + " filtered cohort generated successfully.");
+  }
+</script>
+{% endblock %}

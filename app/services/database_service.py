@@ -2,6 +2,7 @@ import csv
 import random
 import sqlite3
 from datetime import date, timedelta
+from pathlib import Path
 
 from flask import current_app, g
 from werkzeug.security import generate_password_hash
@@ -95,6 +96,13 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   resource TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS clinical_notes (
+  note_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  doctor_name TEXT NOT NULL,
+  content TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS raw_heart_dataset (
   raw_id INTEGER PRIMARY KEY AUTOINCREMENT,
   heart_disease TEXT,
@@ -141,11 +149,24 @@ def init_database():
     db.executescript(SCHEMA)
     user_count = db.execute("SELECT COUNT(*) FROM users").fetchone()[0]
     if user_count == 0:
-        seed_demo_data(db)
+        seed_demo_users(db)
+    patient_count = db.execute("SELECT COUNT(*) FROM patients").fetchone()[0]
+    if patient_count == 0:
+        csv_path = real_dataset_path()
+        if csv_path.exists():
+            import_heart_csv(db, csv_path)
     db.commit()
 
 
-def seed_demo_data(db, rows=240):
+def real_dataset_path():
+    root = Path(current_app.root_path).parent
+    clean = root / "data" / "Heart_new2_clean.csv"
+    if clean.exists():
+        return clean
+    return root / "data" / "Heart_new2.csv"
+
+
+def seed_demo_users(db):
     users = [
         ("Dr. Sharma", "doctor@datavibe.local", "Cardiologist", "clinical"),
         ("Ramesh Iyer", "ramesh@datavibe.local", "Health Official", "public_health"),
@@ -157,6 +178,11 @@ def seed_demo_data(db, rows=240):
             "INSERT INTO users (name, email, password_hash, role, persona) VALUES (?, ?, ?, ?, ?)",
             (name, email, generate_password_hash("datavibe123"), role, persona),
         )
+
+
+def seed_demo_data(db, rows=240):
+    seed_demo_users(db)
+    return
 
     first_names = ["Aarav", "Anita", "Diya", "Ishaan", "Kavya", "Mohan", "Neha", "Priya", "Rahul", "Sanjay", "Tara", "Vikram"]
     last_names = ["Bose", "Iyer", "Kapoor", "Khan", "Mehta", "Nair", "Patel", "Rao", "Reddy", "Sharma", "Singh", "Verma"]

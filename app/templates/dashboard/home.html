@@ -802,9 +802,17 @@
           <i data-lucide="activity"></i>
           <span class="menu-text">Analytics Overview</span>
         </a>
+        <a href="{{ url_for('dashboard.powerbi_style_dashboard') }}" class="sidebar-menu-item">
+          <i data-lucide="pie-chart"></i>
+          <span class="menu-text">Power BI Report</span>
+        </a>
         <a href="{{ url_for('dashboard.tableau_style_dashboard') }}" class="sidebar-menu-item">
           <i data-lucide="line-chart"></i>
-          <span class="menu-text">Clinical Analytics</span>
+          <span class="menu-text">Clinical Tableau View</span>
+        </a>
+        <a href="{{ url_for('dashboard.sql_console') }}" class="sidebar-menu-item">
+          <i data-lucide="database"></i>
+          <span class="menu-text">SQL Query Console</span>
         </a>
         <a href="{{ url_for('dashboard.heart_disease_story') }}" class="sidebar-menu-item">
           <i data-lucide="clipboard-list"></i>
@@ -825,6 +833,10 @@
         <a href="{{ url_for('public_health.public_health_dashboard') }}" class="sidebar-menu-item">
           <i data-lucide="map"></i>
           <span class="menu-text">Regional Health Map</span>
+        </a>
+        <a href="{{ url_for('dashboard.powerbi_style_dashboard') }}" class="sidebar-menu-item">
+          <i data-lucide="pie-chart"></i>
+          <span class="menu-text">Power BI Report</span>
         </a>
         <a href="{{ url_for('public_health.visualizations_dashboard') }}" class="sidebar-menu-item">
           <i data-lucide="trending-up"></i>

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>About Us | CardioViz Analytics</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-low": "#f3f2ff",
+                    "status-stable": "#1a2a6c",
+                    "on-tertiary-fixed": "#410000",
+                    "surface-light": "#F8FAFC",
+                    "secondary-fixed-dim": "#ffb4a9",
+                    "tertiary-container": "#680001",
+                    "on-error-container": "#93000a",
+                    "on-tertiary-fixed-variant": "#8e130c",
+                    "background": "#faf8ff",
+                    "error-container": "#ffdad6",
+                    "inverse-surface": "#2c3041",
+                    "primary-container": "#1a2a6c",
+                    "on-error": "#ffffff",
+                    "secondary-container": "#fe5c4a",
+                    "on-primary-fixed": "#001356",
+                    "on-surface": "#171b2b",
+                    "status-critical": "#E74C3C",
+                    "tertiary-fixed": "#ffdad5",
+                    "on-secondary": "#ffffff",
+                    "gradient-vital": "linear-gradient(135deg, #1a2a6c 0%, #c0392b 100%)",
+                    "primary-fixed-dim": "#b9c3ff",
+                    "surface-muted": "#F1F5F9",
+                    "on-surface-variant": "#454650",
+                    "on-secondary-fixed": "#410000",
+                    "surface": "#faf8ff",
+                    "surface-variant": "#dfe1f8",
+                    "on-primary": "#ffffff",
+                    "surface-container-high": "#e4e7fe",
+                    "secondary-fixed": "#ffdad5",
+                    "surface-tint": "#4b5a9e",
+                    "outline-variant": "#c6c5d2",
+                    "on-tertiary-container": "#fe6653",
+                    "on-tertiary": "#ffffff",
+                    "on-primary-fixed-variant": "#334284",
+                    "secondary": "#b4271d",
+                    "surface-container": "#ebedff",
+                    "surface-dim": "#d6d9f0",
+                    "outline": "#767681",
+                    "on-secondary-fixed-variant": "#910807",
+                    "inverse-primary": "#b9c3ff",
+                    "primary": "#001255",
+                    "tertiary-fixed-dim": "#ffb4a9",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary": "#400000",
+                    "on-primary-container": "#8594dc",
+                    "on-background": "#171b2b",
+                    "on-secondary-container": "#610001",
+                    "surface-bright": "#faf8ff",
+                    "error": "#ba1a1a",
+                    "primary-fixed": "#dde1ff",
+                    "inverse-on-surface": "#efefff",
+                    "surface-container-highest": "#dfe1f8"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "lg": "32px",
+                    "gutter": "24px",
+                    "margin-mobile": "16px",
+                    "xs": "8px",
+                    "base": "4px",
+                    "xl": "48px",
+                    "margin-desktop": "40px",
+                    "sm": "16px",
+                    "md": "24px"
+            },
+            "fontFamily": {
+                    "title-lg": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "label-md": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "data-mono": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "body-md": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 24px;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .timeline-line {
+            background: linear-gradient(to bottom, #1a2a6c, #c0392b);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="bg-surface-container-lowest dark:bg-surface-dim w-full top-0 sticky z-50 border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none h-20">
+<div class="flex justify-between items-center w-full px-margin-desktop max-w-screen-2xl mx-auto h-full">
+<div class="flex items-center gap-xl">
+<span class="text-title-lg font-title-lg font-bold text-primary dark:text-primary-fixed-dim tracking-tight">CardioViz</span>
+<nav class="hidden md:flex gap-lg">
+<a class="text-on-surface-variant dark:text-on-surface hover:text-primary dark:hover:text-primary-fixed-dim transition-colors text-label-md font-label-md" href="/">Home</a>
+<a class="text-on-surface-variant dark:text-on-surface hover:text-primary dark:hover:text-primary-fixed-dim transition-colors text-label-md font-label-md" href="{{ url_for('dashboard.knowledge_center_page') }}">Knowledge Center</a>
+<a class="text-primary dark:text-primary-fixed-dim font-bold border-b-2 border-primary dark:border-primary-fixed-dim pb-1 text-label-md font-label-md" href="{{ url_for('dashboard.about_us_page') }}">About Us</a>
+</nav>
+</div>
+<div class="flex items-center gap-md">
+<div class="hidden lg:flex items-center bg-surface-container rounded-full px-sm py-xs gap-xs">
+<span class="material-symbols-outlined text-on-surface-variant">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-body-md w-48" placeholder="Search data..." type="text"/>
+</div>
+<div class="flex items-center gap-sm">
+<a href="{{ url_for('dashboard.notifications_components_page') }}" class="material-symbols-outlined p-xs rounded-full hover:bg-surface-container-low transition-all text-primary">notifications</a>
+<a href="{{ url_for('dashboard.settings_page') }}" class="material-symbols-outlined p-xs rounded-full hover:bg-surface-container-low transition-all text-primary">settings</a>
+<a href="{{ url_for('auth.login') }}" class="bg-primary text-on-primary px-lg py-xs rounded-full text-label-md font-label-md hover:opacity-90 active:scale-[0.98] transition-all text-center">Sign In</a>
+<button class="bg-status-critical text-on-primary px-lg py-xs rounded-full text-label-md font-label-md hover:opacity-90 active:scale-[0.98] transition-all hidden sm:block" onclick="alert('Critical Emergency Dispatch Active.')">Emergency Alert</button>
+</div>
+</div>
+</div>
+</header>
+<main class="flex-grow">
+<!-- Hero Section -->
+<section class="relative w-full h-[600px] overflow-hidden">
+<div class="absolute inset-0 z-0">
+<div class="w-full h-full bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCby0T5vNwks3bKUPJDVnGWPF05ML2IDzONBgWfZvTvzTT0SXm428ByZL1xbcjq2w-FTSwjd2tdqNTamHRx7RslKaiismA9EztdJnpSFlDEw4KpilZ6SylAi44Sys_LIy96kfS9mdTEVNvegnphlgzauvIO4pQWgC7OPaySfdv8aHM9WwUcTIgluyUAghnB5CG1NiKtPjJbP7WDDHk2A_peA0eq6OMMG7EHCk36HhctuxcBszi-3gDCiPRHe-TejjAg3m6qvfcjzYL0')"></div>
+<div class="absolute inset-0 bg-gradient-to-r from-primary/80 to-transparent"></div>
+</div>
+<div class="relative z-10 max-w-screen-2xl mx-auto px-margin-desktop h-full flex flex-col justify-center items-start text-on-primary">
+<h1 class="text-display-lg font-display-lg mb-sm max-w-2xl text-white">About CardioViz</h1>
+<p class="text-headline-md font-headline-md opacity-90 max-w-xl text-white/90">Transforming heart health through data-driven insights and diagnostic precision.</p>
+</div>
+</section>
+<!-- Mission & Vision Section -->
+<section class="py-xl max-w-screen-2xl mx-auto px-margin-desktop space-y-lg">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
+<div class="p-6 bg-white border rounded-2xl shadow-sm space-y-3">
+<h3 class="text-lg font-black text-primary">Our Mission</h3>
+<p class="text-xs text-slate-500 leading-relaxed">To empower healthcare professionals with real-time, high-fidelity cardiovascular diagnostics and population data analytics to lower global cardiac disease incidence rates.</p>
+</div>
+<div class="p-6 bg-white border rounded-2xl shadow-sm space-y-3">
+<h3 class="text-lg font-black text-primary">Our Vision</h3>
+<p class="text-xs text-slate-500 leading-relaxed">A world where heart disease risk factors are mitigated proactively through automated diagnostic tools and data-driven clinical intervention.</p>
+</div>
+</div>
+
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-6 text-center text-xs font-semibold text-slate-600">
+<div class="p-4 border rounded-xl bg-white"><span class="material-symbols-outlined text-primary mb-2 text-2xl">bolt</span><p>Innovation</p></div>
+<div class="p-4 border rounded-xl bg-white"><span class="material-symbols-outlined text-primary mb-2 text-2xl">verified_user</span><p>Integrity</p></div>
+<div class="p-4 border rounded-xl bg-white"><span class="material-symbols-outlined text-primary mb-2 text-2xl">favorite</span><p>Impact</p></div>
+<div class="p-4 border rounded-xl bg-white"><span class="material-symbols-outlined text-primary mb-2 text-2xl">groups</span><p>Collaboration</p></div>
+</div>
+</section>
+
+<!-- Timeline Journey -->
+<section class="py-xl bg-slate-50 border-y">
+<div class="max-w-screen-2xl mx-auto px-margin-desktop space-y-8 text-xs">
+<h2 class="text-xl font-bold text-center text-primary">Our Journey</h2>
+
+<div class="relative max-w-xl mx-auto pl-8 border-l-2 border-primary space-y-8">
+<div class="relative">
+<div class="absolute -left-10 top-1 w-4.5 h-4.5 rounded-full bg-primary border-4 border-white"></div>
+<h4 class="font-black text-primary">2021 // Platform Prototype</h4>
+<p class="text-slate-500 mt-1">CardioViz Alpha launched for pilot testing with clinical nodes.</p>
+</div>
+<div class="relative">
+<div class="absolute -left-10 top-1 w-4.5 h-4.5 rounded-full bg-primary border-4 border-white"></div>
+<h4 class="font-black text-primary">2022 // Precision Milestone</h4>
+<p class="text-slate-500 mt-1">Achieved 98.8% diagnostic accuracy validation in cardiac trials.</p>
+</div>
+<div class="relative">
+<div class="absolute -left-10 top-1 w-4.5 h-4.5 rounded-full bg-primary border-4 border-white"></div>
+<h4 class="font-black text-primary">2023 // caselist expansion</h4>
+<p class="text-slate-500 mt-1">Over 10,000+ patient vitals profiles indexed and synced.</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Expert Board -->
+<section class="py-xl max-w-screen-2xl mx-auto px-margin-desktop space-y-8 text-xs">
+<h2 class="text-xl font-bold text-center text-primary">Expert Minds Behind the Precision</h2>
+
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+<div class="border rounded-2xl bg-white p-4 text-center space-y-3">
+<div class="w-16 h-16 rounded-full bg-slate-200 mx-auto overflow-hidden">
+<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIlcHoITc2KU8IT_lIRLJbItBOAsorKxv5wA_hvJxiq28xtv8ZXy2_v4GRDM_LtcRw_VwDUEdjMlmeJbeAD0VmTR8DiL8FLcxtxdG8lZoMFkVEMhAS5_s8jgwL8pYk0pRJbqGoiobcYXR-boX2C-OkoIYhyAVoim4VY97ssoQj1azjmU46ipcwoxcX_JeTXz1Nf9j2iqKN7APaCTj-qb6laS6DJaD2-da8Qrb5MzJBB28r2GuS0LWo51IN_OtZiJnoAUmGBMeAwHqr" alt="Dr Sarah Sharma"/>
+</div>
+<h4 class="font-bold">Dr. Sarah Sharma</h4>
+<p class="text-[10px] text-slate-400">Chief Cardiologist</p>
+</div>
+
+<div class="border rounded-2xl bg-white p-4 text-center space-y-3">
+<div class="w-16 h-16 rounded-full bg-slate-200 mx-auto overflow-hidden">
+<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBr2Eqh0z_9DvQtXvCNkE861fwxfBpSqDPw3LobZKFooJT7a3MopaWT8uz9lK1RAi6BueJgCDKDyuAgV8eq5EArfaj5BevA8yaje7_wgQOBg04-eXEaOHq2Mh2jsOYXvg2yxmBVzcg5y20zYEgT6wPhzaTyiWszPt_zf4VQQth4OgQA1hWJlxzgmXYL1sLLStKszAsMmVhnOtq9kfYFjFWu24pipJdcS7V7oWi2IPrw71zO2ghIKRM8Mb9ol8osdqpGVs6Xzr0gj-cb" alt="John Davis"/>
+</div>
+<h4 class="font-bold">John Davis, PhD</h4>
+<p class="text-[10px] text-slate-400">Vascular Researcher</p>
+</div>
+
+<div class="border rounded-2xl bg-white p-4 text-center space-y-3">
+<div class="w-16 h-16 rounded-full bg-slate-200 mx-auto overflow-hidden">
+<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlKF4Y8lnsLSx0qcXvTmegUpbUKDtOucNC6nYq2kdKHVvfomMBESIuNuwgSeGNmrheNVlsrCFZephRQM-9ivUkKjASWRcU_IY8nr7OKxe8tfFg1p87-yl7J9XG935zaZ8crdwVoJz3PJZcYEgRwl8ALL4NKLD6LcUAqOePQ8tYEC2t4eDsBEWb_2PTPUlGRZOwLKs_IVVHsrAPEYZ-q3hGtXScG9R-2SgNYegA1r_A4n_Cny6mYlSWGeYJuOnT-Xsck-CA1vkxUO3l" alt="Maria Garcia"/>
+</div>
+<h4 class="font-bold">Maria Garcia, RD</h4>
+<p class="text-[10px] text-slate-400">Clinical Nutritionist</p>
+</div>
+
+<div class="border rounded-2xl bg-white p-4 text-center space-y-3">
+<div class="w-16 h-16 rounded-full bg-slate-200 mx-auto overflow-hidden">
+<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzGB-AgCjdF52yI0qRujLu3qy2WcxIMrGxFtgMfBIsSDh6-2F6gPZDnKJgg5sWfqInCWMRlX4BgC4Q6lx6437R36tZi1vGoV5GJXlB7I_vCChjWiaHquI9w_St7mAZOG8Au0K4qtZaX2M2GwjiLI07EY3yzOcqt3gsczrvXU8QfDncbkwNJ6A6FcDIeKVyqSnRiE4p0HTO3m0Xx4dLxUqaNhhAdqXLUqhpNUhxIzEhsMfXFg2sXPzKT8qrXzh91yEtS1AxXVJh9CFD" alt="Dr Chen"/>
+</div>
+<h4 class="font-bold">Dr. Michael Chen</h4>
+<p class="text-[10px] text-slate-400">Cardiothoracic Surgeon</p>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-low dark:bg-surface-container-highest w-full mt-auto border-t border-outline-variant">
+<div class="flex flex-col md:flex-row justify-between items-start w-full px-margin-desktop py-lg max-w-screen-2xl mx-auto gap-md text-xs">
+<div class="max-w-md">
+<span class="text-base font-bold text-primary dark:text-primary-fixed-dim">CardioViz</span>
+<p class="mt-sm text-slate-500">© 2024 CardioViz Analytics. All rights reserved. Medical diagnostic precision for healthcare professionals.</p>
+</div>
+<div class="flex flex-col gap-sm">
+<h4 class="text-label-md font-label-md text-primary uppercase">Information</h4>
+<div class="flex flex-col gap-xs text-[11px] text-slate-500">
+<a href="#">Privacy Policy</a>
+<a href="#">HIPAA Compliance</a>
+<a href="#">Terms of Service</a>
+</div>
+</div>
+</div>
+</footer>
+</body></html>

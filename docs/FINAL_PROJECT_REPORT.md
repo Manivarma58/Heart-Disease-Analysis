@@ -6,7 +6,7 @@ DataVibe analyzes heart disease indicators and presents role-specific insights f
 
 ## Dataset
 
-The project uses `Heart_new2.csv`, containing 4,500 heart-health records with lifestyle, demographic, and health-condition fields such as BMI, smoking, stroke, age category, diabetic status, physical activity, sleep time, and heart disease outcome.
+The project uses `Heart_new2_clean.csv`, containing 4,494 cleaned heart-health records with lifestyle, demographic, and health-condition fields such as BMI, smoking, stroke, age category, diabetic status, physical activity, sleep time, and heart disease outcome.
 
 The CSV is stored inside the project at `data/Heart_new2.csv`. It is imported into both the raw table `raw_heart_dataset` and the normalized application tables.
 
@@ -50,7 +50,7 @@ The project includes MySQL views designed for Tableau dashboards. Flask can embe
 ## Submission Contents
 
 - Web application source code.
-- Imported SQLite demo database.
+- Imported SQLite database with the cleaned real dataset.
 - MySQL schema and CSV loading scripts.
 - Tableau connection guide.
 - Final report.

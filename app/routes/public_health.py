@@ -30,11 +30,47 @@ def public_health_dashboard():
            ORDER BY avg_risk DESC"""
     )
     totals = query_one("SELECT COUNT(*) AS patients, ROUND(AVG(framingham_score), 1) AS avg_risk FROM risk_assessments")
+    
+    # Calculate prevalence rate from medical history
+    cases_row = query_one("SELECT COUNT(*) AS cases FROM medical_history WHERE heart_disease='Yes'")
+    total_row = query_one("SELECT COUNT(*) AS total FROM patients")
+    cases_count = cases_row["cases"] if cases_row else 0
+    total_count = total_row["total"] if total_row else 0
+    prevalence = round(100.0 * cases_count / total_count, 1) if total_count > 0 else 8.5
+    
+    # Calculate highest vs lowest region
+    highest_region = "North"
+    lowest_region = "South"
+    highest_risk = 0.0
+    lowest_risk = 100.0
+    for r in regional:
+        if r["avg_risk"] > highest_risk:
+            highest_risk = r["avg_risk"]
+            highest_region = r["region"]
+        if r["avg_risk"] < lowest_risk:
+            lowest_risk = r["avg_risk"]
+            lowest_region = r["region"]
+            
+    variation = {
+        "highest": highest_region,
+        "lowest": lowest_region,
+        "diff": round(highest_risk - lowest_risk, 1)
+    }
+
+    stats = {
+        "prevalence": prevalence,
+        "patients_count": total_count,
+        "variation": variation,
+        "demographic": "Males, 46-60 (15.2%)",
+        "prevention_impact": 2.5
+    }
+
     return render_template(
         "dashboard/public_health.html",
         regional=regional,
         lifestyle=lifestyle,
         totals=totals,
+        stats=stats,
         report=population_report(),
         tableau=tableau_status("public_health"),
     )

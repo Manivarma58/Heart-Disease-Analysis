@@ -1,924 +1,835 @@
-{% extends "base.html" %}
-{% block title %}CardioViz - Fighting Heart Disease Through Data{% endblock %}
-{% block content %}
-<style>
-  /* Base styles */
-  .landing-page {
-    font-family: 'Inter', sans-serif;
-    color: #1e293b;
-    background: #ffffff;
-    overflow-x: hidden;
-  }
+<!DOCTYPE html>
+<html class="scroll-smooth" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>CardioViz | Transforming Cardiac Analytics</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-light": "#F8FAFC",
+                        "on-tertiary-fixed": "#410000",
+                        "on-primary-fixed": "#001356",
+                        "inverse-on-surface": "#efefff",
+                        "background": "#faf8ff",
+                        "on-background": "#171b2b",
+                        "tertiary": "#400000",
+                        "primary": "#001255",
+                        "on-tertiary-fixed-variant": "#8e130c",
+                        "on-secondary-container": "#610001",
+                        "inverse-surface": "#2c3041",
+                        "surface-container-highest": "#dfe1f8",
+                        "primary-fixed-dim": "#b9c3ff",
+                        "surface": "#faf8ff",
+                        "outline": "#767681",
+                        "primary-fixed": "#dde1ff",
+                        "on-primary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "surface-bright": "#faf8ff",
+                        "secondary-container": "#fe5c4a",
+                        "inverse-primary": "#b9c3ff",
+                        "secondary": "#b4271d",
+                        "gradient-vital": "linear-gradient(135deg, #1a2a6c 0%, #c0392b 100%)",
+                        "primary-container": "#1a2a6c",
+                        "tertiary-fixed": "#ffdad5",
+                        "on-primary-container": "#8594dc",
+                        "tertiary-container": "#680001",
+                        "status-critical": "#E74C3C",
+                        "error": "#ba1a1a",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed-variant": "#334284",
+                        "on-surface": "#171b2b",
+                        "surface-container-high": "#e4e7fe",
+                        "on-secondary-fixed": "#410000",
+                        "surface-container": "#ebedff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-tint": "#4b5a9e",
+                        "tertiary-fixed-dim": "#ffb4a9",
+                        "surface-low": "#f3f2ff",
+                        "secondary-fixed": "#ffdad5",
+                        "on-error": "#ffffff",
+                        "surface-dim": "#d6d9f0",
+                        "on-surface-variant": "#454650",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-container": "#fe6653",
+                        "secondary-fixed-dim": "#ffb4a9",
+                        "surface-variant": "#dfe1f8",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed-variant": "#910807",
+                        "outline-variant": "#c6c5d2",
+                        "status-stable": "#1a2a6c",
+                        "surface-muted": "#F1F5F9"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "48px",
+                        "lg": "32px",
+                        "margin-desktop": "40px",
+                        "sm": "16px",
+                        "gutter": "24px",
+                        "md": "24px",
+                        "xs": "8px",
+                        "base": "4px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "data-mono": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "label-md": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "title-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "data-mono": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "title-lg": ["20px", {"lineHeight": "28px", "fontWeight": "500"}]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #1a2a6c 0%, #c0392b 100%); }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); }
+        .hero-title-shadow { text-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        .animate-fade-up { animation: fadeUp 0.8s ease-out forwards; opacity: 0; }
+        @keyframes fadeUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    </style>
+</head>
+<body class="bg-surface-light font-body-md text-on-surface">
+    <!-- Flash Messages Toast Stack -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <section class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none" aria-live="polite">
+                {% for category, message in messages %}
+                    <div class="px-4 py-3 rounded-xl shadow-lg font-label-md text-label-md text-white bg-slate-900/90 backdrop-blur-md pointer-events-auto transition-all duration-350 animate-fade-up border border-slate-700/50">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </section>
+        {% endif %}
+    {% endwith %}
 
-  /* SVG Heartbeat Wave Animation */
-  .heartbeat-container {
-    position: relative;
-    width: 100%;
-    height: 120px;
-    background: #f8fafc;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-  }
-  .heartbeat-svg {
-    width: 100%;
-    height: 100%;
-  }
-  .heartbeat-line {
-    fill: none;
-    stroke: url(#wave-gradient);
-    stroke-width: 3;
-    stroke-linecap: round;
-    stroke-dasharray: 1000;
-    stroke-dashoffset: 1000;
-    animation: drawWave 4s linear infinite;
-  }
+    <!-- Navigation Bar -->
+    <nav class="docked full-width top-0 sticky z-50 bg-surface/90 backdrop-blur-md border-b border-outline-variant/30 shadow-sm">
+        <div class="flex justify-between items-center w-full px-margin-desktop py-md max-w-screen-2xl mx-auto">
+            <!-- Brand -->
+            <a class="flex items-center gap-xs cursor-pointer" href="{{ url_for('dashboard.index') }}">
+                <div class="relative w-12 h-12 flex items-center justify-center">
+                    <!-- STITCH_SVG_START:ANIMATION_4 class="absolute inset-0 w-full h-full" -->
+                    <div class="absolute inset-0 w-full h-full" id="animated-svg-ANIMATION_4" style="display:block;">
+                        <svg viewbox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M50 85C50 85 10 60 10 35C10 20 25 10 40 15C45 17 48 20 50 25C52 20 55 17 60 15C75 10 90 20 90 35C90 60 50 85 50 85Z" fill="none" stroke="#E74C3C" stroke-width="4">
+                                <animate attributename="stroke-dasharray" dur="2s" from="0, 300" repeatcount="indefinite" to="300, 0"></animate>
+                            </path>
+                            <polyline fill="none" points="20,50 35,50 40,30 50,70 60,40 65,50 80,50" stroke="#E74C3C" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
+                                <animate attributename="stroke-dashoffset" dur="1.5s" from="100" repeatcount="indefinite" to="0"></animate>
+                                <animate attributename="stroke-dasharray" dur="1.5s" from="0, 100" repeatcount="indefinite" to="100, 0"></animate>
+                            </polyline>
+                        </svg>
+                    </div>
+                    <!-- STITCH_SVG_END:ANIMATION_4 -->
+                    <img class="relative z-10 w-8 h-8 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnq79hsx4w_RW_7ppHIpcfSS-S20S3Jh4CEBoPWHfRq8DHgEp1GIh0auTAj_Exxw-4zG8m_EWc4rF2RRp4zy1Uy1GNVU1FwrWJwyI2I0YDw9a9W8tjkNhYINLYgbi3-qjxKVRvMIMusd6JALEcJ3ulrdTkVcKQznlrBaOhkW63eUsBItR5qwbrw9aEclBUROKt6cgLpI7ZA6llu2GVIsTjcaKte-fRcHbPA5AcB7zQIAGM8qUIXbZZJSlsWz3n5dffwMZfXi_XiF2W"/>
+                </div>
+                <span class="font-display-lg text-display-lg font-bold text-primary tracking-tight" style="font-size: 24px; line-height: 1;">CardioViz</span>
+            </a>
+            <!-- Links -->
+            <div class="hidden md:flex items-center gap-lg">
+                <a class="font-label-md text-label-md text-primary font-bold border-b-2 border-primary pb-1" href="{{ url_for('dashboard.index') }}">Home</a>
+                <div class="group relative py-1 cursor-pointer">
+                    <span class="font-label-md text-label-md text-on-surface-variant hover:text-primary flex items-center gap-1 transition-colors">
+                        Dashboards <span class="material-symbols-outlined text-[18px]">expand_more</span>
+                    </span>
+                    <div class="absolute top-full left-0 hidden group-hover:block pt-2">
+                        <div class="bg-surface-container-lowest shadow-lg rounded-xl border border-outline-variant/30 py-2 w-56 overflow-hidden">
+                            <a class="block px-md py-sm font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low transition-colors" href="{{ url_for('auth.login') }}">Clinical Analytics</a>
+                            <a class="block px-md py-sm font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low transition-colors" href="{{ url_for('auth.login') }}">Public Health</a>
+                            <a class="block px-md py-sm font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low transition-colors" href="{{ url_for('auth.login') }}">Patient Health</a>
+                        </div>
+                    </div>
+                </div>
+                <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#features">Insights</a>
+                <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#scenarios">About</a>
+                <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#testimonials">Team</a>
+                <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#approach">Resources</a>
+            </div>
+            <!-- Actions -->
+            <div class="flex items-center gap-sm">
+                <a href="{{ url_for('auth.login') }}" class="px-md py-xs rounded-lg border border-primary text-primary font-label-md text-label-md hover:bg-surface-container-low transition-all active:scale-95 inline-block text-center">Login</a>
+                <a href="{{ url_for('auth.login') }}" class="px-md py-xs rounded-lg gradient-bg text-white font-label-md text-label-md shadow-md hover:brightness-110 transition-all active:scale-95 inline-block text-center">Get Started</a>
+            </div>
+        </div>
+    </nav>
 
-  @keyframes drawWave {
-    to {
-      stroke-dashoffset: 0;
-    }
-  }
+    <!-- Hero Section -->
+    <header class="relative h-[85vh] flex items-center overflow-hidden">
+        <!-- STITCH_SHADER_START:ANIMATION_5 class="absolute inset-0 w-full h-full opacity-40" -->
+        <div class="absolute inset-0 w-full h-full opacity-40" style="display:block;">
+            <canvas id="shader-canvas-ANIMATION_5" style="display:block;width:100%;height:100%"></canvas>
+            <script>
+            (function() {
+              const canvas = document.getElementById('shader-canvas-ANIMATION_5');
 
-  /* Hero Section */
-  .hero-section {
-    padding: 5rem clamp(1rem, 5vw, 3rem) 4rem;
-    text-align: center;
-    background: #f8fafc;
-    position: relative;
-  }
-  .hero-badge {
-    background: #eff6ff;
-    color: #3b82f6;
-    font-size: 0.75rem;
-    font-weight: 700;
-    padding: 0.35rem 0.85rem;
-    border-radius: 99px;
-    display: inline-block;
-    margin-bottom: 1.5rem;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-  }
-  .hero-section h1 {
-    font-size: clamp(2rem, 5vw, 3.8rem);
-    font-weight: 800;
-    color: #1e293b;
-    line-height: 1.15;
-    max-width: 52rem;
-    margin: 0 auto 1.25rem;
-  }
-  .hero-section p {
-    font-size: 1.15rem;
-    color: #64748b;
-    max-width: 44rem;
-    margin: 0 auto 2.5rem;
-    line-height: 1.6;
-  }
-  .hero-ctas {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    margin-bottom: 4.5rem;
-    flex-wrap: wrap;
-  }
-  .btn-primary-round {
-    background: #3b82f6;
-    color: white;
-    font-weight: 700;
-    font-size: 0.95rem;
-    padding: 0.8rem 2rem;
-    border-radius: 99px;
-    border: 0;
-    cursor: pointer;
-    box-shadow: 0 10px 20px rgba(59, 130, 246, 0.15);
-    text-decoration: none;
-    transition: background 0.2s, transform 0.1s;
-  }
-  .btn-primary-round:hover {
-    background: #2563eb;
-  }
-  .btn-primary-round:active {
-    transform: scale(0.98);
-  }
-  .btn-ghost-round {
-    background: white;
-    color: #475569;
-    font-weight: 600;
-    font-size: 0.95rem;
-    padding: 0.8rem 2rem;
-    border-radius: 99px;
-    border: 1px solid #cbd5e1;
-    cursor: pointer;
-    text-decoration: none;
-    transition: background 0.2s;
-  }
-  .btn-ghost-round:hover {
-    background: #f8fafc;
-  }
+              function syncSize() {
+                const w = canvas.clientWidth  || 1280;
+                const h = canvas.clientHeight || 720;
+                if (canvas.width !== w || canvas.height !== h) {
+                  canvas.width  = w;
+                  canvas.height = h;
+                }
+              }
+              if (typeof ResizeObserver !== 'undefined') {
+                new ResizeObserver(syncSize).observe(canvas);
+              }
+              syncSize();
 
-  /* Hero Stats counters */
-  .hero-stats-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 2rem;
-    max-width: 60rem;
-    margin: 0 auto;
-    border-top: 1px solid #e2e8f0;
-    padding-top: 2.5rem;
-  }
-  @media (max-width: 768px) {
-    .hero-stats-row {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-  .hero-stat-item {
-    text-align: left;
-  }
-  .hero-stat-item strong {
-    display: block;
-    font-size: 2rem;
-    font-weight: 800;
-    color: #1e293b;
-    margin-bottom: 0.25rem;
-  }
-  .hero-stat-item span {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: #64748b;
-  }
+              const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+              if (!gl) return;
+              const vs = `attribute vec2 a_position;
+varying vec2 v_texCoord;
+void main() {
+  v_texCoord = a_position * 0.5 + 0.5;
+  gl_Position = vec4(a_position, 0.0, 1.0);
+}`;
+              const fs = `precision highp float;
+varying vec2 v_texCoord;
+uniform float u_time;
+uniform vec2 u_resolution;
 
-  /* Persona cards section */
-  .personas-section {
-    padding: 5rem clamp(1rem, 5vw, 2.5rem);
-    background: white;
-    text-align: center;
-  }
-  .section-title {
-    font-size: 1.8rem;
-    font-weight: 800;
-    color: #1e293b;
-    margin-bottom: 0.5rem;
-  }
-  .section-subtitle {
-    font-size: 0.95rem;
-    color: #64748b;
-    max-width: 38rem;
-    margin: 0 auto 3.5rem;
-    line-height: 1.5;
-  }
+float random(vec2 st) {
+    return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+}
 
-  .personas-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-    max-width: 74rem;
-    margin: 0 auto;
-  }
-  @media (max-width: 1024px) {
-    .personas-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-  .persona-card {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    padding: 2rem 1.5rem;
-    text-align: left;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    transition: transform 0.2s, box-shadow 0.2s;
-    min-height: 24rem;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.005);
-  }
-  .persona-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.02);
-  }
-  .persona-card.clinical { border-left: 4px solid #3b82f6; }
-  .persona-card.public-health { border-left: 4px solid #8b5cf6; }
-  .persona-card.patient { border-left: 4px solid #3b82f6; }
-
-  .persona-icon-wrap {
-    width: 2.8rem;
-    height: 2.8rem;
-    border-radius: 8px;
-    display: grid;
-    place-items: center;
-    margin-bottom: 1.5rem;
-  }
-  .persona-icon-wrap.blue { background: #eff6ff; color: #3b82f6; }
-  .persona-icon-wrap.purple { background: #f5f3ff; color: #8b5cf6; }
-
-  .persona-card h3 {
-    font-size: 1.15rem;
-    font-weight: 800;
-    color: #1e293b;
-    margin: 0 0 0.75rem;
-  }
-  .persona-card p {
-    font-size: 0.88rem;
-    color: #64748b;
-    line-height: 1.5;
-    margin: 0 0 1.5rem;
-    flex: 1;
-  }
-  .persona-metrics-badge {
-    background: #f1f5f9;
-    border-radius: 8px;
-    padding: 0.75rem 1rem;
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: #475569;
-    margin-bottom: 1.5rem;
-    letter-spacing: 0.5px;
-  }
-  .btn-persona-action {
-    border: 1px solid #cbd5e1;
-    background: white;
-    font-weight: 700;
-    font-size: 0.88rem;
-    padding: 0.7rem 1.25rem;
-    border-radius: 8px;
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.2s;
-    text-decoration: none;
-    display: block;
-  }
-  .persona-card.clinical .btn-persona-action { color: #3b82f6; border-color: #3b82f6; }
-  .persona-card.clinical .btn-persona-action:hover { background: #eff6ff; }
-  .persona-card.public-health .btn-persona-action { color: #8b5cf6; border-color: #8b5cf6; }
-  .persona-card.public-health .btn-persona-action:hover { background: #f5f3ff; }
-  .persona-card.patient .btn-persona-action { color: #3b82f6; border-color: #3b82f6; }
-  .persona-card.patient .btn-persona-action:hover { background: #eff6ff; }
-
-  /* Risk factors section */
-  .risk-factors-section {
-    padding: 5rem clamp(1rem, 5vw, 2.5rem);
-    background: #f8fafc;
-  }
-  .risk-factors-grid {
-    display: grid;
-    grid-template-columns: 1.1fr 1fr;
-    gap: 4rem;
-    max-width: 74rem;
-    margin: 0 auto;
-    align-items: center;
-  }
-  @media (max-width: 900px) {
-    .risk-factors-grid {
-      grid-template-columns: 1fr;
-      gap: 3rem;
-    }
-  }
-
-  .risk-chart-area h2 {
-    font-size: 1.8rem;
-    font-weight: 800;
-    color: #1e293b;
-    margin: 0 0 0.5rem;
-  }
-  .risk-chart-area p {
-    font-size: 0.92rem;
-    color: #64748b;
-    line-height: 1.5;
-    margin: 0 0 2.5rem;
-  }
-
-  .risk-bars-stack {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
-  .risk-bar-row {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-  }
-  .risk-bar-labels {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: #1e293b;
-  }
-  .risk-bar-track {
-    height: 8px;
-    background: #e2e8f0;
-    border-radius: 99px;
-    overflow: hidden;
-  }
-  .risk-bar-fill {
-    height: 100%;
-    border-radius: 99px;
-  }
-  .risk-bar-fill.blue-light { background: #3b82f6; }
-  .risk-bar-fill.blue-dark { background: #1e3a8a; }
-  .risk-bar-fill.purple { background: #8b5cf6; }
-  .risk-bar-fill.gray { background: #64748b; }
-
-  /* Map and doctors circle container */
-  .risk-image-circle-container {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  .circular-frame {
-    width: 24rem;
-    height: 24rem;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 8px solid white;
-    box-shadow: 0 15px 45px rgba(0,0,0,0.06);
-    position: relative;
-  }
-  .circular-frame img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .circular-badge-overlay {
-    position: absolute;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 16px;
-    padding: 1rem 1.25rem;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-    width: 15rem;
-    text-align: center;
-    border: 1px solid #e2e8f0;
-  }
-  .circular-badge-overlay i {
-    color: #ef4444;
-    width: 1.5rem;
-    height: 1.5rem;
-    margin-bottom: 0.25rem;
-  }
-  .circular-badge-overlay h4 {
-    margin: 0;
-    font-size: 0.88rem;
-    font-weight: 800;
-    color: #1e293b;
-  }
-  .circular-badge-overlay p {
-    margin: 0.2rem 0 0;
-    font-size: 0.72rem;
-    color: #64748b;
-    line-height: 1.3;
-  }
-
-  /* India's Heart burden section */
-  .burden-section {
-    background: #0f172a;
-    color: white;
-    padding: 5rem clamp(1rem, 5vw, 2.5rem);
-    text-align: center;
-  }
-  .burden-section h2 {
-    font-size: 1.8rem;
-    font-weight: 800;
-    color: white;
-    margin: 0 0 3.5rem;
-  }
-  .burden-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2rem;
-    max-width: 74rem;
-    margin: 0 auto;
-  }
-  @media (max-width: 768px) {
-    .burden-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-  .burden-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
-    padding: 2.5rem 1.5rem;
-  }
-  .burden-card strong {
-    display: block;
-    font-size: 3rem;
-    font-weight: 800;
-    color: #3b82f6;
-    margin-bottom: 0.5rem;
-  }
-  .burden-card h3 {
-    font-size: 1rem;
-    font-weight: 800;
-    color: white;
-    margin: 0 0 0.75rem;
-  }
-  .burden-card p {
-    font-size: 0.82rem;
-    color: #94a3b8;
-    line-height: 1.5;
-    margin: 0;
-  }
-
-  /* Workflow/How it works */
-  .workflow-section {
-    padding: 5rem clamp(1rem, 5vw, 2.5rem);
-    background: #f8fafc;
-    text-align: center;
-  }
-  .workflow-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2rem;
-    max-width: 68rem;
-    margin: 0 auto;
-  }
-  @media (max-width: 768px) {
-    .workflow-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-  .workflow-step {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  .workflow-num {
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 50%;
-    background: transparent;
-    border: 2px solid #3b82f6;
-    color: #3b82f6;
-    display: grid;
-    place-items: center;
-    font-weight: 800;
-    font-size: 1rem;
-    margin-bottom: 1.5rem;
-  }
-  .workflow-step h3 {
-    font-size: 1rem;
-    font-weight: 800;
-    color: #1e293b;
-    margin: 0 0 0.5rem;
-  }
-  .workflow-step p {
-    font-size: 0.82rem;
-    color: #64748b;
-    line-height: 1.5;
-    margin: 0;
-    max-width: 18rem;
-  }
-
-  /* Testimonials */
-  .testimonials-section {
-    padding: 5rem clamp(1rem, 5vw, 2.5rem);
-    background: white;
-    text-align: center;
-  }
-  .testimonials-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2rem;
-    max-width: 74rem;
-    margin: 0 auto;
-  }
-  @media (max-width: 1024px) {
-    .testimonials-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-  .testimonial-card {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    padding: 2rem 1.5rem;
-    text-align: left;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-height: 18rem;
-  }
-  .testimonial-user {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1.25rem;
-  }
-  .testimonial-avatar {
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 50%;
-    object-fit: cover;
-  }
-  .testimonial-info h4 {
-    margin: 0 0 0.15rem;
-    font-size: 0.9rem;
-    font-weight: 800;
-    color: #1e293b;
-  }
-  .testimonial-info span {
-    font-size: 0.72rem;
-    color: #64748b;
-    font-weight: 600;
-  }
-  .testimonial-quote {
-    font-size: 0.85rem;
-    color: #475569;
-    line-height: 1.5;
-    font-style: italic;
-    margin: 0 0 1.5rem;
-    flex: 1;
-  }
-  .testimonial-link {
-    font-size: 0.65rem;
-    font-weight: 800;
-    color: #3b82f6;
-    text-decoration: none;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  /* Footer */
-  .landing-footer {
-    background: #f1f5f9;
-    padding: 4rem clamp(1rem, 5vw, 2.5rem) 2rem;
-    border-top: 1px solid #e2e8f0;
-  }
-  .footer-grid {
-    display: grid;
-    grid-template-columns: 1.2fr repeat(3, 1fr);
-    gap: 3rem;
-    max-width: 74rem;
-    margin: 0 auto 3rem;
-  }
-  @media (max-width: 900px) {
-    .footer-grid {
-      grid-template-columns: 1fr;
-      gap: 2rem;
-    }
-  }
-  .footer-col h3 {
-    font-size: 0.72rem;
-    font-weight: 800;
-    color: #475569;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin: 0 0 1.25rem;
-  }
-  .footer-links {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-  .footer-links a {
-    font-size: 0.8rem;
-    color: #64748b;
-    text-decoration: none;
-    font-weight: 600;
-    transition: color 0.2s;
-  }
-  .footer-links a:hover {
-    color: #1e293b;
-  }
-  .footer-bottom {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-top: 1px solid #cbd5e1;
-    padding-top: 1.5rem;
-    max-width: 74rem;
-    margin: 0 auto;
-    flex-wrap: wrap;
-    gap: 1rem;
-    font-size: 0.75rem;
-    color: #94a3b8;
-    font-weight: 600;
-  }
-</style>
-
-<div class="landing-page">
-  <!-- SVG Heartbeat wave Header Decoration -->
-  <div class="heartbeat-container">
-    <svg class="heartbeat-svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
-      <defs>
-        <linearGradient id="wave-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="#6C63FF" />
-          <stop offset="100%" stop-color="#00D2FF" />
-        </linearGradient>
-      </defs>
-      <path class="heartbeat-line" d="M0,60 L200,60 L220,60 L230,20 L240,100 L250,50 L260,70 L270,60 L450,60 L470,20 L480,95 L490,45 L500,75 L510,60 L750,60 L770,10 L785,110 L795,50 L805,70 L815,60 L1000,60 L1020,30 L1030,90 L1040,40 L1050,70 L1060,60 L1200,60" />
-    </svg>
-  </div>
-
-  <!-- 1. Hero Section -->
-  <section class="hero-section">
-    <span class="hero-badge">Fighting Heart Disease through data</span>
-    <h1>CardioViz - Fighting Heart Disease Through Data</h1>
-    <p>Advanced Analytics Platform for Cardiovascular Health. Empowering cardiologists, administrators, and patients with real-time clinical intelligence.</p>
+void main() {
+    vec2 st = v_texCoord;
+    vec3 color1 = vec3(0.10, 0.16, 0.42); // #1a2a6c
+    vec3 color2 = vec3(0.75, 0.22, 0.17); // #c0392b
     
-    <div class="hero-ctas">
-      <a href="{{ url_for('auth.login') }}" class="btn-primary-round">Explore Heart Health Insights</a>
-      <a href="#" class="btn-ghost-round" onclick="alert('Opening research publications...')">View Research & Papers</a>
-    </div>
-
-    <!-- Stats row -->
-    <div class="hero-stats-row">
-      <div class="hero-stat-item">
-        <strong>10,000+</strong>
-        <span>Patients Analyzed</span>
-      </div>
-      <div class="hero-stat-item">
-        <strong>24</strong>
-        <span>Clinical Risk Factors</span>
-      </div>
-      <div class="hero-stat-item">
-        <strong>94%</strong>
-        <span>Detection Accuracy</span>
-      </div>
-      <div class="hero-stat-item">
-        <strong>3</strong>
-        <span>Personas Served</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- 2. Three Persona Cards Section -->
-  <section class="personas-section">
-    <h2 class="section-title">Tailored Clinical Intelligence</h2>
-    <p class="section-subtitle">Different perspectives, one common goal: reducing cardiac mortality through predictive modeling and patient empowerment.</p>
+    vec3 bg = mix(color1, color2, st.y + sin(u_time * 0.5) * 0.2);
     
-    <div class="personas-grid">
-      <!-- Card 1: Clinical (Dr. Sharma) -->
-      <div class="persona-card clinical">
-        <div>
-          <div class="persona-icon-wrap blue">
-            <i data-lucide="stethoscope" style="width: 1.4rem; height: 1.4rem;"></i>
-          </div>
-          <h3>Dr. Sharma's Clinical Risk Analysis</h3>
-          <p>Identify high-risk middle-aged patients through comprehensive lifestyle factor analysis and diagnostic data.</p>
-        </div>
-        <div>
-          <div class="persona-metrics-badge">
-            METRICS / 847 Patients | 156 High-Risk
-          </div>
-          <a href="{{ url_for('auth.login') }}" class="btn-persona-action">Access Clinical Dashboard</a>
-        </div>
-      </div>
+    // Simple geometric particles
+    float particles = 0.0;
+    for(int i = 0; i < 20; i++) {
+        vec2 pos = vec2(random(vec2(float(i), 1.0)), random(vec2(float(i), 2.0)));
+        pos.y = fract(pos.y + u_time * 0.05);
+        float dist = distance(st, pos);
+        particles += smoothstep(0.02, 0.0, dist) * 0.3;
+    }
+    
+    gl_FragColor = vec4(bg + particles, 1.0);
+}`;
+              function cs(type, src) {
+                const s = gl.createShader(type);
+                gl.shaderSource(s, src);
+                gl.compileShader(s);
+                return s;
+              }
+              const prog = gl.createProgram();
+              gl.attachShader(prog, cs(gl.VERTEX_SHADER, vs));
+              gl.attachShader(prog, cs(gl.FRAGMENT_SHADER, fs));
+              gl.linkProgram(prog);
+              gl.useProgram(prog);
+              const buf = gl.createBuffer();
+              gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+              gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+              const pos = gl.getAttribLocation(prog, 'a_position');
+              gl.enableVertexAttribArray(pos);
+              gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+              const uTime = gl.getUniformLocation(prog, 'u_time');
+              const uRes = gl.getUniformLocation(prog, 'u_resolution');
+              const uMouse = gl.getUniformLocation(prog, 'u_mouse');
 
-      <!-- Card 2: Public Health (Ramesh) -->
-      <div class="persona-card public-health">
-        <div>
-          <div class="persona-icon-wrap purple">
-            <i data-lucide="building" style="width: 1.4rem; height: 1.4rem;"></i>
-          </div>
-          <h3>Ramesh's Population Health Policy</h3>
-          <p>Study regional trends, urban vs rural disparities, and the visual impact of health policies on public health.</p>
-        </div>
-        <div>
-          <div class="persona-metrics-badge">
-            METRICS / 12 Regions | 4 Recommendations
-          </div>
-          <a href="{{ url_for('auth.login') }}" class="btn-persona-action">Access Public Health Dashboard</a>
-        </div>
-      </div>
+              let mouse = { x: canvas.width / 2, y: canvas.height / 2 };
+              window.addEventListener('mousemove', (event) => {
+                const rect = canvas.getBoundingClientRect();
+                if (rect.width && rect.height) {
+                  const nx = (event.clientX - rect.left) / rect.width;
+                  const ny = 1.0 - (event.clientY - rect.top) / rect.height;
+                  mouse.x = nx * canvas.width;
+                  mouse.y = ny * canvas.height;
+                }
+              });
 
-      <!-- Card 3: Patient (Anita) -->
-      <div class="persona-card patient">
-        <div>
-          <div class="persona-icon-wrap blue">
-            <i data-lucide="heart" style="width: 1.4rem; height: 1.4rem;"></i>
-          </div>
-          <h3>Anita's Personal Health Monitoring</h3>
-          <p>Track your personal risk factors, daily habits, and monitor your health progress in real-time.</p>
+              function render(t) {
+                if (typeof ResizeObserver === 'undefined') syncSize();
+                gl.viewport(0, 0, canvas.width, canvas.height);
+                if (uTime) gl.uniform1f(uTime, t * 0.001);
+                if (uRes) gl.uniform2f(uRes, canvas.width, canvas.height);
+                if (uMouse) gl.uniform2f(uMouse, mouse.x, mouse.y);
+                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+                requestAnimationFrame(render);
+              }
+              render(0);
+            })();
+            </script>
         </div>
-        <div>
-          <div class="persona-metrics-badge">
-            METRICS / 78% Health Score | 5 Factors
-          </div>
-          <a href="{{ url_for('auth.login') }}" class="btn-persona-action">Access Patient Dashboard</a>
+        <!-- STITCH_SHADER_END:ANIMATION_5 -->
+        <div class="absolute inset-0 bg-primary-container/20"></div>
+        <div class="relative z-10 max-w-screen-2xl mx-auto px-margin-desktop w-full grid grid-cols-1 md:grid-cols-12 gap-gutter">
+            <div class="md:col-span-8 flex flex-col justify-center">
+                <h1 class="animate-fade-up font-display-lg text-display-lg text-primary font-extrabold mb-md hero-title-shadow leading-tight">
+                    Transforming Heart Disease Data into Life-Saving Decisions
+                </h1>
+                <p class="animate-fade-up font-body-lg text-body-lg text-on-surface-variant max-w-2xl mb-lg" style="animation-delay: 0.1s;">
+                    Empowering healthcare providers, policymakers, and patients with interactive Tableau analytics and real-time cardiovascular insights.
+                </p>
+                <div class="animate-fade-up flex flex-wrap gap-md" style="animation-delay: 0.2s;">
+                    <a href="{{ url_for('auth.login') }}" class="gradient-bg px-xl py-md rounded-xl text-white font-label-md text-label-md flex items-center gap-2 shadow-xl hover:scale-105 transition-all text-center">
+                        Explore Dashboards <span class="material-symbols-outlined">trending_flat</span>
+                    </a>
+                    <a href="{{ url_for('auth.login') }}" class="bg-white/30 backdrop-blur-sm border border-primary/20 px-xl py-md rounded-xl text-primary font-label-md text-label-md flex items-center gap-2 hover:bg-white/50 transition-all text-center">
+                        Watch Demo <span class="material-symbols-outlined">play_circle</span>
+                    </a>
+                </div>
+                <div class="animate-fade-up mt-xl pt-lg border-t border-primary/10 flex items-center gap-xl opacity-60 grayscale hover:grayscale-0 transition-all" style="animation-delay: 0.3s;">
+                    <img class="h-8 object-contain" data-alt="A clean, minimalist logo for a world health organization, rendered in a professional monochrome style with medical iconography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0tFneH7K2FhaUbP4D9irZrheQGSG8kEhk_yXufdEEuEayJXu5g5iFIyyZksS_9LbYcfhbFPyuca23Abxp-j4BkrLLdC-Ysx_zFAgIE4ZKSPhZuK9zmLmk_Ug35uElGAAXU4e2Cv4koa3_hgy6RhO9hFVY5kiTC_670mZHjLt5L4oAZhNHtNXUjImG42-n_FyNTt5JrTBlYbUPQTDhWjtaBIUoJxDFo_8hEPglbnFluWF-rxaca4UGwoW0ggBBbhSi_HF1HEmpQOJ_"/>
+                    <img class="h-8 object-contain" data-alt="The logo of a prestigious university medical research center, emphasizing authority and scientific rigor through clean lines and a classic medical crest." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSl859KP6esrfueqqkNLgOlQfZPaNMwyOoRenMVl5ZBPIs8z94jQjmHf-IqxQGAbunlfC9Kn5sjmYeZZwzepgSp55FkPSRrvap0gbjaPrzk_RlF7f5Wnx36q3y689fbNtxtvLw665TmYR_W-lHoar5UvfaVrufw-_h_918W6LY22GDrtKLVdsux_22TI2XFBML_ENke89HUPDIgYuC08NMPYF8B1AJyLKawg2rlXgFPuE_H_b4gSI9AO-G31NwjIU95wZOw0o2sBJO"/>
+                    <img class="h-8 object-contain" data-alt="A modern tech certification badge for HIPAA compliance and healthcare data security, featuring a green shield and padlock symbol." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAutby0_KlP3OahxVNJiv-eaM9GpJCtlzEyNiLfh3PJ77jz6imVchCAj18iUNNm4tqLyhy_A3V3AKOAkJiKgG060DlMdkHvvE5vLLduKQz-VU5Z2-F_1DAd88Nk9iwXwWuaDgIGCoToZIXcl6gc9TGp2-PXq8z0ZtaoP9mDnzZyx5XVsmcgGUHPFN42hR0dRqkujL-itHq80pqL3a2C2ey_oA90tiamxhfsADAIeqoZHpHhh7Va3JJ80NFYlhYdoPp9VAEAJaSPk2uK"/>
+                </div>
+            </div>
+            <div class="hidden md:flex md:col-span-4 items-center justify-center">
+                <div class="relative w-full aspect-square glass-card rounded-3xl shadow-2xl border border-white/40 p-base animate-pulse">
+                    <div class="w-full h-full rounded-2xl bg-cover bg-center" data-alt="A high-fidelity data visualization dashboard showing complex cardiovascular health metrics, including live ECG wave patterns, 3D heart models, and vibrant statistical graphs on a dark, professional medical interface." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBhEAS5AHoqX4uJUA6aEX2Jp1m8ItIj-hTFmJfry7Dg6vpV6oHDfEXvM7AXZB_stp0T8M8jLPxbfhCRNEXdApnKFxqHMYG3AjCVPzHkxeNa_8qC41lJs8iBc3-YWURZdxiEJJiug7Uc1g1WRPY2cfjSsdLN36kzeDrwZ1m_zED7fqUZxdGRanaNBrtxkYSNZoU_tx41eS5AQWgNzvwhQOE2lnVwh9L1iL_aG6uFJu0gwlKx-KPgkaGjPd3vh9jXsQI7EZeerc4l2EiT')"></div>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  </section>
+    </header>
 
-  <!-- 3. Key Risk Factors Section -->
-  <section class="risk-factors-section">
-    <div class="risk-factors-grid">
-      <!-- Left side: Bar chart -->
-      <div class="risk-chart-area">
-        <h2>Analyzing Critical Risk Factors</h2>
-        <p>Our platform specifically isolates cardiovascular pathology. These are the top predictors of cardiovascular incidents in our current dataset.</p>
+    <!-- Key Statistics Counter -->
+    <section class="bg-white py-xl border-y border-outline-variant/30">
+        <div class="max-w-screen-2xl mx-auto px-margin-desktop grid grid-cols-2 md:grid-cols-4 gap-gutter text-center">
+            <div class="space-y-base">
+                <div class="font-display-lg text-display-lg text-primary font-bold">10+</div>
+                <div class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Interactive Dashboards</div>
+            </div>
+            <div class="space-y-base">
+                <div class="font-display-lg text-display-lg text-secondary font-bold">100,000+</div>
+                <div class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Patient Data Points</div>
+            </div>
+            <div class="space-y-base">
+                <div class="font-display-lg text-display-lg text-primary font-bold">15+</div>
+                <div class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Key Risk Factors</div>
+            </div>
+            <div class="space-y-base">
+                <div class="font-display-lg text-display-lg text-secondary font-bold">98%</div>
+                <div class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Data Accuracy</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- User Scenarios (Features) -->
+    <section class="py-xl bg-surface-low" id="scenarios">
+        <div class="max-w-screen-2xl mx-auto px-margin-desktop">
+            <div class="text-center mb-xl">
+                <h2 class="font-headline-lg text-headline-lg text-primary mb-sm">One Platform, Three Perspectives</h2>
+                <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl mx-auto">Tailored analytical environments designed for the specific needs of diverse healthcare stakeholders.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+                <!-- Clinical -->
+                <div class="glass-card p-xl rounded-2xl border border-white hover:shadow-xl transition-all group">
+                    <div class="w-16 h-16 rounded-xl bg-secondary/10 flex items-center justify-center mb-lg group-hover:bg-secondary transition-colors">
+                        <span class="material-symbols-outlined text-[32px] text-secondary group-hover:text-white">stethoscope</span>
+                    </div>
+                    <h3 class="font-title-lg text-title-lg text-primary mb-sm">Clinical Decision Support</h3>
+                    <p class="font-body-md text-body-md text-on-surface-variant mb-md">Real-time patient diagnostics and predictive modeling for acute cardiac events.</p>
+                    <a class="font-label-md text-label-md text-secondary flex items-center gap-base hover:gap-sm transition-all" href="{{ url_for('auth.login') }}">Learn more <span class="material-symbols-outlined text-[18px]">arrow_forward</span></a>
+                </div>
+                <!-- Public Health -->
+                <div class="glass-card p-xl rounded-2xl border border-white hover:shadow-xl transition-all group">
+                    <div class="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center mb-lg group-hover:bg-primary transition-colors">
+                        <span class="material-symbols-outlined text-[32px] text-primary group-hover:text-white">corporate_fare</span>
+                    </div>
+                    <h3 class="font-title-lg text-title-lg text-primary mb-sm">Policy &amp; Public Health</h3>
+                    <p class="font-body-md text-body-md text-on-surface-variant mb-md">Population-level trends and demographic mapping for effective intervention planning.</p>
+                    <a class="font-label-md text-label-md text-primary flex items-center gap-base hover:gap-sm transition-all" href="{{ url_for('auth.login') }}">Learn more <span class="material-symbols-outlined text-[18px]">arrow_forward</span></a>
+                </div>
+                <!-- Personal Health -->
+                <div class="glass-card p-xl rounded-2xl border border-white hover:shadow-xl transition-all group">
+                    <div class="w-16 h-16 rounded-xl bg-green-100 flex items-center justify-center mb-lg group-hover:bg-green-600 transition-colors">
+                        <span class="material-symbols-outlined text-[32px] text-green-600 group-hover:text-white">favorite</span>
+                    </div>
+                    <h3 class="font-title-lg text-title-lg text-primary mb-sm">Personal Health Monitoring</h3>
+                    <p class="font-body-md text-body-md text-on-surface-variant mb-md">Patient-facing visualizations that simplify complex medical data for daily wellness.</p>
+                    <a class="font-label-md text-label-md text-green-600 flex items-center gap-base hover:gap-sm transition-all" href="{{ url_for('auth.login') }}">Learn more <span class="material-symbols-outlined text-[18px]">arrow_forward</span></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dashboard Previews -->
+    <section class="py-xl" id="previews">
+        <div class="max-w-screen-2xl mx-auto px-margin-desktop">
+            <div class="flex justify-between items-end mb-xl">
+                <div>
+                    <h2 class="font-headline-lg text-headline-lg text-primary">See CardioViz in Action</h2>
+                    <p class="font-body-md text-body-md text-on-surface-variant">Live previews of our specialized Tableau integration.</p>
+                </div>
+                <div class="flex gap-sm">
+                    <button id="slide-left" class="w-12 h-12 rounded-full border border-outline-variant flex items-center justify-center hover:bg-surface-container transition-colors">
+                        <span class="material-symbols-outlined">chevron_left</span>
+                    </button>
+                    <button id="slide-right" class="w-12 h-12 rounded-full border border-outline-variant flex items-center justify-center hover:bg-surface-container transition-colors">
+                        <span class="material-symbols-outlined">chevron_right</span>
+                    </button>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter overflow-hidden">
+                <!-- Slide 1 -->
+                <div class="group cursor-pointer">
+                    <div class="aspect-video rounded-2xl overflow-hidden mb-md shadow-md border border-outline-variant/30">
+                        <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A professional medical dashboard showing real-time clinical diagnostics with detailed ECG waves, heart rate charts, and patient risk assessment metrics in a crisp light-themed UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGbGhIiyFrNaFTrrsrs5hHorsvZTZDlCgp-HErQS80VTySgf6lF8III87pTqnLKq59O_ZvlcCzMO4AKZMSBqDudm3p3Kfb9RbUdgtIyUZ6TKnAVmXx5QcL1gVHSQoiS18p2FQ71JcvXsSJnsml12TRPMrOmN1IIukSSlDKp-a5LZezNFb1PslGg9E-YhlSWL0HWiWHp0nX4na9n1ukfkhszESfrNlCabkIVlvK6aBsh5vY9uYvx2eMDhTHzOa_0NHKxeq4DieXPanL"/>
+                    </div>
+                    <div class="flex gap-xs mb-xs">
+                        <span class="px-xs py-0.5 rounded-full bg-secondary-container/20 text-secondary font-label-sm text-label-sm">Clinical</span>
+                        <span class="px-xs py-0.5 rounded-full bg-primary-fixed/30 text-primary font-label-sm text-label-sm">Real-time</span>
+                    </div>
+                    <h4 class="font-title-lg text-title-lg text-primary mb-xs">Acute Care Analytics</h4>
+                    <p class="font-body-md text-body-md text-on-surface-variant line-clamp-2">High-resolution diagnostic tools for cardiac surgeons and intensive care units.</p>
+                </div>
+                <!-- Slide 2 -->
+                <div class="group cursor-pointer">
+                    <div class="aspect-video rounded-2xl overflow-hidden mb-md shadow-md border border-outline-variant/30">
+                        <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A geographical heat map visualization representing cardiovascular health trends across different city neighborhoods, featuring clean data points and intuitive population density overlays in a medical analytics style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSOtPj710hqN7A7dW9SAElhEVblfQOTKq1p7JqHPHKdd_P_edUCMMOpCXk4pE5BCHSIww0tJQL14aR65sOKDE3HpOqPTbiBTd5Um3IDiST5Yf3C8AZBzLZdQgbnck5BMs_TNlhhJHUfLx3wozMvbQ6s9bMGcYVGE0E1s6IK7HcZIQOTuEjLJznSuf7WdaVqt9DJn2v2c0DgnyvAE2I2sJB3Q2QbJYFGjIj_may1SOpz-hycM91Pyvl4q6rOGDvDkGA2vSs9ezO6TWf"/>
+                    </div>
+                    <div class="flex gap-xs mb-xs">
+                        <span class="px-xs py-0.5 rounded-full bg-primary-container/10 text-primary font-label-sm text-label-sm">Public Health</span>
+                        <span class="px-xs py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm">Demographics</span>
+                    </div>
+                    <h4 class="font-title-lg text-title-lg text-primary mb-xs">Population Health Trends</h4>
+                    <p class="font-body-md text-body-md text-on-surface-variant line-clamp-2">Visualizing risk factors across geographic and socio-economic demographics.</p>
+                </div>
+                <!-- Slide 3 -->
+                <div class="group cursor-pointer">
+                    <div class="aspect-video rounded-2xl overflow-hidden mb-md shadow-md border border-outline-variant/30">
+                        <img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A mobile-responsive patient portal displaying simple heart health tracking icons, progress rings for daily activity, and encouraging medical messages in a soft, approachable green and white aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbhnTljiHSMHk7hYeJrvM31Gzs1gVmCr5wjNcmVNGEFQuLzBXVkQrpyVxDncTJbJ1sCyP2FnTAwetYpLo5XEU2eZDjVVBnsd76GTfynA3WU9gjxtJfnuxLU29eSPGtyQp_5wRr331lir9xm3EXLDgVOOV-JYhJxudnT9aPvCcMBQV9brCiXPhv_X8c0JMJqxkvctUjNHzKCmeEVvqpjAOuFHhN5lItkzIUJeIijprwcd2XnVLWlWjGKSdoAYsWQb0iBz3JYAEHK4ti"/>
+                    </div>
+                    <div class="flex gap-xs mb-xs">
+                        <span class="px-xs py-0.5 rounded-full bg-green-100 text-green-700 font-label-sm text-label-sm">Patient Portal</span>
+                        <span class="px-xs py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm">Mobile Ready</span>
+                    </div>
+                    <h4 class="font-title-lg text-title-lg text-primary mb-xs">Personal Vitals Tracker</h4>
+                    <p class="font-body-md text-body-md text-on-surface-variant line-clamp-2">Simplifying complex data into actionable health insights for the everyday user.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Our Approach (Workflow) -->
+    <section class="py-xl bg-primary text-white overflow-hidden" id="approach">
+        <div class="max-w-screen-2xl mx-auto px-margin-desktop">
+            <h2 class="font-headline-lg text-headline-lg mb-xl text-center">Engineered for Precision</h2>
+            <div class="relative">
+                <!-- Line -->
+                <div class="absolute top-1/2 left-0 w-full h-0.5 bg-white/20 -translate-y-1/2 hidden md:block"></div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-gutter relative z-10">
+                    <!-- Step 1 -->
+                    <div class="flex flex-col items-center text-center space-y-md">
+                        <div class="w-16 h-16 rounded-full bg-secondary flex items-center justify-center text-white shadow-lg ring-8 ring-primary">
+                            <span class="material-symbols-outlined text-[24px]">input</span>
+                        </div>
+                        <div>
+                            <h4 class="font-title-lg text-title-lg font-bold mb-xs">Collect &amp; Extract</h4>
+                            <p class="font-body-md text-body-md text-white/70">Ingesting raw ECG and diagnostic data from diverse medical sources.</p>
+                        </div>
+                    </div>
+                    <!-- Step 2 -->
+                    <div class="flex flex-col items-center text-center space-y-md">
+                        <div class="w-16 h-16 rounded-full bg-white flex items-center justify-center text-primary shadow-lg ring-8 ring-primary">
+                            <span class="material-symbols-outlined text-[24px]">cleaning_services</span>
+                        </div>
+                        <div>
+                            <h4 class="font-title-lg text-title-lg font-bold mb-xs">Store &amp; Clean</h4>
+                            <p class="font-body-md text-body-md text-white/70">Standardizing datasets in secure, HIPAA-compliant environments.</p>
+                        </div>
+                    </div>
+                    <!-- Step 3 -->
+                    <div class="flex flex-col items-center text-center space-y-md">
+                        <div class="w-16 h-16 rounded-full bg-secondary flex items-center justify-center text-white shadow-lg ring-8 ring-primary">
+                            <span class="material-symbols-outlined text-[24px]">hub</span>
+                        </div>
+                        <div>
+                            <h4 class="font-title-lg text-title-lg font-bold mb-xs">Connect &amp; Visualize</h4>
+                            <p class="font-body-md text-body-md text-white/70">Mapping cleaned data to high-performance Tableau instances.</p>
+                        </div>
+                    </div>
+                    <!-- Step 4 -->
+                    <div class="flex flex-col items-center text-center space-y-md">
+                        <div class="w-16 h-16 rounded-full bg-white flex items-center justify-center text-primary shadow-lg ring-8 ring-primary">
+                            <span class="material-symbols-outlined text-[24px]">insights</span>
+                        </div>
+                        <div>
+                            <h4 class="font-title-lg text-title-lg font-bold mb-xs">Analyze &amp; Report</h4>
+                            <p class="font-body-md text-body-md text-white/70">Generating actionable intelligence and automated critical alerts.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="py-xl bg-surface-low" id="testimonials">
+        <div class="max-w-screen-2xl mx-auto px-margin-desktop">
+            <h2 class="font-headline-lg text-headline-lg text-primary text-center mb-xl">Trusted by Specialists</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+                <!-- Testimonial 1 -->
+                <div class="bg-white p-xl rounded-2xl shadow-sm border border-outline-variant/30">
+                    <p class="font-body-md text-body-md text-on-surface-variant italic mb-lg">"CardioViz has revolutionized our department's ability to predict post-operative risks. The data density is incredible yet intuitive."</p>
+                    <div class="flex items-center gap-md">
+                        <img class="w-12 h-12 rounded-full object-cover" data-alt="A professional headshot of a female cardiologist in her 40s, wearing a white lab coat and stethoscope, set against a blurred medical office background, with a confident and warm expression." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCh6xvxpzXv2oyOJZTYOcLjeyQsv3neIB6h4OQz_Pkah4Pk6OgMr3u82EIbh9xOi0Yk8oDyBmmXnDGGQguVJmTT7XYeMBMp4e6XcRBRDrIEf1vb6Kpgpd6CPAXOhFXoQgrCfibJYW0H3lrWg0illudGN3k7omtanTF6Os5IlmF-2KeLG8z0VfmzlAGbFp5zAarb0WVW4gsIaovprgU6Eg99J71PewdN7iWS68bH5bow9LdF8F1-WK2KkmmS1Fgi86yhDPQizByn1qxI"/>
+                        <div>
+                            <div class="font-label-md text-label-md text-primary">Dr. Sarah Sharma</div>
+                            <div class="font-label-sm text-label-sm text-on-surface-variant">Chief of Cardiology, Metro Health</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Testimonial 2 -->
+                <div class="bg-white p-xl rounded-2xl shadow-sm border border-outline-variant/30">
+                    <p class="font-body-md text-body-md text-on-surface-variant italic mb-lg">"As a health policy analyst, the population mapping tools allow us to allocate resources with surgical precision. Essential for modern cities."</p>
+                    <div class="flex items-center gap-md">
+                        <img class="w-12 h-12 rounded-full object-cover" data-alt="A portrait of a male public health official in a sharp business suit, looking through spectacles with a focused and analytical demeanor, in a modern glass office setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCupn-Q1wnc5AY6uba2EGgcFXEBafhdYs8ws3FNbjEvLB3si0QEID0b_XiU69pv-UQgvtflk0mL7IMqORG0pmHpeF8rbkOI-PoumrUqkVMzOdw_1NhCe1vUGewY9vjhxWJQ-w8elKsQ3MqE3KiG27I-5YPd8s_7iqOOsJJjXR64woWaLgroJuiJ3E7Fx99hKA0lZ07HvNbExo0QyOnaLjLKNN05KtOhnJOLirFFVEP2H3xclOCjRxGaEgHWjMbUr9uPm2OdCCFLfT38"/>
+                        <div>
+                            <div class="font-label-md text-label-md text-primary">Ramesh Kumar</div>
+                            <div class="font-label-sm text-label-sm text-on-surface-variant">Public Health Director</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Testimonial 3 -->
+                <div class="bg-white p-xl rounded-2xl shadow-sm border border-outline-variant/30">
+                    <p class="font-body-md text-body-md text-on-surface-variant italic mb-lg">"Finally, a medical tool that doesn't feel like a textbook. I can actually understand my father's heart health trends in seconds."</p>
+                    <div class="flex items-center gap-md">
+                        <img class="w-12 h-12 rounded-full object-cover" data-alt="A smiling woman in her 30s with a kind and relieved expression, wearing casual contemporary clothing, photographed in a bright, airy home living room with soft natural light." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAM2QGeCWV3UlcoAo4I_U1i7ESIQ9i0AwqUodvuF7lQr8lqRi3Ycd66UZXxahFAJ55fkMw9tqecGIQq6fpitP3LVo68eOpXivFiyYTT9d_s-jCUoc-icP2bO3s5QvdMNfWC2xYzBoOUyNrJiPjJlJwvTjQX-4-z_a1osnPXnQuRLsNfFzmMQC4No_UACEOpSU8VA9fdP5FjMUJ6gQF0Q-V2LCrZIyjFrcshogLmuvl8FjlQStE5hgyUpLSayB-HSco35s_5Ps6N-AK6"/>
+                        <div>
+                            <div class="font-label-md text-label-md text-primary">Anita Patel</div>
+                            <div class="font-label-sm text-label-sm text-on-surface-variant">Patient Advocate &amp; Caregiver</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Grid -->
+    <section class="py-xl" id="features">
+        <div class="max-w-screen-2xl mx-auto px-margin-desktop">
+            <h2 class="font-headline-lg text-headline-lg text-primary text-center mb-xl">Powerful Analytical Capabilities</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
+                <div class="p-md space-y-sm">
+                    <span class="material-symbols-outlined text-secondary text-[32px]">query_stats</span>
+                    <h5 class="font-title-lg text-title-lg text-primary">Advanced Analytics</h5>
+                    <p class="font-body-md text-body-md text-on-surface-variant">Complex statistical modeling for predictive patient outcome forecasting.</p>
+                </div>
+                <div class="p-md space-y-sm">
+                    <span class="material-symbols-outlined text-secondary text-[32px]">sync</span>
+                    <h5 class="font-title-lg text-title-lg text-primary">Real-time Updates</h5>
+                    <p class="font-body-md text-body-md text-on-surface-variant">Data streams synchronized directly from medical monitoring devices.</p>
+                </div>
+                <div class="p-md space-y-sm">
+                    <span class="material-symbols-outlined text-secondary text-[32px]">filter_alt</span>
+                    <h5 class="font-title-lg text-title-lg text-primary">Advanced Filtering</h5>
+                    <p class="font-body-md text-body-md text-on-surface-variant">Drill down into specific demographics, symptoms, and risk factors.</p>
+                </div>
+                <div class="p-md space-y-sm">
+                    <span class="material-symbols-outlined text-secondary text-[32px]">verified_user</span>
+                    <h5 class="font-title-lg text-title-lg text-primary">Secure &amp; HIPAA</h5>
+                    <p class="font-body-md text-body-md text-on-surface-variant">Military-grade encryption protecting sensitive patient health information.</p>
+                </div>
+                <div class="p-md space-y-sm">
+                    <span class="material-symbols-outlined text-secondary text-[32px]">terminal</span>
+                    <h5 class="font-title-lg text-title-lg text-primary">API Integration</h5>
+                    <p class="font-body-md text-body-md text-on-surface-variant">Seamlessly connect with existing EMR and hospital management systems.</p>
+                </div>
+                <div class="p-md space-y-sm">
+                    <span class="material-symbols-outlined text-secondary text-[32px]">notifications_active</span>
+                    <h5 class="font-title-lg text-title-lg text-primary">Automated Alerts</h5>
+                    <p class="font-body-md text-body-md text-on-surface-variant">Customizable threshold notifications for clinical staff and patients.</p>
+                </div>
+                <div class="p-md space-y-sm">
+                    <span class="material-symbols-outlined text-secondary text-[32px]">cloud_upload</span>
+                    <h5 class="font-title-lg text-title-lg text-primary">Scalable Infrastructure</h5>
+                    <p class="font-body-md text-body-md text-on-surface-variant">Built on robust cloud architectures capable of millions of records.</p>
+                </div>
+                <div class="p-md space-y-sm">
+                    <span class="material-symbols-outlined text-secondary text-[32px]">description</span>
+                    <h5 class="font-title-lg text-title-lg text-primary">Audit Reporting</h5>
+                    <p class="font-body-md text-body-md text-on-surface-variant">Instant generation of clinical reports for insurance and regulation.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter CTA -->
+    <section class="max-w-screen-2xl mx-auto px-margin-desktop mb-xl">
+        <div class="gradient-bg rounded-[2rem] p-xl md:p-32 text-center text-white relative overflow-hidden shadow-2xl">
+            <!-- STITCH_SHADER_START:ANIMATION_5 class="absolute inset-0 w-full h-full opacity-20 pointer-events-none" -->
+            <div class="absolute inset-0 w-full h-full opacity-20 pointer-events-none" style="display:block;">
+                <canvas id="shader-canvas-ANIMATION_5_cta" style="display:block;width:100%;height:100%"></canvas>
+                <script>
+                (function() {
+                  const canvas = document.getElementById('shader-canvas-ANIMATION_5_cta');
+
+                  function syncSize() {
+                    const w = canvas.clientWidth  || 1280;
+                    const h = canvas.clientHeight || 720;
+                    if (canvas.width !== w || canvas.height !== h) {
+                      canvas.width  = w;
+                      canvas.height = h;
+                    }
+                  }
+                  if (typeof ResizeObserver !== 'undefined') {
+                    new ResizeObserver(syncSize).observe(canvas);
+                  }
+                  syncSize();
+
+                  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                  if (!gl) return;
+                  const vs = `attribute vec2 a_position;
+varying vec2 v_texCoord;
+void main() {
+  v_texCoord = a_position * 0.5 + 0.5;
+  gl_Position = vec4(a_position, 0.0, 1.0);
+}`;
+                  const fs = `precision highp float;
+varying vec2 v_texCoord;
+uniform float u_time;
+uniform vec2 u_resolution;
+
+float random(vec2 st) {
+    return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+}
+
+void main() {
+    vec2 st = v_texCoord;
+    vec3 color1 = vec3(0.10, 0.16, 0.42); // #1a2a6c
+    vec3 color2 = vec3(0.75, 0.22, 0.17); // #c0392b
+    
+    vec3 bg = mix(color1, color2, st.y + sin(u_time * 0.5) * 0.2);
+    
+    // Simple geometric particles
+    float particles = 0.0;
+    for(int i = 0; i < 20; i++) {
+        vec2 pos = vec2(random(vec2(float(i), 1.0)), random(vec2(float(i), 2.0)));
+        pos.y = fract(pos.y + u_time * 0.05);
+        float dist = distance(st, pos);
+        particles += smoothstep(0.02, 0.0, dist) * 0.3;
+    }
+    
+    gl_FragColor = vec4(bg + particles, 1.0);
+}`;
+                  function cs(type, src) {
+                    const s = gl.createShader(type);
+                    gl.shaderSource(s, src);
+                    gl.compileShader(s);
+                    return s;
+                  }
+                  const prog = gl.createProgram();
+                  gl.attachShader(prog, cs(gl.VERTEX_SHADER, vs));
+                  gl.attachShader(prog, cs(gl.FRAGMENT_SHADER, fs));
+                  gl.linkProgram(prog);
+                  gl.useProgram(prog);
+                  const buf = gl.createBuffer();
+                  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+                  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+                  const pos = gl.getAttribLocation(prog, 'a_position');
+                  gl.enableVertexAttribArray(pos);
+                  gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+                  const uTime = gl.getUniformLocation(prog, 'u_time');
+                  const uRes = gl.getUniformLocation(prog, 'u_resolution');
+                  const uMouse = gl.getUniformLocation(prog, 'u_mouse');
+
+                  let mouse = { x: canvas.width / 2, y: canvas.height / 2 };
+                  window.addEventListener('mousemove', (event) => {
+                    const rect = canvas.getBoundingClientRect();
+                    if (rect.width && rect.height) {
+                      const nx = (event.clientX - rect.left) / rect.width;
+                      const ny = 1.0 - (event.clientY - rect.top) / rect.height;
+                      mouse.x = nx * canvas.width;
+                      mouse.y = ny * canvas.height;
+                    }
+                  });
+
+                  function render(t) {
+                    if (typeof ResizeObserver === 'undefined') syncSize();
+                    gl.viewport(0, 0, canvas.width, canvas.height);
+                    if (uTime) gl.uniform1f(uTime, t * 0.001);
+                    if (uRes) gl.uniform2f(uRes, canvas.width, canvas.height);
+                    if (uMouse) gl.uniform2f(uMouse, mouse.x, mouse.y);
+                    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+                    requestAnimationFrame(render);
+                  }
+                  render(0);
+                })();
+                </script>
+            </div>
+            <!-- STITCH_SHADER_END:ANIMATION_5 -->
+            <div class="relative z-10 max-w-2xl mx-auto">
+                <h2 class="font-headline-lg text-headline-lg mb-md">Ready to Transform Heart Health Analytics?</h2>
+                <p class="font-body-lg text-body-lg text-white/80 mb-xl">Join hundreds of clinics already improving patient outcomes with CardioViz.</p>
+                <form id="newsletter-form" class="flex flex-col sm:flex-row gap-md max-w-lg mx-auto">
+                    <input id="newsletter-email" class="flex-grow rounded-xl border-none bg-white/10 backdrop-blur-md text-white placeholder:text-white/60 focus:ring-2 focus:ring-white/50 px-md py-lg font-body-md" placeholder="Enter professional email" type="email" required/>
+                    <button class="bg-white text-primary font-label-md text-label-md px-xl py-lg rounded-xl hover:bg-surface-container-high transition-all active:scale-95 shadow-lg" type="submit">Get Started Now</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-surface-container-highest py-xl border-t border-outline-variant/50">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-gutter px-margin-desktop max-w-screen-2xl mx-auto mb-xl">
+            <!-- Brand -->
+            <div class="space-y-md">
+                <div class="flex items-center gap-xs">
+                    <div class="w-10 h-10 flex items-center justify-center">
+                        <img class="w-8 h-8 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnq79hsx4w_RW_7ppHIpcfSS-S20S3Jh4CEBoPWHfRq8DHgEp1GIh0auTAj_Exxw-4zG8m_EWc4rF2RRp4zy1Uy1GNVU1FwrWJwyI2I0YDw9a9W8tjkNhYINLYgbi3-qjxKVRvMIMusd6JALEcJ3ulrdTkVcKQznlrBaOhkW63eUsBItR5qwbrw9aEclBUROKt6cgLpI7ZA6llu2GVIsTjcaKte-fRcHbPA5AcB7zQIAGM8qUIXbZZJSlsWz3n5dffwMZfXi_XiF2W"/>
+                    </div>
+                    <span class="font-headline-md text-headline-md font-bold text-primary">CardioViz</span>
+                </div>
+                <p class="font-body-md text-body-md text-on-surface-variant">Precision Cardiac Monitoring. Empowering clinical excellence through data-driven insight.</p>
+                <div class="flex gap-md">
+                    <a class="text-on-surface-variant hover:text-primary" href="#"><span class="material-symbols-outlined">public</span></a>
+                    <a class="text-on-surface-variant hover:text-primary" href="#"><span class="material-symbols-outlined">alternate_email</span></a>
+                </div>
+            </div>
+            <!-- Quick Links -->
+            <div class="space-y-md">
+                <h6 class="font-label-md text-label-md text-primary uppercase tracking-widest">Quick Links</h6>
+                <ul class="space-y-sm">
+                    <li><a class="font-body-md text-body-md text-on-surface-variant hover:text-secondary hover:underline underline-offset-4 transition-all" href="{{ url_for('auth.login') }}">Dashboards</a></li>
+                    <li><a class="font-body-md text-body-md text-on-surface-variant hover:text-secondary hover:underline underline-offset-4 transition-all" href="#features">Insights</a></li>
+                    <li><a class="font-body-md text-body-md text-on-surface-variant hover:text-secondary hover:underline underline-offset-4 transition-all" href="#previews">Pricing Plans</a></li>
+                    <li><a class="font-body-md text-body-md text-on-surface-variant hover:text-secondary hover:underline underline-offset-4 transition-all" href="{{ url_for('auth.login') }}">Request Demo</a></li>
+                </ul>
+            </div>
+            <!-- Resources -->
+            <div class="space-y-md">
+                <h6 class="font-label-md text-label-md text-primary uppercase tracking-widest">Resources</h6>
+                <ul class="space-y-sm">
+                    <li><a class="font-body-md text-body-md text-on-surface-variant hover:text-secondary hover:underline underline-offset-4 transition-all" href="{{ url_for('dashboard.tableau_style_dashboard') }}">Documentation</a></li>
+                    <li><a class="font-body-md text-body-md text-on-surface-variant hover:text-secondary hover:underline underline-offset-4 transition-all" href="#scenarios">API Reference</a></li>
+                    <li><a class="font-body-md text-body-md text-on-surface-variant hover:text-secondary hover:underline underline-offset-4 transition-all" href="#approach">Help Center</a></li>
+                    <li><a class="font-body-md text-body-md text-on-surface-variant hover:text-secondary hover:underline underline-offset-4 transition-all" href="#">Legal Status</a></li>
+                </ul>
+            </div>
+            <!-- Contact -->
+            <div class="space-y-md">
+                <h6 class="font-label-md text-label-md text-primary uppercase tracking-widest">Contact Info</h6>
+                <ul class="space-y-sm">
+                    <li class="flex items-center gap-xs font-body-md text-body-md text-on-surface-variant"><span class="material-symbols-outlined text-[18px]">location_on</span> 1200 Medical Plaza, CA</li>
+                    <li class="flex items-center gap-xs font-body-md text-body-md text-on-surface-variant"><span class="material-symbols-outlined text-[18px]">mail</span> contact@cardioviz.ai</li>
+                    <li class="flex items-center gap-xs font-body-md text-body-md text-on-surface-variant"><span class="material-symbols-outlined text-[18px]">call</span> +1 (555) CAR-DIOV</li>
+                </ul>
+            </div>
+        </div>
+        <div class="px-margin-desktop max-w-screen-2xl mx-auto pt-lg border-t border-outline-variant/30 flex flex-col md:flex-row justify-between items-center gap-md">
+            <p class="font-label-sm text-label-sm text-on-surface-variant">© 2026 CardioViz Analytics. All rights reserved. Precision Cardiac Monitoring.</p>
+            <div class="flex gap-lg">
+                <a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary" href="{{ url_for('dashboard.privacy_policy_page') }}">Privacy Policy</a>
+                <a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary" href="{{ url_for('dashboard.terms_of_service_page') }}">Terms of Service</a>
+                <a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary" href="{{ url_for('dashboard.hipaa_compliance_page') }}">HIPAA Compliance</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Simple scroll reveal interaction
+        const observerOptions = { threshold: 0.1 };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-fade-up');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section').forEach(section => {
+            section.classList.add('opacity-0');
+            observer.observe(section);
+        });
+
+        // Interactive slider preview script
+        let activeSlideIndex = 0;
+        const slides = document.querySelectorAll('#previews .grid > div');
         
-        <div class="risk-bars-stack">
-          <div class="risk-bar-row">
-            <div class="risk-bar-labels">
-              <span>High Cholesterol</span>
-              <span>67%</span>
-            </div>
-            <div class="risk-bar-track">
-              <div class="risk-bar-fill blue-light" style="width: 67%;"></div>
-            </div>
-          </div>
-          <div class="risk-bar-row">
-            <div class="risk-bar-labels">
-              <span>Smoking</span>
-              <span>58%</span>
-            </div>
-            <div class="risk-bar-track">
-              <div class="risk-bar-fill blue-dark" style="width: 58%;"></div>
-            </div>
-          </div>
-          <div class="risk-bar-row">
-            <div class="risk-bar-labels">
-              <span>High BMI</span>
-              <span>52%</span>
-            </div>
-            <div class="risk-bar-track">
-              <div class="risk-bar-fill purple" style="width: 52%;"></div>
-            </div>
-          </div>
-          <div class="risk-bar-row">
-            <div class="risk-bar-labels">
-              <span>Sedentary Lifestyle</span>
-              <span>48%</span>
-            </div>
-            <div class="risk-bar-track">
-              <div class="risk-bar-fill gray" style="width: 48%;"></div>
-            </div>
-          </div>
-        </div>
-        
-        <a href="#" style="font-size: 0.88rem; font-weight: 700; color: #3b82f6; text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem;">
-          View Full Dataset &rarr;
-        </a>
-      </div>
+        function updateSlideVisibility() {
+            slides.forEach((slide, idx) => {
+                if (window.innerWidth < 768) {
+                    if (idx === activeSlideIndex) {
+                        slide.style.display = 'block';
+                    } else {
+                        slide.style.display = 'none';
+                    }
+                } else {
+                    slide.style.display = 'block';
+                }
+            });
+        }
 
-      <!-- Right side: circle card -->
-      <div class="risk-image-circle-container">
-        <div class="circular-frame">
-          <img src="{{ url_for('static', filename='images/doctors_analyzing.png') }}" alt="Doctors analyzing cardiac diagnostics">
-        </div>
-        <div class="circular-badge-overlay">
-          <i data-lucide="heart" style="fill: rgba(239, 68, 68, 0.1);"></i>
-          <h4>Continuous Monitoring</h4>
-          <p>CardioViz interfaces with medical-grade data to ensure early detection.</p>
-        </div>
-      </div>
-    </div>
-  </section>
+        document.getElementById('slide-left').addEventListener('click', () => {
+            activeSlideIndex = (activeSlideIndex - 1 + slides.length) % slides.length;
+            updateSlideVisibility();
+        });
 
-  <!-- 4. Real-Time Statistics burden section -->
-  <section class="burden-section">
-    <h2>The Reality: India's Heart Disease Burden</h2>
-    <div class="burden-grid">
-      <div class="burden-card">
-        <strong>30%</strong>
-        <h3>Total Mortality</h3>
-        <p>Heart disease accounts for 30% of all mortality in urban environments.</p>
-      </div>
-      <div class="burden-card">
-        <strong>64M</strong>
-        <h3>Heart Patients</h3>
-        <p>Estimated database of active cases in the country, rising yearly.</p>
-      </div>
-      <div class="burden-card">
-        <strong>2.8M</strong>
-        <h3>Annual Deaths</h3>
-        <p>Nearly three million lives lost annually to cardiovascular events.</p>
-      </div>
-    </div>
-  </section>
+        document.getElementById('slide-right').addEventListener('click', () => {
+            activeSlideIndex = (activeSlideIndex + 1) % slides.length;
+            updateSlideVisibility();
+        });
 
-  <!-- 5. How It Works -->
-  <section class="workflow-section">
-    <h2 class="section-title">A Simple Workflow for Complex Data</h2>
-    <p class="section-subtitle">Connecting datasets to clinic outcomes in three easy steps.</p>
-    
-    <div class="workflow-grid">
-      <div class="workflow-step">
-        <div class="workflow-num">1</div>
-        <h3>Upload Health Data</h3>
-        <p>Seamlessly integrate demographic, clinical, and lifestyle data through our HIPAA-compliant intake.</p>
-      </div>
-      <div class="workflow-step">
-        <div class="workflow-num">2</div>
-        <h3>AI Risk Analysis</h3>
-        <p>Our core engine identifies hidden patterns and correlations with clinical-grade safety and accuracy.</p>
-      </div>
-      <div class="workflow-step">
-        <div class="workflow-num">3</div>
-        <h3>Actionable Insights</h3>
-        <p>Receive personalized care plans or high-level policy recommendations based on longitudinal data.</p>
-      </div>
-    </div>
-  </section>
+        window.addEventListener('resize', updateSlideVisibility);
+        updateSlideVisibility();
 
-  <!-- 6. Success Stories Testimonials -->
-  <section class="testimonials-section">
-    <h2 class="section-title">Impacting Real Lives</h2>
-    <p class="section-subtitle">How CardioViz helps doctors, analysts, and patients save hearts.</p>
-    
-    <div class="testimonials-grid">
-      <div class="testimonial-card">
-        <div>
-          <div class="testimonial-user">
-            <img class="testimonial-avatar" src="{{ url_for('static', filename='images/doctor_avatar.png') }}" alt="Dr. Sharma">
-            <div class="testimonial-info">
-              <h4>Dr. Sharma</h4>
-              <span>Cardiologist, Apollo Heart</span>
-            </div>
-          </div>
-          <p class="testimonial-quote">"CardioViz's clinical dashboard allowed me to prioritize high-risk patients who might have otherwise been missed. We've seen a measurable improvement in patient care adherence."</p>
-        </div>
-        <a href="#" class="testimonial-link" onclick="alert('Viewing Dr. Sharma clinical research notes...')">VALUED IN CLINICAL INTERVENTIONS</a>
-      </div>
-
-      <div class="testimonial-card">
-        <div>
-          <div class="testimonial-user">
-            <img class="testimonial-avatar" src="{{ url_for('static', filename='images/public_health_avatar.png') }}" alt="Ramesh">
-            <div class="testimonial-info">
-              <h4>Ramesh I.</h4>
-              <span>Public Health Administrator</span>
-            </div>
-          </div>
-          <p class="testimonial-quote">"Mapping 12 distinct regions revealed critical rural disparities. We used these insights to push 4 key policy recommendations to the health ministry this year."</p>
-        </div>
-        <a href="#" class="testimonial-link" onclick="alert('Viewing Ramesh policy impact report...')">OPTIMIZED REGIONAL CLINIC ALLOCATIONS</a>
-      </div>
-
-      <div class="testimonial-card">
-        <div>
-          <div class="testimonial-user">
-            <img class="testimonial-avatar" src="{{ url_for('static', filename='images/patient_avatar.png') }}" alt="Anita">
-            <div class="testimonial-info">
-              <h4>Anita R.</h4>
-              <span>Patient User</span>
-            </div>
-          </div>
-          <p class="testimonial-quote">"Seeing my 78% health score motivated me to address the risk factors tracked by CardioViz. For the first time, my health feels like data I can actually manage."</p>
-        </div>
-        <a href="#" class="testimonial-link" onclick="alert('Viewing Anita metric tracking history...')">7.4% GAIN IN CARDIOVASCULAR HEALTH SCORE METRIC INDEX</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- 7. Footer -->
-  <footer class="landing-footer">
-    <div class="footer-grid">
-      <div class="footer-col">
-        <h3 style="font-size: 1.1rem; font-weight: 800; color: #1e293b; text-transform: none; margin-bottom: 0.5rem;">CardioViz</h3>
-        <p style="font-size: 0.8rem; color: #64748b; line-height: 1.5; margin: 0 0 1.25rem;">Advanced Clinical Engine for a healthier heart. Transforming cardiovascular care through the power of data.</p>
-        <div style="display: flex; gap: 0.75rem; color: #64748b;">
-          <i data-lucide="globe" style="width: 1.1rem; height: 1.1rem; cursor: pointer;"></i>
-          <i data-lucide="mail" style="width: 1.1rem; height: 1.1rem; cursor: pointer;"></i>
-          <i data-lucide="share-2" style="width: 1.1rem; height: 1.1rem; cursor: pointer;"></i>
-        </div>
-      </div>
-      <div class="footer-col">
-        <h3>Dashboards</h3>
-        <ul class="footer-links">
-          <li><a href="{{ url_for('auth.login') }}">Risk Factor Database</a></li>
-          <li><a href="{{ url_for('auth.login') }}">Clinical Analytics</a></li>
-          <li><a href="{{ url_for('auth.login') }}">Public Health Portal</a></li>
-          <li><a href="{{ url_for('auth.login') }}">Patient Stories</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h3>Resources</h3>
-        <ul class="footer-links">
-          <li><a href="#">Global Heart Registry</a></li>
-          <li><a href="#">Healthcare Partners</a></li>
-          <li><a href="#">Privacy Policy</a></li>
-          <li><a href="#">Terms of Service</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h3>Contact</h3>
-        <ul class="footer-links">
-          <li><span style="font-size:0.8rem; color:#64748b; font-weight:600;">Support & Intake Clinic</span></li>
-          <li><span style="font-size:0.8rem; color:#64748b;">Bangalore Intervention Hub</span></li>
-          <li><span style="font-size:0.8rem; color:#64748b;">Karnataka, India</span></li>
-          <li><a href="tel:+918088000000" style="color: #3b82f6;">+91 80 8800 0000</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <span>&copy; 2026 CardioViz Clinical Intelligence. All rights reserved.</span>
-      <div style="display: flex; gap: 1rem;">
-        <span>HIPAA COMPLIANT</span>
-        <span>GDPR READY</span>
-        <span>ISO 27001</span>
-      </div>
-    </div>
-  </footer>
-</div>
-{% endblock %}
+        // Client-side Newsletter Form submission handling
+        document.getElementById('newsletter-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const emailInput = document.getElementById('newsletter-email');
+            const userEmail = emailInput.value;
+            if (userEmail) {
+                // Show standard visual confirmation toast
+                const toastContainer = document.createElement('div');
+                toastContainer.className = 'fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none';
+                
+                const toast = document.createElement('div');
+                toast.className = 'px-4 py-3 rounded-xl shadow-lg font-label-md text-label-md text-white bg-green-600/90 backdrop-blur-md pointer-events-auto transition-all duration-350 border border-green-500/50';
+                toast.textContent = `Thank you for subscribing! A welcome email will be sent to ${userEmail}.`;
+                
+                toastContainer.appendChild(toast);
+                document.body.appendChild(toastContainer);
+                
+                // Reset form
+                emailInput.value = '';
+                
+                setTimeout(() => {
+                    toast.classList.add('opacity-0', 'translate-y-[-20px]');
+                    setTimeout(() => {
+                        toastContainer.remove();
+                    }, 400);
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>

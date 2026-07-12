@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CardioViz | Help Center &amp; Support Hub</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .hero-gradient {
+            background: radial-gradient(circle at top right, #dde1ff 0%, #faf8ff 100%);
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-container": "#610001",
+                        "surface": "#faf8ff",
+                        "on-surface": "#171b2b",
+                        "primary-container": "#1a2a6c",
+                        "secondary-container": "#fe5c4a",
+                        "outline": "#767681",
+                        "outline-variant": "#c6c5d2",
+                        "primary": "#001255",
+                        "on-primary": "#ffffff",
+                        "surface-container-low": "#f3f2ff",
+                        "surface-container-high": "#e4e7fe",
+                        "surface-container-highest": "#dfe1f8",
+                        "on-surface-variant": "#454650",
+                        "status-stable": "#1a2a6c",
+                        "status-critical": "#E74C3C"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "4px",
+                        "sm": "16px",
+                        "margin-desktop": "40px",
+                        "xl": "48px",
+                        "lg": "32px",
+                        "md": "24px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "xs": "8px"
+                    },
+                    "fontFamily": {
+                        "title-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "title-lg": ["20px", {"lineHeight": "28px", "fontWeight": "500"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-surface font-body-md text-on-surface selection:bg-primary-container selection:text-white">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center px-margin-desktop w-full h-16 sticky top-0 z-50 bg-surface dark:bg-inverse-surface border-b border-outline-variant shadow-sm">
+<div class="flex items-center gap-md">
+<a href="{{ url_for('dashboard.home') }}" class="flex items-center gap-2">
+    <span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">CardioViz</span>
+</a>
+<nav class="hidden md:flex items-center gap-lg ml-lg">
+<a class="text-on-surface-variant hover:bg-surface-container-low transition-colors px-2 py-1 rounded" href="{{ url_for('dashboard.home') }}">Dashboard</a>
+<a class="text-on-surface-variant hover:bg-surface-container-low transition-colors px-2 py-1 rounded" href="{{ url_for('clinical.clinical_dashboard') }}">Patients</a>
+<a class="text-primary font-bold border-b-2 border-primary px-2 py-1" href="{{ url_for('dashboard.support_hub_page') }}">Support</a>
+</nav>
+</div>
+<div class="flex items-center gap-md">
+<div class="relative hidden lg:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="pl-10 pr-4 py-2 bg-surface-container-low border border-outline-variant rounded-full text-label-md focus:outline-none focus:ring-2 focus:ring-primary/20 w-64 transition-all" placeholder="Search clinical docs..." type="text"/>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer p-2 hover:bg-surface-container-low rounded-full transition-colors" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer p-2 hover:bg-surface-container-low rounded-full transition-colors" data-icon="settings">settings</span>
+<img class="w-10 h-10 rounded-full border-2 border-primary-container object-cover" data-alt="A professional headshot of a Chief Medical Officer in a high-tech medical office. The lighting is clean and clinical, highlighting the authoritative yet approachable expression. The background shows blurred medical monitors with blue heart-rate graphs, maintaining a professional corporate aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmw1FPEGcfC25hzLcSkBzhjdKbOXybRz1Y-y_LRD6dEFezccT3q38MO-X8wztFtD8iU5sltu9jucaj1SOldKq_IWNruyETi7awZFHVLdesfyGSYApDh-3ItzBkJ1Ebrc0VBE_i_2gjLJNXEsajrNnHSBhUtH4aRZNqkVGBvWaKUXLOGpYyLnR68KyUSEbnpQse2i21d9K5Rx_uwYWZljPACoIRw2peCAeF-9iif3xTzSN5-PhuQYpr5LIlVixo6BjxEx7lt02b4k0Q"/>
+</div>
+</header>
+<main class="min-h-screen">
+<!-- Hero Section -->
+<section class="hero-gradient pt-20 pb-24 px-margin-desktop text-center relative overflow-hidden">
+<div class="max-w-4xl mx-auto relative z-10">
+<h1 class="font-headline-lg text-headline-lg text-primary mb-4">Help Center &amp; Support</h1>
+<p class="text-body-lg text-on-surface-variant mb-10 max-w-2xl mx-auto">Find answers, get help, and connect with our support team of clinical data specialists.</p>
+<div class="relative max-w-2xl mx-auto group">
+<span class="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-primary text-3xl">search</span>
+<input class="w-full pl-16 pr-8 py-6 rounded-2xl border-none shadow-xl text-lg focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-outline" placeholder="How can we help you today? (e.g., Arrythmia risk scoring)" type="text"/>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 bg-primary text-white px-6 py-3 rounded-xl font-bold hover:scale-105 transition-transform active:scale-95">
+                        Search
+                    </button>
+</div>
+<div class="mt-8 flex flex-wrap justify-center gap-4">
+<span class="text-label-sm text-outline">Trending:</span>
+<a class="text-label-sm font-bold text-primary hover:underline" href="#">ECG Export</a>
+<a class="text-label-sm font-bold text-primary hover:underline" href="#">API Integration</a>
+<a class="text-label-sm font-bold text-primary hover:underline" href="#">HIPAA Compliance</a>
+</div>
+</div>
+<!-- Decorative Medical Grid -->
+<div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: radial-gradient(#001255 1px, transparent 1px); background-size: 32px 32px;"></div>
+</section>
+<!-- Category Grid -->
+<section class="px-margin-desktop -mt-12 mb-20 relative z-20">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
+<!-- Categories -->
+<div class="glass-card p-lg rounded-2xl hover:shadow-lg transition-all cursor-pointer group border-b-4 border-b-primary">
+<span class="material-symbols-outlined text-4xl text-primary mb-4 block group-hover:scale-110 transition-transform" data-icon="rocket_launch">rocket_launch</span>
+<h3 class="font-title-lg text-title-lg text-primary mb-2">Getting Started</h3>
+<p class="text-label-md text-on-surface-variant">Step-by-step guides for initial setup and user onboarding.</p>
+</div>
+<div class="glass-card p-lg rounded-2xl hover:shadow-lg transition-all cursor-pointer group border-b-4 border-b-primary">
+<span class="material-symbols-outlined text-4xl text-primary mb-4 block group-hover:scale-110 transition-transform" data-icon="dashboard">dashboard</span>
+<h3 class="font-title-lg text-title-lg text-primary mb-2">Dashboards</h3>
+<p class="text-label-md text-on-surface-variant">Customizing visualization widgets and real-time monitoring.</p>
+</div>
+<div class="glass-card p-lg rounded-2xl hover:shadow-lg transition-all cursor-pointer group border-b-4 border-b-primary">
+<span class="material-symbols-outlined text-4xl text-primary mb-4 block group-hover:scale-110 transition-transform" data-icon="patient_list">patient_list</span>
+<h3 class="font-title-lg text-title-lg text-primary mb-2">Patient Management</h3>
+<p class="text-label-md text-on-surface-variant">Managing histories, vital alerts, and diagnostic workflows.</p>
+</div>
+<div class="glass-card p-lg rounded-2xl hover:shadow-lg transition-all cursor-pointer group border-b-4 border-b-primary">
+<span class="material-symbols-outlined text-4xl text-primary mb-4 block group-hover:scale-110 transition-transform" data-icon="analytics">analytics</span>
+<h3 class="font-title-lg text-title-lg text-primary mb-2">Reports &amp; Data</h3>
+<p class="text-label-md text-on-surface-variant">Exporting clinical reports and understanding analytics models.</p>
+</div>
+<div class="glass-card p-lg rounded-2xl hover:shadow-lg transition-all cursor-pointer group border-b-4 border-b-primary">
+<span class="material-symbols-outlined text-4xl text-primary mb-4 block group-hover:scale-110 transition-transform" data-icon="manage_accounts">manage_accounts</span>
+<h3 class="font-title-lg text-title-lg text-primary mb-2">Account &amp; Settings</h3>
+<p class="text-label-md text-on-surface-variant">Security preferences, team permissions, and MFA setup.</p>
+</div>
+<div class="glass-card p-lg rounded-2xl hover:shadow-lg transition-all cursor-pointer group border-b-4 border-b-primary">
+<span class="material-symbols-outlined text-4xl text-primary mb-4 block group-hover:scale-110 transition-transform" data-icon="build">build</span>
+<h3 class="font-title-lg text-title-lg text-primary mb-2">Troubleshooting</h3>
+<p class="text-label-md text-on-surface-variant">Resolving connectivity issues and system error messages.</p>
+</div>
+</div>
+</section>
+<!-- Bento Layout: Popular Articles & Documentation Tabs -->
+<section class="px-margin-desktop mb-20 grid grid-cols-1 lg:grid-cols-12 gap-lg">
+<!-- Popular Articles -->
+<div class="lg:col-span-8 bg-white rounded-2xl shadow-sm border border-outline-variant overflow-hidden">
+<div class="p-lg border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+<h2 class="font-headline-md text-headline-md text-primary">Popular Articles</h2>
+<a class="text-label-md text-primary font-bold hover:underline" href="#">View All</a>
+</div>
+<div class="divide-y divide-outline-variant">
+<div class="p-md hover:bg-surface-container-low transition-colors cursor-pointer flex items-center group">
+<span class="material-symbols-outlined text-outline group-hover:text-primary mr-md">description</span>
+<div class="flex-1">
+<h4 class="font-bold text-on-surface">Configuring personalized risk score thresholds</h4>
+<p class="text-label-sm text-on-surface-variant">Updated 2 days ago • 5 min read</p>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:translate-x-1 transition-transform">chevron_right</span>
+</div>
+<div class="p-md hover:bg-surface-container-low transition-colors cursor-pointer flex items-center group">
+<span class="material-symbols-outlined text-outline group-hover:text-primary mr-md">description</span>
+<div class="flex-1">
+<h4 class="font-bold text-on-surface">Best practices for multi-lead ECG visualization</h4>
+<p class="text-label-sm text-on-surface-variant">Updated 1 week ago • 8 min read</p>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:translate-x-1 transition-transform">chevron_right</span>
+</div>
+<div class="p-md hover:bg-surface-container-low transition-colors cursor-pointer flex items-center group">
+<span class="material-symbols-outlined text-outline group-hover:text-primary mr-md">description</span>
+<div class="flex-1">
+<h4 class="font-bold text-on-surface">Integrating DICOM viewers with CardioViz Pro</h4>
+<p class="text-label-sm text-on-surface-variant">Updated 3 days ago • 12 min read</p>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:translate-x-1 transition-transform">chevron_right</span>
+</div>
+<div class="p-md hover:bg-surface-container-low transition-colors cursor-pointer flex items-center group">
+<span class="material-symbols-outlined text-outline group-hover:text-primary mr-md">description</span>
+<div class="flex-1">
+<h4 class="font-bold text-on-surface">Understanding the AI heart rhythm classifier</h4>
+<p class="text-label-sm text-on-surface-variant">Updated 5 days ago • 6 min read</p>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:translate-x-1 transition-transform">chevron_right</span>
+</div>
+<div class="p-md hover:bg-surface-container-low transition-colors cursor-pointer flex items-center group">
+<span class="material-symbols-outlined text-outline group-hover:text-primary mr-md">description</span>
+<div class="flex-1">
+<h4 class="font-bold text-on-surface">Sharing patient summaries with specialist teams</h4>
+<p class="text-label-sm text-on-surface-variant">Updated 1 month ago • 4 min read</p>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:translate-x-1 transition-transform">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- Documentation Tabs -->
+<div class="lg:col-span-4 flex flex-col gap-lg">
+<div class="bg-primary rounded-2xl p-lg text-white shadow-lg overflow-hidden relative group">
+<div class="relative z-10">
+<h3 class="font-headline-md text-headline-md mb-4">Documentation</h3>
+<nav class="flex flex-col gap-2">
+<a class="flex items-center justify-between p-3 bg-white/10 rounded-lg hover:bg-white/20 transition-all group" href="#">
+<span class="font-label-md">User Guide</span>
+<span class="material-symbols-outlined">menu_book</span>
+</a>
+<a class="flex items-center justify-between p-3 bg-white/10 rounded-lg hover:bg-white/20 transition-all group" href="#">
+<span class="font-label-md">API Reference</span>
+<span class="material-symbols-outlined">code</span>
+</a>
+<a class="flex items-center justify-between p-3 bg-white/10 rounded-lg hover:bg-white/20 transition-all group" href="#">
+<span class="font-label-md">Admin Portal</span>
+<span class="material-symbols-outlined">admin_panel_settings</span>
+</a>
+<a class="flex items-center justify-between p-3 bg-white/10 rounded-lg hover:bg-white/20 transition-all group" href="#">
+<span class="font-label-md">Developer Hub</span>
+<span class="material-symbols-outlined">terminal</span>
+</a>
+</nav>
+</div>
+<span class="material-symbols-outlined absolute -bottom-8 -right-8 text-9xl opacity-10 group-hover:rotate-12 transition-transform">library_books</span>
+</div>
+<div class="bg-surface-container-high rounded-2xl p-lg border border-outline-variant">
+<h3 class="font-title-lg text-title-lg text-primary mb-4 flex items-center">
+<span class="material-symbols-outlined mr-2">forum</span> Community Support
+                    </h3>
+<p class="text-label-md text-on-surface-variant mb-4">Join 5,000+ cardiologists and techs in our private professional forum.</p>
+<button class="w-full py-3 bg-white border border-primary text-primary rounded-xl font-bold hover:bg-primary hover:text-white transition-all">
+                        Visit Forum
+                    </button>
+</div>
+</div>
+</section>
+<!-- Tutorials & Webinars -->
+<section class="px-margin-desktop mb-20">
+<div class="flex flex-col md:flex-row justify-between items-end mb-lg gap-md">
+<div>
+<h2 class="font-headline-md text-headline-md text-primary mb-2">Tutorials &amp; Training</h2>
+<p class="text-on-surface-variant">Master CardioViz with expert-led video walkthroughs.</p>
+</div>
+<div class="flex gap-4">
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-outline-variant hover:bg-surface-container-low transition-all">
+<span class="material-symbols-outlined">filter_list</span> All Categories
+                    </button>
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-outline-variant hover:bg-surface-container-low transition-all">
+<span class="material-symbols-outlined">calendar_month</span> View Webinar Schedule
+                    </button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-lg">
+<!-- Video Cards -->
+<div class="group cursor-pointer">
+<div class="relative rounded-xl overflow-hidden mb-4 shadow-sm">
+<img class="w-full aspect-video object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A cinematic thumbnail for a medical software tutorial. The screen shows a dark-mode ECG dashboard with complex red and blue lines. A professional clinician is seen in a small inset bubble, gesturing towards the data. High-quality lighting and professional typography overlay 'Course 1: Overview'." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDkwyL12tmXD1K2jHDHBM_oqUUW_73cw8cNbN2rNb0vILi-TddzBGFcuHPvTgfoZhGa-lo6r29PvhwDAUauBUqLRbyqmIE-guu_vQQOvsgTbeOWl9gMohSuCv9eX-s7MJALw6mmhrfNUB4OA1E92NkIZWIOCkcAzCsszKFgtr7ouavtRY-zsxgLCinjvsaMJwESJCgWtXRD_CTaxqg9ZEDssm9T6aNBq-AHUhKORnbP-8m0F-fEuxSRAdOEzi0KUvoECnkF_5_CygWd"/>
+<div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-white text-5xl">play_circle</span>
+</div>
+<span class="absolute bottom-2 right-2 bg-black/80 text-white text-[10px] px-2 py-1 rounded">12:45</span>
+</div>
+<h4 class="font-bold text-on-surface group-hover:text-primary transition-colors">CardioViz Platform Overview</h4>
+<p class="text-label-sm text-on-surface-variant">Introductory module for new clinical users.</p>
+</div>
+<div class="group cursor-pointer">
+<div class="relative rounded-xl overflow-hidden mb-4 shadow-sm">
+<img class="w-full aspect-video object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A thumbnail depicting an advanced clinical data analysis tutorial. A detailed view of a 12-lead ECG is shown with AI-generated heatmaps indicating potential arrhythmia zones. The style is technical and clean, with 'Advanced Analytics' text in the corner. Medical office lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDuAh_DLZqLOv3e4pN9hzpNZ4urfiWOtgT-wJgweU42q3HjPbbsAQNtovdSsothvt5se2qa3GvBAj0OCjogDvJ_Aaj-2U7ag3YTiBI1oSiFkDXx_6mT9BuBMRchdibPknPsMewFQSUHj6KbX5pbqJ3TsZSALmhDnnrNBWEbevPn0BNwBRZ5MYTA5f_6PAbJqrVh0TPfkJ-GLbNQMoJ0vQHEPPp7RbO8w4LPzlb2Svq65gHcBnrYdg4eOS9KpVfbLGuTsiuLbr9qVms2"/>
+<div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-white text-5xl">play_circle</span>
+</div>
+<span class="absolute bottom-2 right-2 bg-black/80 text-white text-[10px] px-2 py-1 rounded">08:20</span>
+</div>
+<h4 class="font-bold text-on-surface group-hover:text-primary transition-colors">Advanced Risk Profiling</h4>
+<p class="text-label-sm text-on-surface-variant">Deep dive into the Arrythmia Engine.</p>
+</div>
+<div class="group cursor-pointer">
+<div class="relative rounded-xl overflow-hidden mb-4 shadow-sm">
+<img class="w-full aspect-video object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A clinical training thumbnail focused on patient data security. A glowing lock icon is superimposed over a blurred medical record screen. Professional, high-contrast aesthetic with deep navy blues and sharp white highlights. Text reads 'HIPAA Compliance &amp; Security'." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSGcGfoXBw9TqSat_YbLlKq7wLv6U7JfzjvF6eDFqPe3755Qz7ID8axTT94YuI729x79v4FeNz5otslA-VEUHgoNMDQw1SAPAkcYPq8rbLa5OgBMZKkdLR_CghgFV5UUX9tzWq-7TDW0GbnJ7PGPiyaWjaPm8Nao5J5sFt0smM89Fx4zmLM5_jliCD-I86lU04iSCcmGfu4lQ3MExXK_Njmv213qTwTYFBESqOcuaWHw9BFRgiNX0ekqxyqC0HMGJfHVqbQikcXPbB"/>
+<div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-white text-5xl">play_circle</span>
+</div>
+<span class="absolute bottom-2 right-2 bg-black/80 text-white text-[10px] px-2 py-1 rounded">15:10</span>
+</div>
+<h4 class="font-bold text-on-surface group-hover:text-primary transition-colors">Security &amp; Compliance</h4>
+<p class="text-label-sm text-on-surface-variant">Managing permissions and data privacy.</p>
+</div>
+<div class="group cursor-pointer">
+<div class="relative rounded-xl overflow-hidden mb-4 shadow-sm">
+<img class="w-full aspect-video object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A tutorial thumbnail showing a tablet device displaying the CardioViz mobile app. A clinician's hand is interacting with the screen. The setting is a brightly lit hospital hallway, giving a sense of mobility and efficiency. Text overlay says 'Mobile Unit Walkthrough'." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOypzsLfH3_yiA29AjCyqfbc_6ZWTbhJukechfjRzrQs2jIcmwrX_ceO095_T-bq_QmOo6-KHJAjStUDiMFC4jt3bRP08O8Fiq31dNPjuaJHLxUW0FTRNfh3W_WI9I-rfn5OWqCnxK_HRh71Yi39bzz3nZt39Ar4uTu5qngQ8bkv0uYL8kAetiNFjQqEOi0V9UskpE5eqF3fvOEv2ND1hX4rku16sRRGF-Azdv-GBMz5EIotB2XaeGzCEwf72fGEV-MJjDUvlXEBER"/>
+<div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-white text-5xl">play_circle</span>
+</div>
+<span class="absolute bottom-2 right-2 bg-black/80 text-white text-[10px] px-2 py-1 rounded">05:55</span>
+</div>
+<h4 class="font-bold text-on-surface group-hover:text-primary transition-colors">Using the Mobile App</h4>
+<p class="text-label-sm text-on-surface-variant">Remote patient monitoring on the go.</p>
+</div>
+</div>
+</section>
+<!-- Ticket Support & FAQ -->
+<section class="px-margin-desktop mb-20">
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-xl">
+<!-- FAQ Accordion -->
+<div class="xl:col-span-7">
+<h2 class="font-headline-md text-headline-md text-primary mb-8">Frequently Asked Questions</h2>
+<div class="space-y-4">
+<!-- FAQ Item -->
+<div class="bg-white rounded-xl border border-outline-variant overflow-hidden">
+<button class="w-full p-lg text-left flex justify-between items-center hover:bg-surface-container-low transition-colors group" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.arrow').classList.toggle('rotate-180')">
+<span class="font-bold text-on-surface">How do I export ECG data for a patient?</span>
+<span class="material-symbols-outlined arrow transition-transform">expand_more</span>
+</button>
+<div class="p-lg pt-0 text-on-surface-variant hidden border-t border-outline-variant bg-surface-container-low/30">
+                                Navigate to the Patient Profile, select 'Diagnostic Records', and click the 'Export' icon at the top right of the ECG waveform. You can export as PDF, CSV, or DICOM.
+                            </div>
+</div>
+<div class="bg-white rounded-xl border border-outline-variant overflow-hidden">
+<button class="w-full p-lg text-left flex justify-between items-center hover:bg-surface-container-low transition-colors group" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.arrow').classList.toggle('rotate-180')">
+<span class="font-bold text-on-surface">Is CardioViz FDA Cleared?</span>
+<span class="material-symbols-outlined arrow transition-transform">expand_more</span>
+</button>
+<div class="p-lg pt-0 text-on-surface-variant hidden border-t border-outline-variant bg-surface-container-low/30">
+                                Yes, CardioViz is an FDA Cleared Class II Software as a Medical Device (SaMD) for the analysis and visualization of cardiac rhythms.
+                            </div>
+</div>
+<div class="bg-white rounded-xl border border-outline-variant overflow-hidden">
+<button class="w-full p-lg text-left flex justify-between items-center hover:bg-surface-container-low transition-colors group" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.arrow').classList.toggle('rotate-180')">
+<span class="font-bold text-on-surface">What EHR systems do you integrate with?</span>
+<span class="material-symbols-outlined arrow transition-transform">expand_more</span>
+</button>
+<div class="p-lg pt-0 text-on-surface-variant hidden border-t border-outline-variant bg-surface-container-low/30">
+                                We currently support native integrations with Epic, Cerner, and Allscripts via HL7 FHIR standards.
+                            </div>
+</div>
+<div class="bg-white rounded-xl border border-outline-variant overflow-hidden">
+<button class="w-full p-lg text-left flex justify-between items-center hover:bg-surface-container-low transition-colors group" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.arrow').classList.toggle('rotate-180')">
+<span class="font-bold text-on-surface">How often is patient data backed up?</span>
+<span class="material-symbols-outlined arrow transition-transform">expand_more</span>
+</button>
+<div class="p-lg pt-0 text-on-surface-variant hidden border-t border-outline-variant bg-surface-container-low/30">
+                                Data is replicated in real-time across multiple encrypted availability zones and full system snapshots are taken every 4 hours.
+                            </div>
+</div>
+</div>
+</div>
+<!-- Ticket Submission Form -->
+<div class="xl:col-span-5">
+<div class="bg-white rounded-2xl shadow-lg border border-outline-variant p-lg sticky top-24">
+<h3 class="font-headline-md text-headline-md text-primary mb-2">Submit a Ticket</h3>
+<p class="text-label-md text-on-surface-variant mb-6">Need technical help? Our team typically responds in under 2 hours.</p>
+<form class="space-y-4">
+<div>
+<label class="block text-label-sm font-bold text-on-surface mb-2">Subject</label>
+<input class="w-full p-3 rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Summary of the issue" type="text"/>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="block text-label-sm font-bold text-on-surface mb-2">Category</label>
+<select class="w-full p-3 rounded-lg border border-outline-variant">
+<option>Technical Issue</option>
+<option>Billing</option>
+<option>Feature Request</option>
+<option>Compliance</option>
+</select>
+</div>
+<div>
+<label class="block text-label-sm font-bold text-on-surface mb-2">Priority</label>
+<select class="w-full p-3 rounded-lg border border-outline-variant">
+<option>Low</option>
+<option>Medium</option>
+<option>High (Critical)</option>
+</select>
+</div>
+</div>
+<div>
+<label class="block text-label-sm font-bold text-on-surface mb-2">Description</label>
+<textarea class="w-full p-3 rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Detailed description of your request..." rows="4"></textarea>
+</div>
+<div class="border-2 border-dashed border-outline-variant p-4 rounded-xl text-center hover:bg-surface-container-low transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-outline">upload_file</span>
+<p class="text-label-sm text-outline">Click to attach screenshots or logs</p>
+</div>
+<button class="w-full py-4 bg-primary text-white font-bold rounded-xl shadow-md hover:bg-primary-container hover:shadow-lg transition-all active:scale-95" type="submit">
+                                Submit Support Request
+                            </button>
+</form>
+<!-- Ticket Status Tracker -->
+<div class="mt-8 pt-6 border-t border-outline-variant">
+<h4 class="font-bold text-on-surface mb-4">Your Recent Tickets</h4>
+<div class="flex items-center justify-between p-3 bg-surface-container-low rounded-lg">
+<div class="flex items-center gap-3">
+<span class="w-2 h-2 rounded-full bg-amber-500"></span>
+<span class="text-label-sm font-medium">#CV-9421: API Auth Error</span>
+</div>
+<span class="text-label-sm text-outline">Pending</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- System Status & Contact -->
+<section class="bg-surface-container-highest px-margin-desktop py-xl">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-lg max-w-7xl mx-auto">
+<div class="flex items-center gap-4 bg-white p-lg rounded-2xl border border-outline-variant shadow-sm">
+<div class="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
+<span class="material-symbols-outlined text-emerald-600">check_circle</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">System Status</h4>
+<p class="text-label-md text-emerald-600 font-bold">99.98% Uptime - All Systems Normal</p>
+</div>
+</div>
+<div class="flex items-center gap-4 bg-white p-lg rounded-2xl border border-outline-variant shadow-sm">
+<div class="w-12 h-12 rounded-full bg-primary-container/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">mail</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">Email Support</h4>
+<p class="text-label-md text-on-surface-variant">support@cardioviz.med</p>
+</div>
+</div>
+<div class="flex items-center gap-4 bg-white p-lg rounded-2xl border border-outline-variant shadow-sm">
+<div class="w-12 h-12 rounded-full bg-primary-container/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">phone_in_talk</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">Priority Hotline</h4>
+<p class="text-label-md text-on-surface-variant">+1 (800) CARDIO-HUB</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full py-lg px-margin-desktop grid grid-cols-1 md:grid-cols-2 items-center bg-surface-container-highest dark:bg-inverse-surface border-t border-outline-variant">
+<div class="flex flex-col gap-2">
+<span class="font-title-lg text-title-lg font-bold text-on-surface">CardioViz Analytics</span>
+<p class="font-label-sm text-label-sm text-on-surface-variant">© 2024 CardioViz Analytics. FDA Cleared Class II Software.</p>
+</div>
+<div class="flex flex-wrap md:justify-end gap-lg mt-md md:mt-0">
+<a class="text-on-surface-variant hover:text-primary transition-colors font-label-sm" href="{{ url_for('dashboard.privacy_policy_page') }}">Privacy Policy</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-label-sm" href="{{ url_for('dashboard.terms_of_service_page') }}">Terms of Service</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-label-sm" href="{{ url_for('dashboard.hipaa_compliance_page') }}">Compliance</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-label-sm" href="{{ url_for('dashboard.support_hub_page') }}">Contact Support</a>
+</div>
+</footer>
+<!-- Floating Live Chat Widget Simulation -->
+<div class="fixed bottom-6 right-6 z-[100]">
+<div class="hidden mb-4 w-80 md:w-96 bg-white rounded-2xl shadow-2xl border border-outline-variant overflow-hidden animate-in slide-in-from-bottom-5 duration-300" id="chat-window">
+<div class="bg-primary p-4 text-white flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="relative">
+<img class="w-10 h-10 rounded-full border border-white/20" data-alt="A small circular avatar of a friendly medical customer support representative wearing a headset. She is smiling in a bright, modern office environment with soft blue tones. Professional and helpful mood." src="https://lh3.googleusercontent.com/aida-public/AB6AXuARiQNXvWCZOHruo54v_fpXUoWLXi3g61S9-8k4NQIuvIasIe66VwVu3y3Zy19GWPZlIfl0pVcekWOqBv3zGIryFmOZGQZh-2gxklbzslvnb6NN-yoqyiA9IV4J-opPBVXiGL7SJGAabuuISggEX5J965ymTfMdMcw-kjBVsgOtVc2318F43JR6YJa4y1-Upd0um9MCLkk3AzJfwNF0DIItoSMOZ_LSseKviPz4futsz6S_QhKjJrKqMJX1FMQHwUzusmoSlteUhJed"/>
+<span class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 border-2 border-primary rounded-full"></span>
+</div>
+<div>
+<h4 class="font-bold text-sm">Clinical Support Live</h4>
+<p class="text-[10px] opacity-80">Available 24/7 • &lt;2 min response</p>
+</div>
+</div>
+<button class="p-1 hover:bg-white/10 rounded-full transition-colors" onclick="toggleChat()">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="h-80 overflow-y-auto p-4 space-y-4 bg-surface-container-low/50">
+<div class="flex gap-2">
+<div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-sm text-on-surface max-w-[80%] border border-outline-variant">
+                        Hello! I'm Sarah from the clinical support team. How can I assist you with CardioViz today?
+                    </div>
+</div>
+</div>
+<div class="p-4 border-t border-outline-variant bg-white">
+<div class="flex gap-2">
+<input class="flex-1 border-none bg-surface-container-low rounded-xl px-4 py-2 focus:ring-2 focus:ring-primary/20 transition-all text-sm" placeholder="Type your message..." type="text"/>
+<button class="bg-primary text-white p-2 rounded-xl">
+<span class="material-symbols-outlined">send</span>
+</button>
+</div>
+</div>
+</div>
+<button class="bg-primary text-white p-4 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all flex items-center gap-2 group" onclick="toggleChat()">
+<span class="material-symbols-outlined">chat</span>
+<span class="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 ease-in-out whitespace-nowrap font-bold pr-1">Live Help</span>
+</button>
+</div>
+<script>
+        function toggleChat() {
+            const chat = document.getElementById('chat-window');
+            chat.classList.toggle('hidden');
+        }
+
+        // Simple observer for reveal animations
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('opacity-100');
+                    entry.target.classList.remove('opacity-0', 'translate-y-4');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section').forEach(section => {
+            section.classList.add('transition-all', 'duration-700', 'opacity-0', 'translate-y-4');
+            observer.observe(section);
+        });
+    </script>
+</body></html>

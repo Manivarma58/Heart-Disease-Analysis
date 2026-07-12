@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Report Builder | Clinical Intelligence</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=JetBrains+Mono:wght@450&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#434653",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "surface-container-high": "#e6e8ea",
+                        "on-secondary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "primary-container": "#0f52ba",
+                        "outline-variant": "#c3c6d5",
+                        "primary": "#003c90",
+                        "primary-fixed-dim": "#b0c6ff",
+                        "on-primary-fixed": "#001945",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "secondary-fixed": "#d3e4fe",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-tint": "#1d59c1",
+                        "on-tertiary": "#ffffff",
+                        "surface-variant": "#e0e3e5",
+                        "tertiary-fixed": "#ffdbcd",
+                        "on-tertiary-fixed-variant": "#7d2d00",
+                        "on-primary-container": "#bcceff",
+                        "on-error-container": "#93000a",
+                        "outline": "#737784",
+                        "tertiary": "#732900",
+                        "inverse-primary": "#b0c6ff",
+                        "secondary-container": "#d0e1fb",
+                        "surface-container-low": "#f2f4f6",
+                        "on-secondary-container": "#54647a",
+                        "background": "#f7f9fb",
+                        "inverse-surface": "#2d3133",
+                        "on-background": "#191c1e",
+                        "on-secondary-fixed": "#0b1c30",
+                        "on-error": "#ffffff",
+                        "surface-dim": "#d8dadc",
+                        "surface-container-highest": "#e0e3e5",
+                        "surface-container": "#eceef0",
+                        "surface-bright": "#f7f9fb",
+                        "on-primary-fixed-variant": "#00419c",
+                        "tertiary-fixed-dim": "#ffb596",
+                        "inverse-on-surface": "#eff1f3",
+                        "secondary": "#505f76",
+                        "on-surface": "#191c1e",
+                        "tertiary-container": "#993900",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-container": "#ffc0a7",
+                        "primary-fixed": "#d9e2ff",
+                        "surface": "#f7f9fb",
+                        "on-tertiary-fixed": "#360f00"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "panel-padding": "16px",
+                        "compact-gutter": "12px",
+                        "standard-margin": "24px",
+                        "table-cell-padding": "8px 12px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "title-sm": ["Plus Jakarta Sans"],
+                        "body-sm": ["Plus Jakarta Sans"],
+                        "mono-md": ["JetBrains Mono"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "mono-sm": ["JetBrains Mono"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "label-caps": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "title-sm": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "mono-md": ["13px", {"lineHeight": "20px", "fontWeight": "450"}],
+                        "display-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "mono-sm": ["11px", {"lineHeight": "16px", "fontWeight": "450"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-caps": ["10px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .canvas-grid {
+            background-image: radial-gradient(#c3c6d5 0.5px, transparent 0.5px);
+            background-size: 20px 20px;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #c3c6d5;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md selection:bg-primary-container selection:text-on-primary-container overflow-hidden">
+
+<!-- TopNavBar -->
+<header class="bg-surface dark:bg-surface-dim border-b border-outline-variant dark:border-outline top-0 z-50 flex justify-between items-center w-full px-standard-margin h-14">
+    <div class="flex items-center gap-6">
+        <a href="{{ url_for('dashboard.home') }}" class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">Clinical Intelligence</a>
+        <div class="hidden md:flex items-center gap-1">
+            <nav class="flex gap-4">
+                <a class="text-on-surface-variant font-body-md text-body-md hover:bg-surface-container-high transition-colors px-3 py-1 rounded" href="{{ url_for('dashboard.home') }}">Overview</a>
+                <a class="text-primary font-bold border-b-2 border-primary font-body-md text-body-md px-3 py-1" href="{{ url_for('dashboard.reports_builder_page') }}">Report Builder</a>
+                <a class="text-on-surface-variant font-body-md text-body-md hover:bg-surface-container-high transition-colors px-3 py-1 rounded" href="{{ url_for('dashboard.reports_dashboard_page') }}">Reports Hub</a>
+            </nav>
+        </div>
+    </div>
+    <div class="flex items-center gap-4">
+        <div class="relative group">
+            <button class="flex items-center gap-2 px-3 py-1.5 bg-surface-container-high rounded text-on-surface-variant hover:bg-surface-container-highest transition-all">
+                <span class="material-symbols-outlined text-[20px]">export_notes</span>
+                <span class="font-body-md text-body-md">Export</span>
+                <span class="material-symbols-outlined">expand_more</span>
+            </button>
+            <div class="absolute right-0 top-full mt-1 w-40 bg-surface shadow-lg border border-outline-variant rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 overflow-hidden text-xs font-semibold">
+                <div class="hover:bg-surface-container-high px-4 py-2 cursor-pointer font-body-md" onclick="alert('Exporting PDF standard...')">PDF Document</div>
+                <div class="hover:bg-surface-container-high px-4 py-2 cursor-pointer font-body-md" onclick="alert('Exporting Word Document...')">Word Report</div>
+                <div class="hover:bg-surface-container-high px-4 py-2 cursor-pointer font-body-md" onclick="alert('Exporting Spreadsheet file...')">Excel Sheet</div>
+            </div>
+        </div>
+        <button class="bg-primary text-on-primary px-4 py-1.5 rounded font-title-sm text-title-sm flex items-center gap-2 active:opacity-80 transition-all" onclick="alert('Added Report layout structure to clinician favorites.')">
+            <span class="material-symbols-outlined text-[18px]">save</span>
+            Save to Favorites
+        </button>
+        <div class="flex items-center gap-2 border-l border-outline-variant pl-4 ml-2">
+            <a href="{{ url_for('dashboard.notifications_components_page') }}" class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container-high p-1 rounded">notifications</a>
+            <a href="{{ url_for('dashboard.settings_page') }}" class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container-high p-1 rounded">settings</a>
+            <div class="w-8 h-8 rounded-full bg-primary-fixed-dim border border-outline-variant overflow-hidden">
+                <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3QekDGYZaRGIujnn6i0SoHA04C7tOW1ed_O82RUHBOLEq8-E8SvI8V-MTzsaOiV3ywenatBFipZLbrucuaLWwHV3AAcPs5FSdP78MOlactq-U_S1iVkqXfspFpAM93Fx1fRf_Jt6jHWXYOXYTsAcdHOle9CGPgUVgQJk1xNV4gSW9RceSEhqK51J0c4Q9FU-z5BEqiIfPGNXY4QXNioJIlKpYvpdoGGUFodTIrr9GI4xzsm2ggVrGsh32sRqVTYZAC_P3950fkg6G" alt="Clinician Mature Avatar"/>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="flex h-[calc(100vh-3.5rem)] overflow-hidden">
+    <!-- SideNavBar / Left Panel: Data Fields -->
+    <aside class="bg-surface-container-high dark:bg-surface-container border-r border-outline-variant dark:border-outline docked left-0 h-full w-[280px] flex flex-col py-panel-padding">
+        <div class="px-4 mb-6">
+            <h2 class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-4 tracking-widest text-[11px]">Data Fields</h2>
+            <div class="relative">
+                <input class="w-full bg-surface border border-outline-variant rounded px-3 py-2 text-body-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="Search fields..." type="text"/>
+                <span class="material-symbols-outlined absolute right-3 top-2.5 text-[18px] text-outline">search</span>
+            </div>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto custom-scrollbar px-2 space-y-4 text-xs font-semibold text-slate-500">
+            <div>
+                <span class="text-label-caps text-on-surface-variant px-2 block mb-2 text-[10px] tracking-wider uppercase font-bold">IDENTIFIERS</span>
+                <div class="space-y-1">
+                    <div class="flex items-center gap-3 p-2 bg-surface hover:bg-surface-container-highest cursor-grab transition-all border border-transparent hover:border-outline-variant rounded group">
+                        <span class="material-symbols-outlined text-outline group-hover:text-primary">drag_indicator</span>
+                        <span class="font-mono-sm text-mono-sm text-on-surface">PATIENT_ID</span>
+                    </div>
+                    <div class="flex items-center gap-3 p-2 bg-surface hover:bg-surface-container-highest cursor-grab transition-all border border-transparent hover:border-outline-variant rounded group">
+                        <span class="material-symbols-outlined text-outline group-hover:text-primary">drag_indicator</span>
+                        <span class="font-mono-sm text-mono-sm text-on-surface">CLINIC_NODE</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <span class="text-label-caps text-on-surface-variant px-2 block mb-2 text-[10px] tracking-wider uppercase font-bold">METRICS</span>
+                <div class="space-y-1">
+                    <div class="flex items-center gap-3 p-2 bg-surface hover:bg-surface-container-highest cursor-grab transition-all border border-transparent hover:border-outline-variant rounded group">
+                        <span class="material-symbols-outlined text-outline group-hover:text-primary">drag_indicator</span>
+                        <span class="font-mono-sm text-mono-sm text-on-surface">RISK_SCORE_V2</span>
+                    </div>
+                    <div class="flex items-center gap-3 p-2 bg-surface hover:bg-surface-container-highest cursor-grab transition-all border border-transparent hover:border-outline-variant rounded group">
+                        <span class="material-symbols-outlined text-outline group-hover:text-primary">drag_indicator</span>
+                        <span class="font-mono-sm text-mono-sm text-on-surface">ACUITY_INDEX</span>
+                    </div>
+                    <div class="flex items-center gap-3 p-2 bg-surface hover:bg-surface-container-highest cursor-grab transition-all border border-transparent hover:border-outline-variant rounded group">
+                        <span class="material-symbols-outlined text-outline group-hover:text-primary">drag_indicator</span>
+                        <span class="font-mono-sm text-mono-sm text-on-surface">LOS_PROJECTION</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <span class="text-label-caps text-on-surface-variant px-2 block mb-2 text-[10px] tracking-wider uppercase font-bold">TEMPORAL</span>
+                <div class="space-y-1">
+                    <div class="flex items-center gap-3 p-2 bg-surface hover:bg-surface-container-highest cursor-grab transition-all border border-transparent hover:border-outline-variant rounded group">
+                        <span class="material-symbols-outlined text-outline group-hover:text-primary">drag_indicator</span>
+                        <span class="font-mono-sm text-mono-sm text-on-surface">ADMISSION_DATE</span>
+                    </div>
+                    <div class="flex items-center gap-3 p-2 bg-surface hover:bg-surface-container-highest cursor-grab transition-all border border-transparent hover:border-outline-variant rounded group">
+                        <span class="material-symbols-outlined text-outline group-hover:text-primary">drag_indicator</span>
+                        <span class="font-mono-sm text-mono-sm text-on-surface">READMIT_30D</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-auto pt-4 border-t border-outline-variant px-4 space-y-2 text-xs font-bold text-slate-500">
+            <button class="w-full flex items-center gap-3 p-2 text-on-surface-variant hover:bg-surface-container-highest rounded transition-all font-title-sm text-title-sm" onclick="alert('Contacting support systems...')">
+                <span class="material-symbols-outlined">help</span>
+                Support
+            </button>
+            <button class="w-full flex items-center gap-3 p-2 text-on-surface-variant hover:bg-surface-container-highest rounded transition-all font-title-sm text-title-sm" onclick="alert('Opening layout building documentation references...')">
+                <span class="material-symbols-outlined">description</span>
+                Documentation
+            </button>
+        </div>
+    </aside>
+    
+    <!-- Main Content: Canvas Area -->
+    <main class="flex-1 flex flex-col relative bg-surface-container-low overflow-hidden">
+        <div class="h-12 border-b border-outline-variant bg-surface px-6 flex items-center justify-between">
+            <div class="flex items-center gap-4 text-xs font-bold">
+                <span class="font-title-sm text-title-sm text-on-surface">Longitudinal Patient Analysis v2</span>
+                <span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container font-label-caps text-label-caps rounded text-[10px]">DRAFT</span>
+            </div>
+            <div class="flex items-center gap-3 text-xs font-bold">
+                <button class="p-1.5 hover:bg-surface-container-high rounded transition-all" title="Undo" onclick="alert('Undo action')">
+                    <span class="material-symbols-outlined text-on-surface-variant">undo</span>
+                </button>
+                <button class="p-1.5 hover:bg-surface-container-high rounded transition-all" title="Redo" onclick="alert('Redo action')">
+                    <span class="material-symbols-outlined text-on-surface-variant">redo</span>
+                </button>
+                <div class="w-px h-6 bg-outline-variant"></div>
+                <button class="flex items-center gap-2 px-3 py-1 border border-primary text-primary hover:bg-primary/5 rounded font-body-md" onclick="alert('Report preview updated.')">
+                    <span class="material-symbols-outlined text-[18px]">visibility</span>
+                    Preview
+                </button>
+            </div>
+        </div>
+        
+        <div class="flex-1 p-8 canvas-grid relative overflow-y-auto custom-scrollbar">
+            <!-- Drop Zones & Report Canvas -->
+            <div class="max-w-5xl mx-auto space-y-6">
+                <!-- Header Section Builder -->
+                <div class="bg-surface border border-outline-variant rounded p-6 shadow-sm min-h-[100px] border-dashed flex flex-col items-center justify-center text-on-surface-variant group hover:border-primary transition-all cursor-pointer" onclick="alert('Configure header options...')">
+                    <span class="material-symbols-outlined text-outline mb-2">add_circle</span>
+                    <p class="font-body-md text-body-md text-xs font-semibold text-slate-500">Drag 'Logo' or 'Header Text' here</p>
+                </div>
+                
+                <!-- Chart Preview Area -->
+                <div class="bg-surface border border-outline-variant rounded p-8 shadow-sm flex flex-col gap-6 relative">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-headline-md text-headline-md text-on-surface font-bold">Patient Risk Distribution</h3>
+                            <p class="font-body-sm text-body-sm text-on-surface-variant font-semibold">Aggregate analysis of Risk Score vs. Age Cohort</p>
+                        </div>
+                        <button class="p-1 hover:bg-surface-container-high rounded" onclick="alert('Chart properties menu...')"><span class="material-symbols-outlined">more_vert</span></button>
+                    </div>
+                    
+                    <!-- Visual Mock of a Chart -->
+                    <div class="w-full h-[400px] bg-surface-container-low rounded flex items-end justify-between px-12 py-8 relative group">
+                        <!-- Overlay Watermark -->
+                        <div class="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none select-none">
+                            <span class="font-display-lg text-display-lg rotate-[-15deg] border-4 border-primary p-4 text-[48px] font-black">CLINICAL INTELLIGENCE</span>
+                        </div>
+                        <!-- Mock Bars -->
+                        <div class="w-12 bg-primary/20 rounded-t h-[40%] hover:bg-primary/40 transition-all cursor-pointer relative group/bar">
+                            <div class="absolute -top-6 left-1/2 -translate-x-1/2 font-mono-sm text-mono-sm text-xs font-bold text-slate-700">0.42</div>
+                        </div>
+                        <div class="w-12 bg-primary/40 rounded-t h-[65%] hover:bg-primary/60 transition-all cursor-pointer relative group/bar">
+                            <div class="absolute -top-6 left-1/2 -translate-x-1/2 font-mono-sm text-mono-sm text-xs font-bold text-slate-700">0.58</div>
+                        </div>
+                        <div class="w-12 bg-primary rounded-t h-[90%] hover:bg-primary/80 transition-all cursor-pointer relative group/bar">
+                            <div class="absolute -top-6 left-1/2 -translate-x-1/2 font-mono-sm text-mono-sm text-xs font-bold text-slate-700">0.89</div>
+                        </div>
+                        <div class="w-12 bg-primary/60 rounded-t h-[55%] hover:bg-primary/70 transition-all cursor-pointer relative group/bar">
+                            <div class="absolute -top-6 left-1/2 -translate-x-1/2 font-mono-sm text-mono-sm text-xs font-bold text-slate-700">0.51</div>
+                        </div>
+                        <div class="w-12 bg-primary/30 rounded-t h-[30%] hover:bg-primary/50 transition-all cursor-pointer relative group/bar">
+                            <div class="absolute -top-6 left-1/2 -translate-x-1/2 font-mono-sm text-mono-sm text-xs font-bold text-slate-700">0.22</div>
+                        </div>
+                        <div class="w-12 bg-primary/70 rounded-t h-[75%] hover:bg-primary/90 transition-all cursor-pointer relative group/bar">
+                            <div class="absolute -top-6 left-1/2 -translate-x-1/2 font-mono-sm text-mono-sm text-xs font-bold text-slate-700">0.71</div>
+                        </div>
+                        
+                        <!-- Axis Labels -->
+                        <div class="absolute bottom-2 left-1/2 -translate-x-1/2 font-label-caps text-label-caps text-on-surface-variant font-bold text-[10px] tracking-wider">AGE GROUPS (20-80+)</div>
+                        <div class="absolute -left-10 top-1/2 -rotate-90 font-label-caps text-label-caps text-on-surface-variant font-bold text-[10px] tracking-wider">RISK SCORE INDEX</div>
+                    </div>
+                    
+                    <div class="flex gap-4 border-t border-outline-variant pt-4 text-xs font-bold text-slate-600">
+                        <div class="flex items-center gap-2 bg-surface-container-high px-3 py-1 rounded text-body-sm font-mono-md">
+                            <span class="material-symbols-outlined text-[16px]">filter_alt</span>
+                            Region: NA_East
+                        </div>
+                        <div class="flex items-center gap-2 bg-surface-container-high px-3 py-1 rounded text-body-sm font-mono-md">
+                            <span class="material-symbols-outlined text-[16px]">calendar_today</span>
+                            Q3 2023 - Q4 2024
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Drop Zone for Additional Table -->
+                <div class="bg-surface border border-outline-variant rounded p-6 shadow-sm border-dashed flex flex-col items-center justify-center text-on-surface-variant group hover:border-primary transition-all cursor-pointer" onclick="alert('Configure target tables breakdowns...')">
+                    <span class="material-symbols-outlined text-outline mb-2">table_chart</span>
+                    <p class="font-body-md text-body-md text-xs font-semibold text-slate-500">Drag 'Data Table' here for detailed breakdown</p>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Configuration Panel (Right Sidebar) -->
+    <aside class="w-[320px] bg-surface-container-high border-l border-outline-variant flex flex-col h-full text-xs font-bold text-slate-700">
+        <div class="p-4 border-b border-outline-variant">
+            <h2 class="font-title-sm text-title-sm text-on-surface font-bold text-sm">Properties</h2>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto custom-scrollbar">
+            <!-- Chart Type Selector -->
+            <div class="p-4 space-y-4">
+                <span class="text-label-caps text-on-surface-variant block text-[10px] tracking-wider font-bold">CHART TYPE</span>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <button class="flex flex-col items-center justify-center p-3 bg-surface border-2 border-primary rounded hover:bg-surface-container-highest transition-all group">
+                        <span class="material-symbols-outlined text-primary mb-1">bar_chart</span>
+                        <span class="font-body-sm text-body-sm text-on-surface">Bar</span>
+                    </button>
+                    <button class="flex flex-col items-center justify-center p-3 bg-surface border-2 border-transparent rounded hover:border-outline-variant transition-all group" onclick="alert('Line graph activated...')">
+                        <span class="material-symbols-outlined text-on-surface-variant mb-1">show_chart</span>
+                        <span class="font-body-sm text-body-sm text-on-surface">Line</span>
+                    </button>
+                    <button class="flex flex-col items-center justify-center p-3 bg-surface border-2 border-transparent rounded hover:border-outline-variant transition-all group" onclick="alert('Scatter plots activated...')">
+                        <span class="material-symbols-outlined text-on-surface-variant mb-1">scatter_plot</span>
+                        <span class="font-body-sm text-body-sm text-on-surface">Scatter</span>
+                    </button>
+                    <button class="flex flex-col items-center justify-center p-3 bg-surface border-2 border-transparent rounded hover:border-outline-variant transition-all group" onclick="alert('Heatmaps activated...')">
+                        <span class="material-symbols-outlined text-on-surface-variant mb-1">grid_view</span>
+                        <span class="font-body-sm text-body-sm text-on-surface">Heatmap</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Filters Section -->
+            <div class="p-4 space-y-4 border-t border-outline-variant">
+                <div class="flex justify-between items-center text-xs">
+                    <span class="text-label-caps text-on-surface-variant block text-[10px] tracking-wider font-bold">FILTERS</span>
+                    <button class="text-primary hover:underline font-label-caps" onclick="alert('Adding custom metrics filter...')">+ ADD</button>
+                </div>
+                <div class="space-y-3">
+                    <div class="p-3 bg-surface rounded border border-outline-variant font-semibold">
+                        <div class="flex justify-between mb-2">
+                            <span class="font-mono-sm text-mono-sm text-xs font-bold text-slate-800">REGION_ID</span>
+                            <span class="material-symbols-outlined text-outline text-[16px] cursor-pointer" onclick="this.parentElement.parentElement.remove()">close</span>
+                        </div>
+                        <select class="w-full bg-surface-container-low border-none rounded text-body-sm focus:ring-1 focus:ring-primary h-8 py-0 font-semibold text-xs">
+                            <option>Is exactly...</option>
+                            <option>Contains...</option>
+                            <option>Starts with...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="p-3 bg-surface rounded border border-outline-variant font-semibold">
+                        <div class="flex justify-between mb-2">
+                            <span class="font-mono-sm text-mono-sm text-xs font-bold text-slate-800">DATE_RANGE</span>
+                            <span class="material-symbols-outlined text-outline text-[16px] cursor-pointer" onclick="this.parentElement.parentElement.remove()">close</span>
+                        </div>
+                        <div class="flex gap-2 text-xs">
+                            <div class="flex-1 bg-surface-container-low p-1 rounded text-center text-mono-sm font-semibold">2023-01-01</div>
+                            <div class="flex-1 bg-surface-container-low p-1 rounded text-center text-mono-sm font-semibold">2024-12-31</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Styling & Branding -->
+            <div class="p-4 space-y-4 border-t border-outline-variant font-semibold">
+                <span class="text-label-caps text-on-surface-variant block text-[10px] tracking-wider font-bold">STYLING &amp; BRANDING</span>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="font-body-md text-body-md text-on-surface text-xs">Show Watermark</span>
+                        <div class="w-10 h-5 bg-primary rounded-full relative cursor-pointer shadow-inner transition-colors" onclick="alert('Toggle watermark overlay')">
+                            <div class="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all"></div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="font-body-md text-body-md text-on-surface text-xs">Show Gridlines</span>
+                        <div class="w-10 h-5 bg-outline-variant rounded-full relative cursor-pointer transition-colors" onclick="alert('Toggle coordinate gridlines')">
+                            <div class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all"></div>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <span class="font-body-sm text-body-sm text-on-surface-variant text-[11px] font-bold">Theme Palette</span>
+                        <div class="flex gap-2">
+                            <div class="w-6 h-6 rounded-full bg-primary ring-2 ring-offset-2 ring-primary cursor-pointer"></div>
+                            <div class="w-6 h-6 rounded-full bg-tertiary cursor-pointer" onclick="alert('Palette 2 selected')"></div>
+                            <div class="w-6 h-6 rounded-full bg-[#006e1c] cursor-pointer" onclick="alert('Palette 3 selected')"></div>
+                            <div class="w-6 h-6 rounded-full bg-[#93000a] cursor-pointer" onclick="alert('Palette 4 selected')"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="p-4 border-t border-outline-variant bg-surface">
+            <button class="w-full bg-primary-container text-on-primary-container py-2 rounded font-title-sm text-title-sm hover:brightness-110 active:scale-95 transition-all text-xs font-bold text-slate-800" onclick="alert('Initiating custom report document generation...')">
+                Generate Report
+            </button>
+        </div>
+    </aside>
+</div>
+
+<!-- Footer -->
+<footer class="bg-surface-container-low dark:bg-surface-container-lowest border-t border-outline-variant dark:border-outline bottom-0 fixed z-[60] flex justify-between items-center w-full px-standard-margin py-3 text-xs font-bold text-slate-500">
+    <div class="flex items-center gap-6">
+        <span class="font-label-caps text-label-caps text-secondary dark:text-secondary-fixed-dim text-[10px] tracking-wide">© 2024 Clinical Intelligence Systems. All rights reserved.</span>
+        <nav class="flex gap-4">
+            <a class="font-body-sm text-body-sm text-on-secondary-container hover:text-primary transition-colors" href="#">Privacy Policy</a>
+            <a class="font-body-sm text-body-sm text-on-secondary-container hover:text-primary transition-colors" href="#">Terms of Service</a>
+        </nav>
+    </div>
+    <div class="flex items-center gap-4">
+        <span class="font-mono-sm text-mono-sm text-on-surface-variant bg-surface-container-high px-2 py-0.5 rounded font-mono">ENV: PRODUCTION v2.4.1</span>
+        <a class="font-body-sm text-body-sm text-on-secondary-container hover:text-primary transition-colors" href="#">Support Portal</a>
+    </div>
+</footer>
+
+<script>
+    // Drag micro-interactions simulation
+    document.querySelectorAll('.cursor-grab').forEach(el => {
+        el.addEventListener('mousedown', () => {
+            el.style.transform = 'scale(0.98)';
+            el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+        });
+        el.addEventListener('mouseup', () => {
+            el.style.transform = 'scale(1)';
+            el.style.boxShadow = 'none';
+        });
+    });
+</script>
+</body>
+</html>

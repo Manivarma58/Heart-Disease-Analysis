@@ -1,0 +1,478 @@
+{% extends "base.html" %}
+{% block title %}Application Integration Portal - CardioViz{% endblock %}
+{% block content %}
+<!-- Load Tailwind CDN and Config for this layout section -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "surface-low": "#F1F5F9",
+                "primary": "#001255",
+                "secondary": "#b4271d",
+                "outline-variant": "#c6c5d2"
+        }
+      }
+    }
+  }
+</script>
+
+<style>
+    /* Premium style rules */
+    .terminal-console {
+        background: #0f172a;
+        color: #38bdf8;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 11px;
+    }
+    .flow-node {
+        transition: all 0.3s ease;
+    }
+    .flow-node.active {
+        background: #3b82f6;
+        color: white;
+        border-color: #3b82f6;
+        box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+    }
+    .flow-node.active i {
+        color: white !important;
+    }
+    .ds-container {
+        display: grid;
+        grid-template-columns: 16rem 1fr;
+        min-height: calc(100vh - 70px);
+        background: #F8FAFC;
+        font-family: 'Inter', sans-serif;
+    }
+    .ds-sidebar {
+        background: white;
+        border-right: 1px solid #cbd5e1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 1.5rem 1rem;
+    }
+    .ds-workspace {
+        padding: 2.5rem clamp(1rem, 4vw, 3rem);
+        overflow-y: auto;
+    }
+    .sidebar-menu-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #64748b;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    .sidebar-menu-item:hover {
+        background: #F1F5F9;
+        color: #1e293b;
+    }
+    .sidebar-menu-item.active {
+        background: #F1F5F9;
+        color: #001255;
+        border-left: 3px solid #001255;
+        border-radius: 0 8px 8px 0;
+    }
+</style>
+
+<div class="ds-container">
+    <!-- Sidebar Navigation -->
+    <aside class="ds-sidebar">
+        <div>
+            <div class="px-4 mb-6">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Design System</span>
+                <span class="text-lg font-black text-blue-600 block mt-1">CardioViz ds v2.4</span>
+            </div>
+            
+            <nav class="sidebar-menu space-y-1 flex flex-col">
+                <a href="#architecture" class="sidebar-menu-item"><i data-lucide="layers"></i> Architecture</a>
+                <a href="#user-flows" class="sidebar-menu-item"><i data-lucide="git-commit"></i> User Flows</a>
+                <a href="#api-playground" class="sidebar-menu-item"><i data-lucide="play-circle"></i> API Playground</a>
+                <a href="#state-ws" class="sidebar-menu-item"><i data-lucide="activity"></i> State & Telemetry</a>
+                <a href="#devops" class="sidebar-menu-item"><i data-lucide="cpu"></i> Security & DevOps</a>
+            </nav>
+            
+            <div class="border-t border-slate-200 mt-6 pt-6">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block px-4 mb-2">Other Modules</span>
+                <a href="{{ url_for('dashboard.navigation_components_page') }}" class="sidebar-menu-item"><i data-lucide="menu"></i> Navigation</a>
+                <a href="{{ url_for('dashboard.notifications_components_page') }}" class="sidebar-menu-item"><i data-lucide="bell"></i> Notification Hub</a>
+                <a href="{{ url_for('dashboard.forms_page') }}" class="sidebar-menu-item"><i data-lucide="edit-3"></i> Form System</a>
+                <a href="{{ url_for('dashboard.visualizations_library_page') }}" class="sidebar-menu-item"><i data-lucide="bar-chart-3"></i> Visualizations</a>
+            </div>
+        </div>
+
+        <div class="pt-6 border-t border-slate-200">
+            <a href="{{ url_for('dashboard.home') }}" class="sidebar-menu-item" style="color:var(--secondary);"><i data-lucide="arrow-left"></i> Exit Design System</a>
+        </div>
+    </aside>
+
+    <!-- Workspace -->
+    <main class="ds-workspace space-y-12">
+        <header class="border-b pb-6">
+            <h1 class="text-3xl font-black text-blue-900">Application Integration Portal</h1>
+            <p class="text-sm text-slate-500 mt-1">Full stack interactive architectural catalog and system mapping.</p>
+        </header>
+
+        <!-- 1. APPLICATION ARCHITECTURE -->
+        <section id="architecture" class="space-y-6">
+            <h2 class="text-xl font-bold border-b pb-2 flex items-center gap-2"><span class="text-blue-600">01 //</span> System Architecture</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 text-xs">
+                <!-- Frontend Component Tree -->
+                <div class="bg-white border p-4 rounded-xl shadow-sm space-y-3">
+                    <span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full uppercase">Frontend (Next.js)</span>
+                    <ul class="space-y-1.5 font-mono text-[10.5px] text-slate-600">
+                        <li>📁 components/</li>
+                        <li class="pl-3">📁 layout/ <span class="text-slate-400">(Nav, Sidebar, Footer)</span></li>
+                        <li class="pl-3">📁 auth/ <span class="text-slate-400">(Login, Reset)</span></li>
+                        <li class="pl-3">📁 dashboards/ <span class="text-slate-400">(Hub, Clinical, PH)</span></li>
+                        <li class="pl-3">📁 visualizations/ <span class="text-slate-400">(Charts, Maps)</span></li>
+                        <li>📁 pages/ <span class="text-slate-400">(Home, Insights, About)</span></li>
+                    </ul>
+                </div>
+                
+                <!-- Backend Component Tree -->
+                <div class="bg-white border p-4 rounded-xl shadow-sm space-y-3">
+                    <span class="text-[10px] font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full uppercase">Backend (Flask/Python)</span>
+                    <ul class="space-y-1.5 font-mono text-[10.5px] text-slate-600">
+                        <li>📁 app/routes/</li>
+                        <li class="pl-3">📄 auth.py</li>
+                        <li class="pl-3">📄 dashboard.py</li>
+                        <li class="pl-3">📄 clinical.py</li>
+                        <li>📁 app/services/</li>
+                        <li class="pl-3">📄 database_service.py</li>
+                        <li class="pl-3">📄 tableau_service.py</li>
+                    </ul>
+                </div>
+
+                <!-- Database schema -->
+                <div class="bg-white border p-4 rounded-xl shadow-sm space-y-3">
+                    <span class="text-[10px] font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full uppercase">Database (PostgreSQL)</span>
+                    <ul class="space-y-1.5 font-mono text-[10.5px] text-slate-600">
+                        <li>📁 tables/</li>
+                        <li class="pl-3">📊 users <span class="text-slate-400">(ID, Role, Email)</span></li>
+                        <li class="pl-3">📊 patients <span class="text-slate-400">(Demographics)</span></li>
+                        <li class="pl-3">📊 risk_assessments <span class="text-slate-400">(Scores)</span></li>
+                        <li>📁 views/</li>
+                        <li class="pl-3">👁️ patient_summary</li>
+                        <li class="pl-3">👁️ risk_analysis</li>
+                    </ul>
+                </div>
+
+                <!-- Integrations -->
+                <div class="bg-white border p-4 rounded-xl shadow-sm space-y-3">
+                    <span class="text-[10px] font-bold text-orange-700 bg-orange-100 px-2 py-0.5 rounded-full uppercase">Integration Layer</span>
+                    <ul class="space-y-1.5 font-mono text-[10.5px] text-slate-600">
+                        <li class="flex items-center gap-1"><i data-lucide="bar-chart-2" class="w-3.5 h-3.5 text-orange-600"></i> Tableau Server Embed</li>
+                        <li class="flex items-center gap-1"><i data-lucide="mail" class="w-3.5 h-3.5 text-blue-500"></i> AWS SES Email client</li>
+                        <li class="flex items-center gap-1"><i data-lucide="smartphone" class="w-3.5 h-3.5 text-green-600"></i> Twilio SMS alerts gateway</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. USER FLOWS -->
+        <section id="user-flows" class="space-y-6">
+            <h2 class="text-xl font-bold border-b pb-2 flex items-center gap-2"><span class="text-blue-600">02 //</span> Interactive User Flows</h2>
+            
+            <div class="bg-white border p-6 rounded-xl shadow-sm space-y-6 text-xs">
+                <div class="flex items-center gap-2">
+                    <span class="font-bold text-slate-400">Select flow type:</span>
+                    <button onclick="highlightUserFlow('new')" id="btn-flow-new" class="px-3 py-1.5 bg-blue-600 text-white rounded font-bold">New User</button>
+                    <button onclick="highlightUserFlow('doctor')" id="btn-flow-doctor" class="px-3 py-1.5 border rounded font-bold">Doctor Flow</button>
+                    <button onclick="highlightUserFlow('patient')" id="btn-flow-patient" class="px-3 py-1.5 border rounded font-bold">Patient Flow</button>
+                </div>
+
+                <!-- Flow layout steps -->
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4 font-bold text-center">
+                    <div id="flow-step-1" class="flow-node border rounded-xl p-3 bg-slate-50 w-full md:w-36 flex flex-col items-center gap-1.5"><i data-lucide="home" class="text-blue-600"></i> <span>1. Landing Page</span></div>
+                    <div class="text-slate-300 hidden md:block"><i data-lucide="arrow-right"></i></div>
+                    
+                    <div id="flow-step-2" class="flow-node border rounded-xl p-3 bg-slate-50 w-full md:w-36 flex flex-col items-center gap-1.5"><i data-lucide="user-plus" class="text-blue-600"></i> <span id="flow-label-2">2. Register</span></div>
+                    <div class="text-slate-300 hidden md:block"><i data-lucide="arrow-right"></i></div>
+
+                    <div id="flow-step-3" class="flow-node border rounded-xl p-3 bg-slate-50 w-full md:w-36 flex flex-col items-center gap-1.5"><i data-lucide="shield-check" class="text-blue-600"></i> <span id="flow-label-3">3. Verify Email</span></div>
+                    <div class="text-slate-300 hidden md:block"><i data-lucide="arrow-right"></i></div>
+
+                    <div id="flow-step-4" class="flow-node border rounded-xl p-3 bg-slate-50 w-full md:w-36 flex flex-col items-center gap-1.5"><i data-lucide="settings" class="text-blue-600"></i> <span id="flow-label-4">4. Profile Complete</span></div>
+                    <div class="text-slate-300 hidden md:block"><i data-lucide="arrow-right"></i></div>
+
+                    <div id="flow-step-5" class="flow-node border rounded-xl p-3 bg-slate-50 w-full md:w-36 flex flex-col items-center gap-1.5"><i data-lucide="layout-grid" class="text-blue-600"></i> <span id="flow-label-5">5. Hub Dashboard</span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. API PLAYGROUND -->
+        <section id="api-playground" class="space-y-6">
+            <h2 class="text-xl font-bold border-b pb-2 flex items-center gap-2"><span class="text-blue-600">03 //</span> API Playground Console</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 text-xs">
+                <!-- Console selection -->
+                <div class="lg:col-span-4 bg-white border p-4 rounded-xl shadow-sm space-y-4 font-semibold">
+                    <div>
+                        <label class="block mb-1 text-slate-400">Endpoint Modules</label>
+                        <select id="api-module-select" onchange="loadAPIEndpoints()" class="w-full rounded border-slate-300 py-1.5 text-xs">
+                            <option value="auth">Authentication APIs</option>
+                            <option value="dashboard">Dashboard APIs</option>
+                            <option value="patient">Patient APIs</option>
+                            <option value="integration">Integration APIs</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block mb-1 text-slate-400">Endpoint Route</label>
+                        <select id="api-route-select" class="w-full rounded border-slate-300 py-1.5 text-xs"></select>
+                    </div>
+                    <button onclick="sendMockAPIRequest()" class="w-full bg-blue-600 text-white font-bold py-2 rounded hover:opacity-90 active:scale-95 transition-all">Send Mock Request</button>
+                </div>
+
+                <!-- Console response output -->
+                <div class="lg:col-span-8 bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col justify-between overflow-hidden min-h-[220px]">
+                    <div class="flex justify-between items-center text-[10px] font-bold text-slate-500 border-b border-slate-800 pb-2 mb-2">
+                        <span>RESPONSE OUTPUT CLIENT</span>
+                        <span id="response-status-badge">STATUS: IDLE</span>
+                    </div>
+                    <pre id="api-response-block" class="font-mono text-green-400 overflow-x-auto text-[10.5px]">Waiting for request execution...</pre>
+                    <div class="h-4"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. STATE & WEBSOCKET DATA STREAM -->
+        <section id="state-ws" class="space-y-6">
+            <h2 class="text-xl font-bold border-b pb-2 flex items-center gap-2"><span class="text-blue-600">04 //</span> State Management & WS Streams</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 text-xs">
+                <!-- State Management Redux Tree -->
+                <div class="bg-white border p-4 rounded-xl shadow-sm space-y-4">
+                    <h3 class="font-bold text-sm text-on-surface">Component 4: State Store Tree (Redux)</h3>
+                    
+                    <div class="space-y-2 font-mono text-[10.5px]">
+                        <div class="border rounded p-2 hover:bg-slate-50 cursor-pointer">
+                            <span class="font-bold text-blue-700">state.auth</span>
+                            <span class="text-slate-400 ml-2">{ token: "eyJhbG...", role: "clinical", isAuth: true }</span>
+                        </div>
+                        <div class="border rounded p-2 hover:bg-slate-50 cursor-pointer">
+                            <span class="font-bold text-blue-700">state.dashboards</span>
+                            <span class="text-slate-400 ml-2">{ current: 12, list: [1, 2], cacheExpiry: 171548... }</span>
+                        </div>
+                        <div class="border rounded p-2 hover:bg-slate-50 cursor-pointer">
+                            <span class="font-bold text-blue-700">state.patients</span>
+                            <span class="text-slate-400 ml-2">{ activeCaseload: [1003, 1004], filters: { risk: "High" } }</span>
+                        </div>
+                        <div class="border rounded p-2 hover:bg-slate-50 cursor-pointer">
+                            <span class="font-bold text-blue-700">state.settings</span>
+                            <span class="text-slate-400 ml-2">{ theme: "light", accessibilityHighContrast: false }</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Server-to-Client WebSocket Telemetry stream console -->
+                <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm flex flex-col justify-between h-[250px] overflow-hidden">
+                    <div class="flex justify-between items-center text-[10px] font-bold text-slate-500 border-b border-slate-800 pb-2 mb-2">
+                        <span>WEBSOCKET LIVE TELEMETRY CHANNELS</span>
+                        <div class="flex items-center gap-1.5"><span class="w-2 h-2 bg-green-500 rounded-full animate-ping"></span> <span class="text-green-500">CONNECTED</span></div>
+                    </div>
+                    
+                    <div id="ws-console-logs" class="font-mono text-sky-400 overflow-y-auto h-36 flex flex-col gap-1 pr-2 scroll-hide">
+                        <div>[11:37:02] WS: Listening to telemetry channels...</div>
+                        <div>[11:37:05] WS: Client handshake sync validation success.</div>
+                    </div>
+                    
+                    <div class="border-t border-slate-800 pt-2.5 flex justify-between items-center text-[10px]">
+                        <button onclick="triggerMockWSEvent()" class="bg-blue-650 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded transition-all">Send Mock Telemetry Alert</button>
+                        <span class="text-slate-500">Client latency: 0.4ms</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. DEVOPS & CI/CD PIPELINE -->
+        <section id="devops" class="space-y-6">
+            <h2 class="text-xl font-bold border-b pb-2 flex items-center gap-2"><span class="text-blue-600">05 //</span> Security, DevOps & CI/CD</h2>
+            
+            <!-- CI/CD pipeline visualizer -->
+            <div class="bg-white border p-6 rounded-xl shadow-sm space-y-4 text-xs">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-bold text-sm">Automated CI/CD Deployment Pipeline</h3>
+                    <button onclick="triggerPipelineRun()" class="bg-primary text-on-primary font-bold px-3 py-1.5 rounded hover:opacity-90 active:scale-95 transition-all">Trigger Pipeline Run</button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4 font-bold text-center text-slate-500">
+                    <div id="pipeline-1" class="border rounded-lg p-3 bg-slate-50 transition-all flex flex-col items-center gap-1"><i data-lucide="git-branch" class="w-5 h-5 text-slate-400"></i> 1. Commit</div>
+                    <div id="pipeline-2" class="border rounded-lg p-3 bg-slate-50 transition-all flex flex-col items-center gap-1"><i data-lucide="package" class="w-5 h-5 text-slate-400"></i> 2. Build</div>
+                    <div id="pipeline-3" class="border rounded-lg p-3 bg-slate-50 transition-all flex flex-col items-center gap-1"><i data-lucide="test-tube" class="w-5 h-5 text-slate-400"></i> 3. Test</div>
+                    <div id="pipeline-4" class="border rounded-lg p-3 bg-slate-50 transition-all flex flex-col items-center gap-1"><i data-lucide="shield-alert" class="w-5 h-5 text-slate-400"></i> 4. Sec Scan</div>
+                    <div id="pipeline-5" class="border rounded-lg p-3 bg-slate-50 transition-all flex flex-col items-center gap-1"><i data-lucide="rocket" class="w-5 h-5 text-slate-400"></i> 5. Deploy</div>
+                </div>
+            </div>
+
+            <!-- Performance, Security & Maintenance summaries -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
+                <div class="bg-white border p-4 rounded-xl shadow-sm space-y-3">
+                    <h4 class="font-bold text-slate-400 uppercase text-[10px] tracking-wider">Performance optimizations</h4>
+                    <ul class="space-y-1.5 font-semibold text-slate-600">
+                        <li class="flex items-center gap-1.5"><i data-lucide="check" class="text-green-600 w-4 h-4"></i> Code Splitting & Lazy Loading</li>
+                        <li class="flex items-center gap-1.5"><i data-lucide="check" class="text-green-600 w-4 h-4"></i> Redis caching layers</li>
+                        <li class="flex items-center gap-1.5"><i data-lucide="check" class="text-green-600 w-4 h-4"></i> Data aggregation pipelines</li>
+                    </ul>
+                </div>
+                <div class="bg-white border p-4 rounded-xl shadow-sm space-y-3">
+                    <h4 class="font-bold text-slate-400 uppercase text-[10px] tracking-wider">Security & Encryption</h4>
+                    <ul class="space-y-1.5 font-semibold text-slate-600">
+                        <li class="flex items-center gap-1.5"><i data-lucide="shield" class="text-blue-600 w-4 h-4"></i> JWT with Refresh tokens</li>
+                        <li class="flex items-center gap-1.5"><i data-lucide="shield" class="text-blue-600 w-4 h-4"></i> AES-256 data at rest encryption</li>
+                        <li class="flex items-center gap-1.5"><i data-lucide="shield" class="text-blue-600 w-4 h-4"></i> HIPAA & GDPR compliance logs</li>
+                    </ul>
+                </div>
+                <div class="bg-white border p-4 rounded-xl shadow-sm space-y-3">
+                    <h4 class="font-bold text-slate-400 uppercase text-[10px] tracking-wider">Maintenance & Support</h4>
+                    <ul class="space-y-1.5 font-semibold text-slate-600">
+                        <li class="flex items-center gap-1.5"><i data-lucide="life-buoy" class="text-purple-600 w-4 h-4"></i> 24/7 Application monitoring</li>
+                        <li class="flex items-center gap-1.5"><i data-lucide="life-buoy" class="text-purple-600 w-4 h-4"></i> Live ticketing & Support desk</li>
+                        <li class="flex items-center gap-1.5"><i data-lucide="life-buoy" class="text-purple-600 w-4 h-4"></i> Technical technical reference library</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // 2. User flow visualizer logic
+    function highlightUserFlow(flowType) {
+        // Reset selections
+        const buttons = ['new', 'doctor', 'patient'];
+        buttons.forEach(b => {
+            document.getElementById('btn-flow-' + b).className = 'px-3 py-1.5 border rounded font-bold';
+        });
+        document.getElementById('btn-flow-' + flowType).className = 'px-3 py-1.5 bg-blue-600 text-white rounded font-bold';
+
+        for (let i = 1; i <= 5; i++) {
+            document.getElementById('flow-step-' + i).classList.remove('active');
+        }
+
+        // Apply flow content edits
+        if (flowType === 'new') {
+            document.getElementById('flow-label-2').innerText = '2. Register';
+            document.getElementById('flow-label-3').innerText = '3. Verify Email';
+            document.getElementById('flow-label-4').innerText = '4. Profile Complete';
+            document.getElementById('flow-label-5').innerText = '5. Hub Dashboard';
+        } else if (flowType === 'doctor') {
+            document.getElementById('flow-label-2').innerText = '2. Login Doctor';
+            document.getElementById('flow-label-3').innerText = '3. Patient caselist';
+            document.getElementById('flow-label-4').innerText = '4. Risk Analysis';
+            document.getElementById('flow-label-5').innerText = '5. Clinical Report';
+        } else if (flowType === 'patient') {
+            document.getElementById('flow-label-2').innerText = '2. Login Patient';
+            document.getElementById('flow-label-3').innerText = '3. Metrics Track';
+            document.getElementById('flow-label-4').innerText = '4. Recommendations';
+            document.getElementById('flow-label-5').innerText = '5. Schedule Clinic';
+        }
+
+        // Animate sequence
+        let delay = 0;
+        for (let i = 1; i <= 5; i++) {
+            setTimeout(() => {
+                document.getElementById('flow-step-' + i).classList.add('active');
+            }, delay);
+            delay += 250;
+        }
+    }
+
+    // 3. API Playground options listing
+    const apiRoutes = {
+        auth: [
+            { method: 'POST', path: '/api/auth/login', response: { success: true, token: "eyJhbGciOiJIUzI1NiIsIn...", user: { name: "Dr. Ramesh", email: "ramesh@datavibe.local" } } },
+            { method: 'POST', path: '/api/auth/register', response: { success: true, message: "Verification link dispatched." } },
+            { method: 'GET', path: '/api/auth/logout', response: { status: "Logged out successfully" } }
+        ],
+        dashboard: [
+            { method: 'GET', path: '/api/dashboards', response: { dashboards: [{ id: 1, name: "Clinical Analytics" }, { id: 2, name: "Public Health Map" }] } },
+            { method: 'GET', path: '/api/dashboards/clinical', response: { patient_alerts_count: 5, active_wards: ["7A", "4B"] } }
+        ],
+        patient: [
+            { method: 'GET', path: '/api/patients', response: [{ patient_id: 1003, name: "Anita Sen", risk: "Moderate" }, { patient_id: 1004, name: "David Chen", risk: "High" }] },
+            { method: 'GET', path: '/api/patients/risk-assessment', response: { patient_id: 1004, framingham_score: 22.4, classification: "High Risk" } }
+        ],
+        integration: [
+            { method: 'POST', path: '/api/integrations/tableau', response: { active_embed_tokens: "tab-77a88bc", status: "STABLE" } },
+            { method: 'POST', path: '/api/integrations/sync', response: { status: "Sync triggered", latency_ms: 12.4 } }
+        ]
+    };
+
+    function loadAPIEndpoints() {
+        const mod = document.getElementById('api-module-select').value;
+        const routeSelect = document.getElementById('api-route-select');
+        routeSelect.innerHTML = '';
+        apiRoutes[mod].forEach((route, idx) => {
+            routeSelect.innerHTML += `<option value="${idx}">${route.method} ${route.path}</option>`;
+        });
+    }
+
+    function sendMockAPIRequest() {
+        const mod = document.getElementById('api-module-select').value;
+        const idx = document.getElementById('api-route-select').value;
+        const route = apiRoutes[mod][idx];
+
+        const output = document.getElementById('api-response-block');
+        const badge = document.getElementById('response-status-badge');
+
+        output.innerText = 'Sending request...';
+        badge.innerText = 'STATUS: SENDING';
+        badge.className = 'text-yellow-500 font-bold';
+
+        setTimeout(() => {
+            output.innerText = JSON.stringify(route.response, null, 2);
+            badge.innerText = 'STATUS: 200 OK';
+            badge.className = 'text-green-500 font-bold';
+        }, 600);
+    }
+
+    // 4. WebSocket log streamer simulation
+    function triggerMockWSEvent() {
+        const logs = document.getElementById('ws-console-logs');
+        const date = new Date().toTimeString().split(' ')[0];
+        
+        const events = [
+            `[${date}] WS: Received telemetry heartbeat from PAT-9912.`,
+            `[${date}] WS: Warning! Arrhythmia spike detected: Vitals Alert trigger.`,
+            `[${date}] WS: Cache invalidation message sent to clinical dashboard nodes.`,
+            `[${date}] WS: Live dashboard audit metric count synced.`
+        ];
+        const randomEvent = events[Math.floor(Math.random() * events.length)];
+        
+        logs.innerHTML += `<div>${randomEvent}</div>`;
+        logs.scrollTop = logs.scrollHeight;
+    }
+
+    // 5. DevOps / CI/CD pipeline simulation
+    function triggerPipelineRun() {
+        for (let i = 1; i <= 5; i++) {
+            document.getElementById('pipeline-' + i).className = 'border rounded-lg p-3 bg-slate-50 transition-all flex flex-col items-center gap-1 text-slate-400 border-slate-200';
+        }
+
+        let delay = 0;
+        for (let i = 1; i <= 5; i++) {
+            setTimeout(() => {
+                const el = document.getElementById('pipeline-' + i);
+                el.className = 'border rounded-lg p-3 bg-green-50 text-green-700 border-green-300 shadow-sm flex flex-col items-center gap-1';
+            }, delay);
+            delay += 1000;
+        }
+    }
+
+    // Initialize module list
+    loadAPIEndpoints();
+    // Highlight initial flow
+    highlightUserFlow('new');
+</script>
+{% endblock %}
