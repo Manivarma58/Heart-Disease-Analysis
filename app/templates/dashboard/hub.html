@@ -158,14 +158,10 @@
         <button id="sidebarToggle" class="md:hidden p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors mr-2">
             <span class="material-symbols-outlined">menu</span>
         </button>
-        {% if persona == 'clinical' or persona == 'admin' %}
         <div class="flex items-center gap-xs">
             <span class="material-symbols-outlined text-status-critical text-headline-md" style="font-variation-settings: 'FILL' 1;">ecg_heart</span>
             <h1 class="font-display-lg text-[24px] font-bold text-primary tracking-tight">CardioViz</h1>
         </div>
-        {% else %}
-        <h1 class="font-display-lg text-workflow-blue font-extrabold text-[24px] tracking-tight">DataVibe</h1>
-        {% endif %}
         
         <!-- Search bar with suggestions -->
         <div class="relative group hidden md:block">

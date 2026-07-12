@@ -419,6 +419,7 @@ def integration_page():
 @login_required
 def clinical_analytics_page():
     patients = query_all("SELECT patient_id, first_name, last_name, gender, date_of_birth, region FROM patients ORDER BY last_name ASC")
+    
     totals = query_one(
         """SELECT COUNT(*) AS records,
                   SUM(CASE WHEN heart_disease='Yes' THEN 1 ELSE 0 END) AS heart_cases,
@@ -426,10 +427,104 @@ def clinical_analytics_page():
                   ROUND(AVG(bmi), 1) AS avg_bmi
            FROM raw_heart_dataset"""
     )
+    
+    # Visualizations Data Queries:
+    # 1. Patient Risk Distribution (Stacked Bar: Age Groups vs Risk Category)
+    risk_dist_rows = query_all(
+        """SELECT CASE WHEN (strftime('%Y', 'now') - strftime('%Y', p.date_of_birth)) < 40 THEN 'Under 40'
+                       WHEN (strftime('%Y', 'now') - strftime('%Y', p.date_of_birth)) BETWEEN 40 AND 49 THEN '40-49'
+                       WHEN (strftime('%Y', 'now') - strftime('%Y', p.date_of_birth)) BETWEEN 50 AND 59 THEN '50-59'
+                       WHEN (strftime('%Y', 'now') - strftime('%Y', p.date_of_birth)) BETWEEN 60 AND 69 THEN '60-69'
+                       ELSE '70+' END AS age_group,
+                  r.risk_category,
+                  COUNT(*) as count
+           FROM patients p
+           JOIN risk_assessments r ON p.patient_id = r.patient_id
+           GROUP BY age_group, r.risk_category"""
+    )
+    risk_dist = [dict(r) for r in risk_dist_rows]
+
+    # 3. Gender-Based Prevalence
+    gender_prev_rows = query_all(
+        """SELECT p.gender,
+                  CASE WHEN (strftime('%Y', 'now') - strftime('%Y', p.date_of_birth)) < 40 THEN 'Under 40'
+                       WHEN (strftime('%Y', 'now') - strftime('%Y', p.date_of_birth)) BETWEEN 40 AND 54 THEN '40-54'
+                       WHEN (strftime('%Y', 'now') - strftime('%Y', p.date_of_birth)) BETWEEN 55 AND 69 THEN '55-69'
+                       ELSE '70+' END AS age_group,
+                  COUNT(*) AS total,
+                  SUM(CASE WHEN m.heart_disease = 'Yes' THEN 1 ELSE 0 END) AS heart_cases
+           FROM patients p
+           JOIN medical_history m ON p.patient_id = m.patient_id
+           GROUP BY p.gender, age_group"""
+    )
+    gender_prev = [dict(r) for r in gender_prev_rows]
+
+    # 4. Race/Ethnicity Distribution (last_name holds the mapped Race string)
+    race_dist_rows = query_all(
+        """SELECT p.last_name AS race,
+                  COUNT(*) AS total,
+                  SUM(CASE WHEN m.heart_disease = 'Yes' THEN 1 ELSE 0 END) AS heart_cases
+           FROM patients p
+           JOIN medical_history m ON p.patient_id = m.patient_id
+           GROUP BY race"""
+    )
+    race_dist = [dict(r) for r in race_dist_rows]
+
+    # 6. Lifestyle vs Risk (Bubble Chart variables)
+    lifestyle_rows = query_all(
+        """SELECT l.physical_activity,
+                  r.framingham_score AS risk_score,
+                  c.bmi,
+                  l.smoking_status
+           FROM patients p
+           JOIN lifestyle_factors l ON p.patient_id = l.patient_id
+           JOIN risk_assessments r ON p.patient_id = r.patient_id
+           JOIN clinical_measurements c ON p.patient_id = c.patient_id
+           ORDER BY RANDOM() LIMIT 100"""
+    )
+    lifestyle_risk = [dict(r) for r in lifestyle_rows]
+
+    # 8. Comorbidity prevalence
+    comorbidities = query_one(
+        """SELECT SUM(CASE WHEN m.hypertension = 'Yes' AND m.diabetes = 'Yes' THEN 1 ELSE 0 END) AS bp_and_db,
+                  SUM(CASE WHEN m.hypertension = 'Yes' AND m.diabetes = 'No' THEN 1 ELSE 0 END) AS bp_only,
+                  SUM(CASE WHEN m.hypertension = 'No' AND m.diabetes = 'Yes' THEN 1 ELSE 0 END) AS db_only,
+                  SUM(CASE WHEN m.hypertension = 'No' AND m.diabetes = 'No' THEN 1 ELSE 0 END) AS neither
+           FROM patients p
+           JOIN medical_history m ON p.patient_id = m.patient_id
+           WHERE m.heart_disease = 'Yes'"""
+    )
+    comorbidity_data = dict(comorbidities) if comorbidities else {}
+
+    # Critical Alerts Table data
+    alerts_rows = query_all(
+        """SELECT p.first_name || ' ' || p.last_name AS name,
+                  (strftime('%Y', 'now') - strftime('%Y', p.date_of_birth)) AS age,
+                  r.framingham_score AS risk_score,
+                  c.measurement_date AS last_visit,
+                  r.risk_category AS status
+           FROM patients p
+           JOIN risk_assessments r ON p.patient_id = r.patient_id
+           JOIN clinical_measurements c ON p.patient_id = c.patient_id
+           WHERE r.risk_category = 'Critical' OR r.risk_category = 'High'
+           ORDER BY r.framingham_score DESC LIMIT 5"""
+    )
+    alerts = [dict(a) for a in alerts_rows]
+
+    chart_data = {
+        "risk_dist": risk_dist,
+        "gender_prev": gender_prev,
+        "race_dist": race_dist,
+        "lifestyle_risk": lifestyle_risk,
+        "comorbidity_data": comorbidity_data,
+        "alerts": alerts
+    }
+
     return render_template(
         "dashboard/clinical_analytics.html",
         patients=patients,
         totals=totals,
+        chart_data=chart_data,
         doctor_name=session.get("user", {}).get("name", "Dr. Sharma")
     )
 

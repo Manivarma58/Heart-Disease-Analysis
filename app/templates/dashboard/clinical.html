@@ -281,7 +281,7 @@
                                 <span class="text-body-md select-none">Smoking</span>
                             </label>
                             <label class="flex items-center gap-3 cursor-pointer">
-                                <input checked id="activeCheck" class="rounded text-primary focus:ring-primary" type="checkbox" onchange="applyFilters()"/>
+                                <input id="activeCheck" class="rounded text-primary focus:ring-primary" type="checkbox" onchange="applyFilters()"/>
                                 <span class="text-body-md select-none">Active (Physical Activity)</span>
                             </label>
                             <label class="flex items-center gap-3 cursor-pointer">
@@ -599,7 +599,7 @@
         document.getElementById('ageSlider').value = 90;
         document.getElementById('ageValDisplay').innerText = `20 - 90 yrs`;
         document.getElementById('smokeCheck').checked = false;
-        document.getElementById('activeCheck').checked = true;
+        document.getElementById('activeCheck').checked = false;
         document.getElementById('alcoholCheck').checked = false;
         applyFilters();
     }

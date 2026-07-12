@@ -187,11 +187,14 @@
             </button>
         </form>
 
-        <!-- Links Container -->
-        <div class="flex flex-col gap-2 sm:flex-row sm:gap-4 font-semibold text-sm text-primary mt-6">
-            <button type="button" onclick="alert('Verification code resent!')" class="hover:underline">Resend Code</button>
-            <span class="hidden sm:inline text-outline-variant">|</span>
-            <a href="{{ url_for('auth.register') }}" class="text-on-surface-variant hover:text-primary transition-all">Change Email</a>
+        <!-- Links Container & Countdown -->
+        <div class="flex flex-col items-center gap-2 mt-6">
+            <div class="flex flex-col gap-2 sm:flex-row sm:gap-4 font-semibold text-sm text-primary">
+                <button type="button" id="resend-btn" disabled class="hover:underline opacity-50 cursor-not-allowed transition-all">Resend Code</button>
+                <span class="hidden sm:inline text-outline-variant">|</span>
+                <a href="{{ url_for('auth.register') }}" class="text-on-surface-variant hover:text-primary transition-all">Change Email</a>
+            </div>
+            <p class="text-xs text-slate-400 font-semibold" id="cooldown-timer">Resend code in 59s</p>
         </div>
     </main>
 
@@ -242,6 +245,41 @@
             } else {
                 document.getElementById('otp-code-input').value = code;
             }
+        });
+
+        // Resend Timer countdown
+        let secondsLeft = 59;
+        const cooldownTimer = document.getElementById('cooldown-timer');
+        const resendBtn = document.getElementById('resend-btn');
+        
+        let timerInterval = setInterval(() => {
+            secondsLeft--;
+            if (secondsLeft > 0) {
+                cooldownTimer.textContent = `Resend code in ${secondsLeft}s`;
+            } else {
+                cooldownTimer.textContent = "You can now resend the code.";
+                resendBtn.disabled = false;
+                resendBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                clearInterval(timerInterval);
+            }
+        }, 1000);
+
+        resendBtn.addEventListener('click', () => {
+            alert('Verification code resent successfully to your email address!');
+            secondsLeft = 59;
+            resendBtn.disabled = true;
+            resendBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            timerInterval = setInterval(() => {
+                secondsLeft--;
+                if (secondsLeft > 0) {
+                    cooldownTimer.textContent = `Resend code in ${secondsLeft}s`;
+                } else {
+                    cooldownTimer.textContent = "You can now resend the code.";
+                    resendBtn.disabled = false;
+                    resendBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    clearInterval(timerInterval);
+                }
+            }, 1000);
         });
     </script>
 </body>
