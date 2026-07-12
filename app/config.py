@@ -7,7 +7,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-datavibe-change-me")
-    DATABASE_PATH = os.getenv("DATABASE_PATH", str(BASE_DIR / "datavibe.db"))
+    if os.getenv("VERCEL") or os.getenv("NOW_BUILDER"):
+        DATABASE_PATH = "/tmp/datavibe.db"
+    else:
+        DATABASE_PATH = os.getenv("DATABASE_PATH", str(BASE_DIR / "datavibe.db"))
     TABLEAU_CLINICAL_URL = os.getenv("TABLEAU_CLINICAL_URL", "")
     TABLEAU_PUBLIC_HEALTH_URL = os.getenv("TABLEAU_PUBLIC_HEALTH_URL", "")
     TABLEAU_PATIENT_URL = os.getenv("TABLEAU_PATIENT_URL", "")
