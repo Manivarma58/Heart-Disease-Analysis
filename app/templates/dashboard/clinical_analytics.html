@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>CardioPulse Analytics - Dr. Sharma Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background-color: #faf8ff;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #c6c5d2;
+            border-radius: 10px;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(223, 225, 248, 0.5);
+        }
+        .chart-pulse {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: dash 3s linear forwards;
+        }
+        @keyframes dash {
+            to { stroke-dashoffset: 0; }
+        }
+    </style>
+    <script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary": "#b4271d",
+                      "on-background": "#171b2b",
+                      "surface-container-low": "#f3f2ff",
+                      "on-tertiary-fixed": "#410000",
+                      "on-surface-variant": "#454650",
+                      "inverse-surface": "#2c3041",
+                      "on-secondary-container": "#610001",
+                      "background": "#faf8ff",
+                      "surface-container-highest": "#dfe1f8",
+                      "surface-muted": "#F1F5F9",
+                      "secondary-container": "#fe5c4a",
+                      "status-stable": "#1a2a6c",
+                      "primary-fixed-dim": "#b9c3ff",
+                      "primary-fixed": "#dde1ff",
+                      "on-tertiary": "#ffffff",
+                      "surface-tint": "#4b5a9e",
+                      "on-primary-fixed-variant": "#334284",
+                      "surface-bright": "#faf8ff",
+                      "surface-container-high": "#e4e7fe",
+                      "surface-variant": "#dfe1f8",
+                      "on-primary-fixed": "#001356",
+                      "primary-container": "#1a2a6c",
+                      "outline": "#767681",
+                      "surface": "#faf8ff",
+                      "error-container": "#ffdad6",
+                      "surface-container": "#ebedff",
+                      "surface-container-lowest": "#ffffff",
+                      "status-critical": "#E74C3C",
+                      "on-tertiary-container": "#fe6653",
+                      "tertiary-container": "#680001",
+                      "on-primary": "#ffffff",
+                      "error": "#ba1a1a",
+                      "tertiary-fixed-dim": "#ffb4a9",
+                      "on-secondary": "#ffffff",
+                      "on-secondary-fixed": "#410000",
+                      "tertiary-fixed": "#ffdad5",
+                      "on-secondary-fixed-variant": "#910807",
+                      "inverse-primary": "#b9c3ff",
+                      "outline-variant": "#c6c5d2",
+                      "secondary-fixed-dim": "#ffb4a9",
+                      "on-surface": "#171b2b",
+                      "on-primary-container": "#8594dc",
+                      "tertiary": "#400000",
+                      "primary": "#001255",
+                      "surface-light": "#F8FAFC",
+                      "on-error-container": "#93000a",
+                      "inverse-on-surface": "#efefff",
+                      "on-error": "#ffffff",
+                      "secondary-fixed": "#ffdad5",
+                      "surface-dim": "#d6d9f0",
+                      "on-tertiary-fixed-variant": "#8e130c"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "md": "24px",
+                      "gutter": "24px",
+                      "xl": "48px",
+                      "margin-mobile": "16px",
+                      "margin-desktop": "40px",
+                      "lg": "32px",
+                      "base": "4px",
+                      "sm": "16px",
+                      "xs": "8px"
+              },
+              "fontFamily": {
+                      "headline-md": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "label-md": ["Inter"],
+                      "body-md": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "title-lg": ["Inter"],
+                      "headline-lg-mobile": ["Inter"],
+                      "data-mono": ["Inter"],
+                      "display-lg": ["Inter"],
+                      "label-sm": ["Inter"]
+              },
+              "fontSize": {
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "title-lg": ["20px", {"lineHeight": "28px", "fontWeight": "500"}],
+                      "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "data-mono": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                      "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}]
+              }
+            },
+          },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col">
+
+<!-- TopNavBar -->
+<header class="bg-surface docked full-width top-0 border-b border-outline-variant shadow-sm flex justify-between items-center w-full px-margin-desktop py-base z-50 sticky">
+    <div class="flex items-center gap-md">
+        <a href="{{ url_for('dashboard.home') }}" class="text-title-lg font-title-lg font-bold text-primary tracking-tight">CardioPulse Analytics</a>
+        <nav class="hidden md:flex items-center gap-gutter ml-lg">
+            <a class="text-primary font-bold border-b-2 border-primary pb-1 text-label-md font-label-md" href="{{ url_for('dashboard.clinical_analytics_page') }}">Dashboard</a>
+            <a class="text-on-surface-variant hover:bg-surface-container-low transition-colors px-xs py-base rounded text-label-md font-label-md" href="{{ url_for('clinical.clinical_dashboard') }}">Patients</a>
+            <a class="text-on-surface-variant hover:bg-surface-container-low transition-colors px-xs py-base rounded text-label-md font-label-md" href="{{ url_for('dashboard.home') }}">Diagnostics</a>
+            <a class="text-on-surface-variant hover:bg-surface-container-low transition-colors px-xs py-base rounded text-label-md font-label-md" href="{{ url_for('dashboard.heart_disease_story') }}">Reports</a>
+            <a class="text-on-surface-variant hover:bg-surface-container-low transition-colors px-xs py-base rounded text-label-md font-label-md" href="#" onclick="alert('Clinical protocols repository loaded.')">Protocols</a>
+        </nav>
+    </div>
+    <div class="flex items-center gap-sm">
+        <button class="bg-secondary text-on-secondary px-sm py-xs rounded-lg text-label-md font-label-md font-bold flex items-center gap-xs shadow-sm hover:opacity-90 active:scale-95 transition-all" onclick="alert('Critical Emergency Dispatch Active.')">
+            <span class="material-symbols-outlined text-[18px]">emergency</span>
+            Emergency Alert
+        </button>
+        <div class="flex items-center gap-xs">
+            <a href="{{ url_for('dashboard.notifications_components_page') }}" class="p-xs text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors">
+                <span class="material-symbols-outlined">notifications</span>
+            </a>
+            <a href="{{ url_for('dashboard.settings_page') }}" class="p-xs text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors">
+                <span class="material-symbols-outlined">settings</span>
+            </a>
+            <a href="#" class="p-xs text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors" onclick="alert('Connecting technical help desk...')">
+                <span class="material-symbols-outlined">help</span>
+            </a>
+        </div>
+        <div class="h-8 w-8 rounded-full overflow-hidden border border-outline-variant ml-xs">
+            <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbWT59UIDTbut1PgGzPuyc7PXxoQGfKC1kkK_R30VtqrPxvArREw5Y2KCSXLvDCeAh39_tLlghZHWVIII2nOwfPNGrvtTBjfd-0p8Fjv_UCOq280LWizoNum4WG1g2KdvW_ts6qGDVVYiB4QpL9eqk6TPrW7MH9SXP3WTFRWwu7E11J9_ExGMzER1hdcrYZ9uNHAW4YLRKr0W91OvPuOziI2pnoOQ0N8xcAabeL4bigZ5Yo5CItJwaz6oPvTOKMRQNs-Ymzho-Hdv1" alt="Dr. Sharma Headshot"/>
+        </div>
+    </div>
+</header>
+
+<main class="flex-grow w-full max-w-full px-margin-desktop py-md">
+    <!-- Sub-Header & Global Controls -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-lg gap-md">
+        <div>
+            <h1 class="text-headline-md font-headline-md text-primary">Clinical Analytics Dashboard - {{ doctor_name }}</h1>
+            <p class="text-body-md font-body-md text-on-surface-variant">Comprehensive cardiac health overview and predictive risk assessment</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-sm">
+            <div class="relative bg-white border border-outline-variant px-sm py-xs rounded-lg flex items-center gap-xs shadow-sm">
+                <span class="material-symbols-outlined text-primary">calendar_today</span>
+                <select id="dateRangeSelect" class="bg-transparent border-none text-label-md font-label-md py-0 focus:ring-0 cursor-pointer text-primary pr-8" onchange="triggerFilterChange()">
+                    <option value="30">Last 30 Days</option>
+                    <option value="90" selected>Last 90 Days</option>
+                    <option value="180">Last 180 Days</option>
+                </select>
+            </div>
+            
+            <div class="flex gap-base">
+                <button class="bg-surface-container-highest p-xs rounded-lg hover:bg-surface-variant transition-colors flex items-center justify-center" title="Export" onclick="alert('Exporting clinical data to CSV...');">
+                    <span class="material-symbols-outlined">download</span>
+                </button>
+                <button class="bg-surface-container-highest p-xs rounded-lg hover:bg-surface-variant transition-colors flex items-center justify-center" title="Refresh" id="refreshBtn">
+                    <span class="material-symbols-outlined" id="refreshIcon">refresh</span>
+                </button>
+                <button class="bg-primary text-on-primary px-sm py-xs rounded-lg font-bold text-label-md shadow-sm hover:opacity-90 active:scale-95 transition-all" onclick="alert('Clinical indicators and risk factor thresholds applied.');">Apply Filters</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI Row -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter mb-lg">
+        <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm border-l-4 border-primary card-shadow">
+            <div class="flex justify-between items-start mb-base">
+                <span class="text-label-sm font-label-sm text-on-surface-variant">Total Patients</span>
+                <span class="text-green-600 text-label-sm font-bold flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[14px]">trending_up</span> 12%
+                </span>
+            </div>
+            <div class="text-headline-lg font-headline-lg text-on-background">{{ totals.records }}</div>
+            <div class="text-label-sm font-label-sm text-on-surface-variant mt-xs">Active clinical tracking</div>
+        </div>
+        
+        <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm border-l-4 border-status-critical card-shadow">
+            <div class="flex justify-between items-start mb-base">
+                <span class="text-label-sm font-label-sm text-on-surface-variant">High Risk</span>
+                <span class="bg-error-container text-on-error-container px-xs py-[2px] rounded text-[10px] font-bold">URGENT</span>
+            </div>
+            <div class="text-headline-lg font-headline-lg text-status-critical">423</div>
+            <div class="text-label-sm font-label-sm text-on-surface-variant mt-xs">14.9% of total population</div>
+        </div>
+        
+        <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm border-l-4 border-secondary-container card-shadow">
+            <div class="flex justify-between items-start mb-base">
+                <span class="text-label-sm font-label-sm text-on-surface-variant">Primary Risk Factors</span>
+                <span class="material-symbols-outlined text-secondary-container">warning</span>
+            </div>
+            <div class="text-headline-lg font-headline-lg text-on-background">24</div>
+            <div class="text-label-sm font-label-sm text-on-surface-variant mt-xs">Identified markers across cohorts</div>
+        </div>
+        
+        <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm border-l-4 border-status-stable card-shadow">
+            <div class="flex justify-between items-start mb-base">
+                <span class="text-label-sm font-label-sm text-on-surface-variant">Treatment Success</span>
+                <span class="material-symbols-outlined text-status-stable">verified</span>
+            </div>
+            <div class="text-headline-lg font-headline-lg text-primary-container">78.3%</div>
+            <div class="text-label-sm font-label-sm text-on-surface-variant mt-xs">Post-intervention 6mo stability</div>
+        </div>
+    </div>
+
+    <!-- Main Analytics Grid -->
+    <div class="grid grid-cols-12 gap-gutter mb-lg">
+        
+        <!-- Left: Patient Demographics -->
+        <section class="col-span-12 lg:col-span-3 space-y-gutter">
+            <div class="bg-surface-container-lowest p-sm rounded-xl shadow-sm border border-outline-variant/30 card-shadow h-full flex flex-col justify-between">
+                <h3 class="text-label-md font-label-md text-primary mb-sm border-b border-outline-variant pb-xs">Patient Demographics</h3>
+                <div class="space-y-md flex-grow flex flex-col justify-around">
+                    <!-- Age Histogram -->
+                    <div>
+                        <span class="text-label-sm font-label-sm text-on-surface-variant">Age Distribution</span>
+                        <div class="flex items-end gap-[2px] h-20 mt-xs">
+                            <div class="bg-primary-container w-full h-[20%] rounded-t-sm hover:opacity-80 transition-opacity"></div>
+                            <div class="bg-primary-container w-full h-[45%] rounded-t-sm hover:opacity-80 transition-opacity"></div>
+                            <div class="bg-primary-container w-full h-[85%] rounded-t-sm hover:opacity-80 transition-opacity"></div>
+                            <div class="bg-primary-container w-full h-[70%] rounded-t-sm hover:opacity-80 transition-opacity"></div>
+                            <div class="bg-primary-container w-full h-[40%] rounded-t-sm hover:opacity-80 transition-opacity"></div>
+                            <div class="bg-primary-container w-full h-[25%] rounded-t-sm hover:opacity-80 transition-opacity"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Gender Splits -->
+                    <div class="flex items-center gap-md">
+                        <div class="relative w-16 h-16 rounded-full border-[6px] border-primary-fixed flex items-center justify-center">
+                            <div class="absolute inset-0 rounded-full border-[6px] border-primary border-r-transparent border-b-transparent"></div>
+                            <span class="text-[10px] font-bold">M/F</span>
+                        </div>
+                        <div class="flex-grow text-xs">
+                            <div class="flex justify-between text-label-sm"><span>Male</span><span class="font-bold">58%</span></div>
+                            <div class="flex justify-between text-label-sm"><span>Female</span><span class="font-bold">42%</span></div>
+                        </div>
+                    </div>
+                    
+                    <!-- BMI Distribution -->
+                    <div>
+                        <span class="text-label-sm font-label-sm text-on-surface-variant">BMI Distribution</span>
+                        <div class="w-full bg-surface-container-highest h-2 rounded-full mt-xs overflow-hidden flex">
+                            <div class="h-full bg-green-500 w-[30%]"></div>
+                            <div class="h-full bg-yellow-400 w-[45%]"></div>
+                            <div class="h-full bg-red-500 w-[25%]"></div>
+                        </div>
+                        <div class="flex justify-between mt-xs text-[9px] text-on-surface-variant uppercase tracking-wider font-bold">
+                            <span>Normal</span>
+                            <span>Overweight</span>
+                            <span>Obese</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Center: Risk Factor Analysis (Bento-style charts) -->
+        <section class="col-span-12 lg:col-span-6 grid grid-cols-2 gap-gutter">
+            <div class="col-span-2 bg-surface-container-lowest p-sm rounded-xl shadow-sm border border-outline-variant/30 card-shadow min-h-[300px]">
+                <div class="flex justify-between items-center mb-md">
+                    <h3 class="text-label-md font-label-md text-primary">Risk Factor Correlation Heatmap</h3>
+                    <div class="text-[10px] bg-primary-fixed px-xs py-[2px] rounded uppercase font-bold text-primary">Multivariate Analysis</div>
+                </div>
+                
+                <!-- Scatter/Heatmap Visualization -->
+                <div class="relative h-48 bg-surface-light rounded-lg border border-outline-variant flex items-center justify-center overflow-hidden">
+                    <div class="absolute inset-0 grid grid-cols-8 grid-rows-6 opacity-20">
+                        <div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div>
+                        <div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div>
+                        <div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div>
+                    </div>
+                    <!-- Circles representing data points -->
+                    <div class="absolute w-4 h-4 bg-error rounded-full opacity-60 top-1/4 left-1/4 animate-pulse cursor-pointer hover:scale-110 transition-transform" onclick="alert('Marker details: High Hypertension & LDL Cluster (Cluster #1)')"></div>
+                    <div class="absolute w-3 h-3 bg-primary rounded-full opacity-40 top-1/2 left-2/3 cursor-pointer" onclick="alert('Marker details: Medium Risk Patient Group')"></div>
+                    <div class="absolute w-6 h-6 bg-secondary-container rounded-full opacity-70 bottom-1/3 left-1/2 cursor-pointer" onclick="alert('Marker details: Overweight & High Cholesterol Patient Cluster')"></div>
+                    <div class="absolute w-2 h-2 bg-status-stable rounded-full opacity-50 top-2/3 right-1/4 cursor-pointer" onclick="alert('Marker details: Stable Control Group')"></div>
+                    <span class="text-label-sm text-on-surface-variant italic select-none">Interactive Correlation Space: Age vs. LDL vs. BP</span>
+                </div>
+                
+                <div class="mt-md flex gap-gutter">
+                    <div class="flex-grow text-xs">
+                        <span class="text-label-sm font-label-sm text-on-surface-variant font-semibold">Top Risk Indicators</span>
+                        <div class="space-y-xs mt-xs">
+                            <div class="flex items-center gap-xs">
+                                <div class="w-2 h-2 rounded-full bg-error"></div>
+                                <span class="flex-grow">Hypertension</span>
+                                <span class="font-bold">42%</span>
+                            </div>
+                            <div class="flex items-center gap-xs">
+                                <div class="w-2 h-2 rounded-full bg-secondary-container"></div>
+                                <span class="flex-grow">Hyperlipidemia</span>
+                                <span class="font-bold">38%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="w-px bg-outline-variant"></div>
+                    <div class="flex-grow text-xs">
+                        <span class="text-label-sm font-label-sm text-on-surface-variant font-semibold">Lifestyle Impact</span>
+                        <div class="space-y-xs mt-xs">
+                            <div class="flex items-center gap-xs">
+                                <div class="w-2 h-2 rounded-full bg-primary"></div>
+                                <span class="flex-grow">Sedentary</span>
+                                <span class="font-bold">56%</span>
+                            </div>
+                            <div class="flex items-center gap-xs">
+                                <div class="w-2 h-2 rounded-full bg-primary-fixed-dim"></div>
+                                <span class="flex-grow">Smoking</span>
+                                <span class="font-bold">22%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right: Clinical Indicators -->
+        <section class="col-span-12 lg:col-span-3 space-y-gutter">
+            <div class="bg-surface-container-lowest p-sm rounded-xl shadow-sm border border-outline-variant card-shadow h-full flex flex-col justify-between">
+                <h3 class="text-label-md font-label-md text-primary mb-sm border-b border-outline-variant pb-xs">Clinical Indicators</h3>
+                <div class="space-y-md flex-grow flex flex-col justify-around">
+                    <!-- BP Distribution -->
+                    <div class="p-xs bg-surface-container rounded-lg">
+                        <div class="flex justify-between items-center mb-xs">
+                            <span class="text-label-sm font-label-sm font-bold">BP (Systolic)</span>
+                            <span class="text-[10px] text-error font-bold">↑ High</span>
+                        </div>
+                        <div class="flex items-end gap-[1px] h-12">
+                            <div class="bg-green-400 w-full h-[15%] rounded-t-sm"></div>
+                            <div class="bg-green-400 w-full h-[25%] rounded-t-sm"></div>
+                            <div class="bg-yellow-400 w-full h-[60%] rounded-t-sm"></div>
+                            <div class="bg-orange-400 w-full h-[80%] rounded-t-sm"></div>
+                            <div class="bg-error w-full h-[40%] rounded-t-sm"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Cholesterol Breakdown -->
+                    <div class="space-y-xs">
+                        <span class="text-label-sm font-label-sm text-on-surface-variant font-semibold">Cholesterol (mg/dL)</span>
+                        <div class="flex flex-col gap-base text-xs">
+                            <div class="flex justify-between text-[11px]"><span>Total</span><span class="font-bold">214 (avg)</span></div>
+                            <div class="w-full bg-outline-variant h-1 rounded-full"><div class="bg-primary w-[75%] h-full rounded-full"></div></div>
+                            <div class="flex justify-between text-[11px]"><span>LDL</span><span class="font-bold text-error">138 (avg)</span></div>
+                            <div class="w-full bg-outline-variant h-1 rounded-full"><div class="bg-secondary w-[85%] h-full rounded-full"></div></div>
+                            <div class="flex justify-between text-[11px]"><span>HDL</span><span class="font-bold text-green-600">42 (avg)</span></div>
+                            <div class="w-full bg-outline-variant h-1 rounded-full"><div class="bg-green-500 w-[40%] h-full rounded-full"></div></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Other metrics -->
+                    <div class="grid grid-cols-2 gap-sm pt-xs">
+                        <div class="text-center p-xs border border-outline-variant rounded-lg">
+                            <div class="text-[10px] text-on-surface-variant">Blood Sugar</div>
+                            <div class="text-label-md font-bold text-primary">102 <span class="text-[10px] font-normal">mg/dL</span></div>
+                        </div>
+                        <div class="text-center p-xs border border-outline-variant rounded-lg">
+                            <div class="text-[10px] text-on-surface-variant">Heart Rate</div>
+                            <div class="text-label-md font-bold text-primary">74 <span class="text-[10px] font-normal">bpm</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Bottom: Patient Specific & Trends -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter mb-xl">
+        <!-- Patient-Specific Deep Dive -->
+        <section class="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant card-shadow">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-md gap-sm">
+                <h3 class="text-headline-md font-headline-md text-primary">Patient Focus</h3>
+                
+                <!-- Patient Dropdown Selector -->
+                <div class="relative w-full sm:w-64">
+                    <span class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
+                    <select id="patientDeepSelect" class="w-full pl-9 pr-4 py-xs bg-slate-50 border border-outline-variant/30 rounded-lg text-xs font-bold focus:ring-2 focus:ring-primary" onchange="triggerDeepDive(this.value)">
+                        <option value="">Search by name/ID...</option>
+                        {% for patient in patients %}
+                        <option value="{{ patient.patient_id }}">{{ patient.last_name }}, {{ patient.first_name }} (#{{ patient.patient_id }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div id="patientDetailsArea">
+                <div class="flex items-start gap-md mb-md">
+                    <div class="w-20 h-20 rounded-xl overflow-hidden shadow-sm flex-shrink-0">
+                        <img id="patientPic" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8CwLQZxDmG5Di9GrLBVuMXbWNydICfij2zps_ggtpeJDn2tO8q2RYCEvUIXrAmjJx5UGws6DAQVeYfZJJvLywT8PjenawFMmqLEHxwH4EsBYh2fV99_ojN0kNBiCWlPo27jQEV8PDeRW1eYPP1I3KWi3migYFS4UhDpN_QKhBQUewXBWymPfUONx7xsmmxyC3zIuGhpxVozVw5YQfwRkuHPvJ8HkU-3f6O0N3lIk2hUAtqRf7Bht0h1PmLfi0nSOlncmayyv1Q2IP" alt="Patient ID Photo"/>
+                    </div>
+                    <div class="flex-grow">
+                        <div class="flex justify-between items-start">
+                            <h4 class="text-title-lg font-bold text-primary" id="patientName">Vikram Patel, 64</h4>
+                            <span class="bg-error-container text-on-error-container px-xs py-[2px] rounded text-label-sm font-bold" id="patientRisk">CRITICAL RISK</span>
+                        </div>
+                        <p class="text-label-sm text-on-surface-variant mt-1" id="patientSubText">ID: #CPA-4492 • BMI: 29.4 • Smoker: No</p>
+                        <div class="mt-xs flex gap-xs" id="patientBadges">
+                            <span class="bg-surface-container-high text-primary px-xs py-[1px] rounded text-[10px] font-bold">Hypertension</span>
+                            <span class="bg-surface-container-high text-primary px-xs py-[1px] rounded text-[10px] font-bold">T2 Diabetes</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Treatment Timeline -->
+                <div>
+                    <h5 class="text-label-md font-bold mb-xs text-primary">Treatment History</h5>
+                    <div class="relative border-l-2 border-primary-fixed-dim ml-2 pl-4 space-y-sm text-xs">
+                        <div class="relative">
+                            <div class="absolute -left-[21px] top-1 w-3 h-3 bg-primary rounded-full"></div>
+                            <p class="font-bold text-on-surface" id="timelineDate1">Oct 24, 2024</p>
+                            <p class="text-on-surface-variant" id="timelineDesc1">Stent placement - LAD artery. Success.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-[21px] top-1 w-3 h-3 bg-outline-variant rounded-full"></div>
+                            <p class="font-bold text-on-surface" id="timelineDate2">Sep 12, 2024</p>
+                            <p class="text-on-surface-variant" id="timelineDesc2">Baseline ECG: ST Segment elevation noted.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-md p-sm bg-primary-container text-on-primary-container rounded-lg">
+                    <p class="text-label-sm font-bold mb-xs flex items-center gap-xs">
+                        <span class="material-symbols-outlined text-[18px]">neurology</span> AI Recommendation
+                    </p>
+                    <p class="text-[12px] leading-relaxed" id="patientRecommendation">Initiate dual antiplatelet therapy. Schedule follow-up ECHO in 48 hours to monitor ejection fraction. Current EF: 45%.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trend Analysis & Forecast -->
+        <section class="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant card-shadow flex flex-col justify-between">
+            <div>
+                <div class="flex justify-between items-center mb-md">
+                    <h3 class="text-headline-md font-headline-md text-primary">Cohort Trends</h3>
+                    <div class="flex gap-xs text-[10px] font-bold">
+                        <button class="bg-surface-variant hover:bg-surface-container-high px-xs py-[2px] rounded" onclick="alert('Loading 12 Months trends...')">12M</button>
+                        <button class="bg-primary text-on-primary px-xs py-[2px] rounded">6M</button>
+                        <button class="bg-surface-variant hover:bg-surface-container-high px-xs py-[2px] rounded" onclick="alert('Loading 1 Month trends...')">1M</button>
+                    </div>
+                </div>
+                
+                <!-- Spline Line Chart -->
+                <div class="relative h-48 w-full">
+                    <svg class="w-full h-full overflow-visible" viewbox="0 0 400 150">
+                        <!-- Grid Lines -->
+                        <line stroke="#c6c5d2" stroke-width="0.5" x1="0" x2="400" y1="120" y2="120"></line>
+                        <line stroke="#c6c5d2" stroke-width="0.5" x1="0" x2="400" y1="80" y2="80"></line>
+                        <line stroke="#c6c5d2" stroke-width="0.5" x1="0" x2="400" y1="40" y2="40"></line>
+                        
+                        <!-- Area Fill -->
+                        <path d="M 0 100 Q 50 110, 100 80 T 200 60 T 300 40 T 400 30 L 400 120 L 0 120 Z" fill="rgba(26, 42, 108, 0.05)"></path>
+                        <!-- Main Trend Line (Success) -->
+                        <path class="chart-pulse" d="M 0 100 Q 50 110, 100 80 T 200 60 T 300 40 T 400 30" fill="none" stroke="#1a2a6c" stroke-width="2.5"></path>
+                        <!-- Predictive Forecast (Dashed) -->
+                        <path d="M 400 30 L 450 20" stroke="#c0392b" stroke-dasharray="4 2" stroke-width="2"></path>
+                        <!-- Data Points -->
+                        <circle cx="100" cy="80" fill="#1a2a6c" r="4"></circle>
+                        <circle cx="300" cy="40" fill="#1a2a6c" r="4"></circle>
+                    </svg>
+                    <div class="flex justify-between mt-sm text-[11px] text-on-surface-variant font-semibold">
+                        <span>MAY</span><span>JUN</span><span>JUL</span><span>AUG</span><span>SEP</span><span>OCT</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-lg grid grid-cols-2 gap-md text-xs">
+                <div class="p-xs bg-surface-container rounded-lg">
+                    <p class="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">Progression Index</p>
+                    <p class="text-title-lg font-bold text-green-600">-12.4% <span class="text-[10px] font-normal text-on-surface">vs LY</span></p>
+                </div>
+                <div class="p-xs bg-surface-container rounded-lg">
+                    <p class="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">Prevalence Rate</p>
+                    <p class="text-title-lg font-bold text-error">+4.2% <span class="text-[10px] font-normal text-on-surface">Forecasted</span></p>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="bg-surface-dim full-width py-md border-t border-outline-variant flex flex-col md:flex-row justify-between items-center w-full px-margin-desktop gap-md mt-auto text-xs">
+    <div class="flex items-center gap-md">
+        <span class="text-label-md font-label-md font-bold text-on-surface">CardioPulse Health Systems</span>
+        <span class="text-label-sm font-label-sm text-on-surface-variant">© 2024 Clinical Decision Support.</span>
+    </div>
+    <div class="flex gap-md flex-wrap justify-center font-semibold text-slate-500">
+        <a class="text-on-surface-variant hover:text-primary transition-colors text-label-sm font-label-sm" href="#">Medical Compliance</a>
+        <a class="text-on-surface-variant hover:text-primary transition-colors text-label-sm font-label-sm" href="#">Privacy Policy</a>
+        <a class="text-on-surface-variant hover:text-primary transition-colors text-label-sm font-label-sm" href="#">Technical Support</a>
+        <a class="text-on-surface-variant hover:text-primary transition-colors text-label-sm font-label-sm" href="#">EHR Integration</a>
+    </div>
+</footer>
+
+<script>
+    // Simple interactivity
+    document.querySelectorAll('button, a').forEach(el => {
+        el.addEventListener('click', (e) => {
+            if (el.getAttribute('href') === '#') e.preventDefault();
+            el.classList.add('opacity-80', 'duration-150');
+            setTimeout(() => el.classList.remove('opacity-80'), 150);
+        });
+    });
+    
+    // Refresh Animation
+    const refreshBtn = document.getElementById('refreshBtn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+            const icon = document.getElementById('refreshIcon');
+            icon.style.transition = 'transform 0.5s ease-in-out';
+            icon.style.transform = 'rotate(360deg)';
+            setTimeout(() => {
+                icon.style.transform = 'rotate(0deg)';
+                alert("Analytics database metrics refreshed.");
+            }, 500);
+        });
+    }
+
+    function triggerFilterChange() {
+        alert("Recalculating cohort thresholds for chosen timeline range.");
+    }
+
+    // Dynamic Deep Dive for Patients selection
+    function triggerDeepDive(patientId) {
+        if (!patientId) return;
+        
+        // Fetch details from select options
+        const select = document.getElementById('patientDeepSelect');
+        const text = select.options[select.selectedIndex].text;
+        const namePart = text.split(' (#')[0];
+        
+        document.getElementById('patientName').innerText = namePart + ", " + (patientId % 2 === 0 ? "62" : "58");
+        document.getElementById('patientSubText').innerText = `ID: #CPA-${patientId} • BMI: ${(24 + (patientId % 6)).toFixed(1)} • Smoker: ${patientId % 3 === 0 ? 'Yes' : 'No'}`;
+        
+        const risks = ['LOW RISK', 'MODERATE', 'CRITICAL RISK'];
+        const riskLabel = document.getElementById('patientRisk');
+        const riskType = risks[patientId % 3];
+        riskLabel.innerText = riskType;
+        riskLabel.className = 'px-xs py-[2px] rounded text-label-sm font-bold ';
+        if (riskType === 'LOW RISK') riskLabel.className += 'bg-green-100 text-green-700';
+        else if (riskType === 'MODERATE') riskLabel.className += 'bg-yellow-100 text-yellow-700';
+        else riskLabel.className += 'bg-error-container text-on-error-container';
+
+        // Toggle Timeline details
+        const dates1 = ['Oct 24, 2024', 'Sep 02, 2024', 'Aug 14, 2024'];
+        const descs1 = ['Medication dose adjusted (Lisinopril)', 'Follow-up clinical stress test successful', 'Initial consulting checkup logged'];
+        document.getElementById('timelineDate1').innerText = dates1[patientId % 3];
+        document.getElementById('timelineDesc1').innerText = descs1[patientId % 3];
+
+        const dates2 = ['Sep 12, 2024', 'Aug 10, 2024', 'Jul 05, 2024'];
+        const descs2 = ['Diagnostic consult and vitals mapping', 'Wearable syncing protocol registered', 'Initial ECG diagnostics run'];
+        document.getElementById('timelineDate2').innerText = dates2[patientId % 3];
+        document.getElementById('timelineDesc2').innerText = descs2[patientId % 3];
+
+        const recommendations = [
+            "Initiate dual antiplatelet therapy. Schedule follow-up ECHO in 48 hours to monitor ejection fraction. Current EF: 45%.",
+            "Adjust sodium targets to <1.5g daily. Log daily blood pressure readings inside health journal.",
+            "Schedule diagnostic cardiovascular rehab session. Review blood sugar metrics bi-weekly.",
+            "Maintain Metoprolol schema. Review stress threshold levels before next clinic checkup."
+        ];
+        document.getElementById('patientRecommendation').innerText = recommendations[patientId % 4];
+
+        // Randomize patient avatar images using placeholding array of headshots
+        const avatars = [
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuC8CwLQZxDmG5Di9GrLBVuMXbWNydICfij2zps_ggtpeJDn2tO8q2RYCEvUIXrAmjJx5UGws6DAQVeYfZJJvLywT8PjenawFMmqLEHxwH4EsBYh2fV99_ojN0kNBiCWlPo27jQEV8PDeRW1eYPP1I3KWi3migYFS4UhDpN_QKhBQUewXBWymPfUONx7xsmmxyC3zIuGhpxVozVw5YQfwRkuHPvJ8HkU-3f6O0N3lIk2hUAtqRf7Bht0h1PmLfi0nSOlncmayyv1Q2IP",
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuCJ0HX2ndchYn7PoSqlRG40R4LNRsVt1iQm-58DDSRx_mE6jPeP9qLUh6f01wmFRHkUium1A7AN9i7dmp6DqlTegPqlwvqELEIeZKeSgfYAPrFhjfEK2erMFBvkCJZuf3bxO_lVAt7V_MxYs0N7ty7cZ6VdYkXTTiR7Vnl8YuNDA_rxaeTd1cvoPV-hrqKkexLUjRfnxIZPAuhKHFypbZOvfBIR3DwkODX4c9Uabrc7duor0fYR-72p9kMB01vmsyYiodOAogvNEpxK",
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuBgn9yopAdFVM78SjjvXb2SXReqQrlzRcMC2ndintz2b2bxT0RL5P-bq4GFfs1HQkpHtyds4m5L_-o8NIiLgHuaFLogCxZp7GJS8q5xbE6A_l4kKAgqDDqXAkeKiHoWeLRRCArYSPMk4U79rbLPuRGnV1c1_887FktMvVkf8AN2AJQ4YXe_7yg8pY361z2O4gSS2labWMCl0KyxD2FTRRQo9WgkH3pvp2PWFBPp-y_dnvoXQR5GgTEH3hER24tV_s4oNxVmcbaRV0AX"
+        ];
+        document.getElementById('patientPic').src = avatars[patientId % 3];
+    }
+</script>
+</body>
+</html>

@@ -1,1133 +1,625 @@
-{% extends "base.html" %}
-{% block title %}Public Health Dashboard - CardioViz{% endblock %}
-{% block content %}
-<style>
-  /* Page Layout */
-  .dashboard-container {
-    display: grid;
-    grid-template-columns: 16rem 1fr;
-    min-height: calc(100vh - 70px);
-    background: #f8fafc;
-    transition: grid-template-columns 0.3s ease;
-  }
-  .dashboard-container.collapsed {
-    grid-template-columns: 4.8rem 1fr;
-  }
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Public Health Dashboard | Ramesh</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <!-- Tailwind Configuration -->
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "on-tertiary": "#ffffff",
+                "on-primary": "#ffffff",
+                "surface-muted": "#F1F5F9",
+                "tertiary": "#400000",
+                "on-error": "#ffffff",
+                "on-tertiary-container": "#fe6653",
+                "on-primary-container": "#8594dc",
+                "secondary-fixed": "#ffdad5",
+                "error-container": "#ffdad6",
+                "on-secondary-fixed": "#410000",
+                "on-surface": "#171b2b",
+                "status-stable": "#1a2a6c",
+                "secondary-fixed-dim": "#ffb4a9",
+                "surface-container": "#ebedff",
+                "on-secondary-fixed-variant": "#910807",
+                "surface-bright": "#faf8ff",
+                "secondary-container": "#fe5c4a",
+                "surface-container-low": "#f3f2ff",
+                "surface-dim": "#d6d9f0",
+                "surface-tint": "#4b5a9e",
+                "status-critical": "#E74C3C",
+                "error": "#ba1a1a",
+                "on-primary-fixed-variant": "#334284",
+                "on-error-container": "#93000a",
+                "surface-container-lowest": "#ffffff",
+                "on-background": "#171b2b",
+                "primary-fixed": "#dde1ff",
+                "primary-fixed-dim": "#b9c3ff",
+                "on-surface-variant": "#454650",
+                "background": "#faf8ff",
+                "secondary": "#b4271d",
+                "on-primary-fixed": "#001356",
+                "surface-container-high": "#e4e7fe",
+                "outline": "#767681",
+                "inverse-on-surface": "#efefff",
+                "surface-container-highest": "#dfe1f8",
+                "inverse-surface": "#2c3041",
+                "primary-container": "#1a2a6c",
+                "primary": "#001255",
+                "surface-light": "#F8FAFC",
+                "outline-variant": "#c6c5d2",
+                "inverse-primary": "#b9c3ff",
+                "surface": "#faf8ff",
+                "on-secondary-container": "#610001",
+                "tertiary-fixed": "#ffdad5",
+                "tertiary-fixed-dim": "#ffb4a9",
+                "tertiary-container": "#680001",
+                "on-tertiary-fixed": "#410000",
+                "gradient-vital": "linear-gradient(135deg, #1a2a6c 0%, #c0392b 100%)",
+                "surface-variant": "#dfe1f8",
+                "on-tertiary-fixed-variant": "#8e130c",
+                "on-secondary": "#ffffff"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "xl": "48px",
+                "md": "24px",
+                "margin-desktop": "40px",
+                "base": "4px",
+                "lg": "32px",
+                "margin-mobile": "16px",
+                "gutter": "24px",
+                "xs": "8px",
+                "sm": "16px"
+            },
+            "fontFamily": {
+                "body-lg": ["Inter"],
+                "label-md": ["Inter"],
+                "label-sm": ["Inter"],
+                "body-md": ["Inter"],
+                "headline-md": ["Inter"],
+                "data-mono": ["Inter"],
+                "title-lg": ["Inter"],
+                "headline-lg": ["Inter"]
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .clinical-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0px 2px 4px rgba(26, 42, 108, 0.05);
+            transition: all 0.3s ease;
+        }
+        .clinical-card:hover {
+            box-shadow: 0px 10px 20px rgba(26, 42, 108, 0.1);
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 24px;
+        }
+    </style>
+</head>
+<body class="bg-surface-light font-body-md text-on-surface">
 
-  /* Sidebar Navigation */
-  .sidebar {
-    background: white;
-    border-right: 1px solid #e2e8f0;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 1.5rem 1rem;
-    overflow-y: auto;
-    transition: padding 0.3s ease;
-  }
-  .dashboard-container.collapsed .sidebar {
-    padding: 1.5rem 0.5rem;
-    align-items: center;
-  }
-
-  .sidebar-brand-section {
-    transition: opacity 0.2s;
-  }
-  .dashboard-container.collapsed .sidebar-brand-section {
-    opacity: 0;
-    display: none;
-  }
-
-  .sidebar-menu {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-    margin-bottom: 2rem;
-  }
-  .sidebar-menu-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #64748b;
-    transition: all 0.2s ease;
-    border-left: 3px solid transparent;
-    text-decoration: none;
-  }
-  .sidebar-menu-item:hover {
-    background: #f1f5f9;
-    color: #1e293b;
-  }
-  .sidebar-menu-item.active {
-    background: #eff6ff;
-    color: #3b82f6;
-    border-left-color: #3b82f6;
-    border-radius: 0 8px 8px 0;
-  }
-  .sidebar-menu-item i {
-    width: 1.25rem;
-    height: 1.25rem;
-    flex-shrink: 0;
-  }
-  
-  .menu-text {
-    transition: opacity 0.2s;
-  }
-  .dashboard-container.collapsed .menu-text {
-    opacity: 0;
-    display: none;
-  }
-
-  /* Bottom Actions in Sidebar */
-  .sidebar-footer {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  .btn-quick-consult {
-    background: white;
-    border: 1.5px solid #3b82f6;
-    color: #3b82f6;
-    font-weight: 700;
-    font-size: 0.88rem;
-    padding: 0.75rem 1.25rem;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    width: 100%;
-    margin-bottom: 1.25rem;
-    transition: transform 0.15s, background-color 0.2s;
-    text-decoration: none;
-  }
-  .btn-quick-consult:hover {
-    background: #eff6ff;
-  }
-  .dashboard-container.collapsed .btn-quick-consult {
-    width: 2.8rem;
-    height: 2.8rem;
-    padding: 0;
-    border-radius: 50%;
-  }
-  .dashboard-container.collapsed .btn-quick-consult span {
-    display: none;
-  }
-
-  .sidebar-toggle-btn {
-    align-self: flex-end;
-    background: transparent;
-    border: 0;
-    color: #64748b;
-    cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 6px;
-    margin-bottom: 1rem;
-    transition: background 0.2s;
-  }
-  .sidebar-toggle-btn:hover {
-    background: #f1f5f9;
-    color: #1e293b;
-  }
-
-  /* Workspace Container */
-  .workspace {
-    padding: 2rem clamp(1rem, 4vw, 2.5rem);
-    overflow-y: auto;
-    max-width: 1400px;
-    margin: 0 auto;
-    width: 100%;
-  }
-
-  /* Filters Panel */
-  .filter-panel-card {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 1.25rem;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.005);
-  }
-  .filter-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr) auto;
-    gap: 1rem;
-    align-items: flex-end;
-  }
-  @media (max-width: 1024px) {
-    .filter-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-  @media (max-width: 600px) {
-    .filter-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .filter-item {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-  }
-  .filter-item label {
-    font-size: 0.68rem;
-    font-weight: 700;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  .dropdown-select {
-    background: white;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    padding: 0.5rem 0.75rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #1e293b;
-    outline: none;
-    cursor: pointer;
-  }
-
-  .toggle-button-group {
-    display: flex;
-    background: #f1f5f9;
-    border-radius: 8px;
-    padding: 2px;
-  }
-  .toggle-btn {
-    flex: 1;
-    border: 0;
-    background: transparent;
-    padding: 0.45rem 0.75rem;
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: #64748b;
-    cursor: pointer;
-    border-radius: 6px;
-  }
-  .toggle-btn.active {
-    background: white;
-    color: #1e293b;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  }
-
-  /* Date selector styling */
-  .date-picker-wrap {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    padding: 0.45rem 0.75rem;
-    background: white;
-  }
-
-  /* Toggle Switch */
-  .switch-container {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.45rem;
-  }
-  .switch {
-    position: relative;
-    display: inline-block;
-    width: 2.4rem;
-    height: 1.3rem;
-  }
-  .switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-  .slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #cbd5e1;
-    transition: .3s;
-    border-radius: 34px;
-  }
-  .slider:before {
-    position: absolute;
-    content: "";
-    height: 0.95rem;
-    width: 0.95rem;
-    left: 3px;
-    bottom: 3px;
-    background-color: white;
-    transition: .3s;
-    border-radius: 50%;
-  }
-  input:checked + .slider {
-    background-color: #3b82f6;
-  }
-  input:checked + .slider:before {
-    transform: translateX(1.1rem);
-  }
-
-  /* Dashboard Cards */
-  .dash-card {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.005);
-  }
-  .dash-card h3 {
-    font-size: 1.05rem;
-    font-weight: 800;
-    color: #1e293b;
-    margin: 0 0 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  /* KPI cards left stack */
-  .kpi-vertical-stack {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-  .kpi-card-ph {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 1.1rem 1.25rem;
-    min-height: 5.5rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    position: relative;
-  }
-  .kpi-card-ph.accent-blue { border-left: 4px solid #3b82f6; }
-  .kpi-card-ph.accent-red { border-left: 4px solid #ef4444; }
-  .kpi-card-ph.accent-purple { border-left: 4px solid #a855f7; }
-  .kpi-card-ph.accent-cyan { border-left: 4px solid #06b6d4; }
-
-  .kpi-title-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .kpi-label {
-    font-size: 0.65rem;
-    font-weight: 700;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  .kpi-val {
-    font-size: 1.8rem;
-    font-weight: 800;
-    color: #1e293b;
-    line-height: 1.1;
-    margin-top: 0.15rem;
-  }
-  .kpi-badge {
-    font-size: 0.65rem;
-    font-weight: 700;
-    padding: 0.15rem 0.45rem;
-    border-radius: 99px;
-  }
-  .kpi-badge.red { background: #fef2f2; color: #ef4444; }
-  .kpi-badge.green { background: #ecfdf5; color: #10b981; }
-
-  /* Map Visual Layer overlays */
-  .map-overlay-container {
-    position: relative;
-    border-radius: 12px;
-    overflow: hidden;
-    background: #f1f5f9;
-  }
-  .map-control-overlay {
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-  }
-  .map-control-btn {
-    width: 2.2rem;
-    height: 2.2rem;
-    border-radius: 6px;
-    border: 1px solid #cbd5e1;
-    background: white;
-    cursor: pointer;
-    display: grid;
-    place-items: center;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-  }
-  .map-tabs {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    display: flex;
-    background: white;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    padding: 2px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-  }
-  .map-tab-btn {
-    border: 0;
-    background: transparent;
-    padding: 0.35rem 0.75rem;
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: #64748b;
-    cursor: pointer;
-    border-radius: 6px;
-  }
-  .map-tab-btn.active {
-    background: #eff6ff;
-    color: #3b82f6;
-  }
-
-  /* Health risk color legends */
-  .map-legend {
-    display: flex;
-    gap: 1rem;
-    font-size: 0.7rem;
-    font-weight: 700;
-  }
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-  }
-  .legend-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-  }
-
-  /* Comparison progress bars */
-  .comparison-progress-wrap {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-  .comparison-row {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-  .comparison-labels {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.78rem;
-    font-weight: 750;
-    color: #475569;
-  }
-  .comparison-bar-track {
-    height: 10px;
-    background: #f1f5f9;
-    border-radius: 99px;
-    overflow: hidden;
-  }
-  .comparison-bar-fill {
-    height: 100%;
-    border-radius: 99px;
-  }
-
-  /* Policy Impact elements */
-  .parameter-slider-wrap {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-  .slider-item {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-  }
-  .slider-item-header {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.78rem;
-    font-weight: 700;
-    color: #475569;
-  }
-  .btn-run-simulation {
-    background: #1e3a8a;
-    color: white;
-    border: 0;
-    border-radius: 8px;
-    padding: 0.65rem;
-    font-size: 0.85rem;
-    font-weight: 700;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-  }
-
-  /* Resource Gap tables */
-  .gap-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.82rem;
-  }
-  .gap-table th {
-    text-align: left;
-    padding: 0.5rem 0.75rem;
-    color: #64748b;
-    border-bottom: 1px solid #e2e8f0;
-    font-weight: 700;
-  }
-  .gap-table td {
-    padding: 0.65rem 0.75rem;
-    border-bottom: 1px solid #f1f5f9;
-    font-weight: 600;
-    color: #334155;
-  }
-
-  /* Reporting panel links */
-  .reporting-action-card {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 0.75rem 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    cursor: pointer;
-    transition: background 0.2s;
-    text-decoration: none;
-    color: #334155;
-    margin-bottom: 0.5rem;
-  }
-  .reporting-action-card:hover {
-    background: #f1f5f9;
-  }
-  .reporting-action-icon-wrap {
-    width: 2.2rem;
-    height: 2.2rem;
-    border-radius: 8px;
-    background: white;
-    border: 1px solid #cbd5e1;
-    display: grid;
-    place-items: center;
-    color: #3b82f6;
-  }
-  
-  .floating-zoom-btn {
-    position: absolute;
-    right: 1rem;
-    bottom: 1rem;
-    width: 2.8rem;
-    height: 2.8rem;
-    border-radius: 50%;
-    background: black;
-    color: white;
-    border: 0;
-    cursor: pointer;
-    display: grid;
-    place-items: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    transition: transform 0.2s;
-  }
-  .floating-zoom-btn:hover {
-    transform: scale(1.08);
-  }
-</style>
-
-<div class="dashboard-container" id="dashboard-container">
-  <!-- Sidebar Navigation -->
-  <aside class="sidebar">
-    <div>
-      <button class="sidebar-toggle-btn" id="sidebar-toggle">
-        <i data-lucide="chevrons-left" id="toggle-icon"></i>
-      </button>
-
-      <div class="sidebar-brand-section" style="padding-left: 1rem; margin-bottom: 1.5rem; margin-top: 0.5rem;">
-        <span style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.5px;">HealthAdmin</span>
-        <span style="font-size: 1.25rem; font-weight: 800; color: #1e293b; display: block; font-family: Poppins, sans-serif; margin-top: 0.15rem;">CLINICAL INTELIGENCE</span>
-      </div>
-
-      <nav class="sidebar-menu">
-        <a href="{{ url_for('dashboard.home') }}" class="sidebar-menu-item">
-          <i data-lucide="layout-grid"></i>
-          <span class="menu-text">Dashboard Overview</span>
-        </a>
-        <a href="{{ url_for('public_health.public_health_dashboard') }}" class="sidebar-menu-item active">
-          <i data-lucide="map"></i>
-          <span class="menu-text">Regional Health Map</span>
-        </a>
-        <a href="{{ url_for('public_health.visualizations_dashboard') }}" class="sidebar-menu-item">
-          <i data-lucide="trending-up"></i>
-          <span class="menu-text">Population Trends</span>
-        </a>
-        <a href="#" class="sidebar-menu-item">
-          <i data-lucide="shield-alert"></i>
-          <span class="menu-text">Policy Analysis</span>
-        </a>
-        <a href="#" class="sidebar-menu-item">
-          <i data-lucide="wallet"></i>
-          <span class="menu-text">Resource Planning</span>
-        </a>
-        <a href="#" class="sidebar-menu-item">
-          <i data-lucide="book-open"></i>
-          <span class="menu-text">Reports</span>
-        </a>
-      </nav>
+<!-- TopAppBar -->
+<header class="bg-surface-container-highest dark:bg-inverse-surface flex justify-between items-center px-margin-desktop w-full h-16 z-50 docked full-width top-0 sticky border-b border-outline-variant dark:border-outline shadow-md">
+    <div class="flex items-center gap-md">
+        <a href="{{ url_for('dashboard.home') }}" class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed tracking-tight">Public Health Dashboard</a>
+        <div class="h-6 w-px bg-outline-variant"></div>
+        <div class="flex gap-sm">
+            <select class="bg-transparent border-none font-label-md text-label-md text-on-surface-variant focus:ring-0 cursor-pointer" onchange="alert('Morbidity views shifted for chosen Zone.')">
+                <option>South India</option>
+                <option>North India</option>
+                <option>East India</option>
+                <option>West India</option>
+            </select>
+            <div class="flex bg-surface-container-low rounded-full p-1 border border-outline-variant text-[11px] font-bold">
+                <button class="px-3 py-1 rounded-full bg-primary text-white" id="urbanBtn" onclick="toggleUrb(true)">Urban</button>
+                <button class="px-3 py-1 text-on-surface-variant rounded-full" id="ruralBtn" onclick="toggleUrb(false)">Rural</button>
+            </div>
+        </div>
     </div>
-
-    <div class="sidebar-footer">
-      <a href="#" class="sidebar-menu-item" style="margin: 0;"><i data-lucide="settings"></i> <span class="menu-text">Settings</span></a>
-      <a href="#" class="sidebar-menu-item" style="margin: 0;"><i data-lucide="help-circle"></i> <span class="menu-text">Support</span></a>
-    </div>
-  </aside>
-
-  <!-- Workspace content -->
-  <main class="workspace">
     
-    <!-- 1. Header Section -->
-    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.75rem; margin-bottom: 1.5rem;">
-      <h2 style="font-size: 1.45rem; font-weight: 800; color: #1e293b; margin: 0;">Public Health Dashboard - {{ session.user.name }}</h2>
-      <div style="display: flex; align-items: center; gap: 1.5rem; font-size: 0.88rem; font-weight: 700;">
-        <a href="{{ url_for('public_health.public_health_dashboard') }}" style="color: #1e293b; text-decoration: none; border-bottom: 2px solid #1e293b; padding-bottom: 0.25rem;">Regional Health Map</a>
-        <a href="#" style="color: #64748b; text-decoration: none;">Reports</a>
-      </div>
+    <nav class="hidden md:flex gap-lg">
+        <a class="font-title-lg text-title-lg cursor-pointer active:opacity-80 transition-colors text-primary dark:text-primary-fixed-dim border-b-2 border-primary dark:border-primary-fixed-dim pb-1" href="#">Regional</a>
+        <a class="font-title-lg text-title-lg cursor-pointer active:opacity-80 transition-colors text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-variant/10" href="#" onclick="alert('Switching to Temporal projections timeline...');">Temporal</a>
+        <a class="font-title-lg text-title-lg cursor-pointer active:opacity-80 transition-colors text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-variant/10" href="#" onclick="alert('Loading cohort comparisons...');">Comparison</a>
+        <a class="font-title-lg text-title-lg cursor-pointer active:opacity-80 transition-colors text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-variant/10" href="{{ url_for('dashboard.clinical_analytics_page') }}">Analytics</a>
+    </nav>
+    
+    <div class="flex items-center gap-md">
+        <span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container-low p-2 rounded-full" onclick="alert('Resetting active filters...');">filter_list</span>
+        <a href="{{ url_for('dashboard.notifications_components_page') }}" class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container-low p-2 rounded-full">notifications</a>
+        <div class="flex items-center gap-sm cursor-pointer hover:bg-surface-container-low p-1 rounded-full pr-3" onclick="alert('User: Ramesh (National Administrator)')">
+            <span class="material-symbols-outlined text-primary text-[32px]">account_circle</span>
+            <span class="font-label-md text-label-md">Ramesh</span>
+        </div>
     </div>
+</header>
 
-    <!-- Filters Panel -->
-    <div class="filter-panel-card">
-      <div class="filter-grid">
-        <div class="filter-item">
-          <label>Region Selector</label>
-          <select class="dropdown-select" id="region-filter">
-            <option value="all">All Zones (National)</option>
-            <option value="north">North</option>
-            <option value="south">South</option>
-            <option value="east">East</option>
-            <option value="west">West</option>
-            <option value="central">Central</option>
-          </select>
-        </div>
-
-        <div class="filter-item">
-          <label>Settlement Type</label>
-          <div class="toggle-button-group">
-            <button class="toggle-btn active" id="btn-settle-urban" onclick="toggleSettlement('urban')">Urban</button>
-            <button class="toggle-btn" id="btn-settle-rural" onclick="toggleSettlement('rural')">Rural</button>
-          </div>
-        </div>
-
-        <div class="filter-item">
-          <label>Time Period</label>
-          <div class="date-picker-wrap">
-            <i data-lucide="calendar" style="width: 1rem; height: 1rem; color: #64748b;"></i>
-            <span style="font-size: 0.85rem; font-weight: 600; color: #1e293b; cursor: pointer;">Jan 2023 - Dec 2023</span>
-          </div>
-        </div>
-
-        <div class="filter-item">
-          <div class="switch-container">
-            <label class="switch">
-              <input type="checkbox" id="policy-impact-switch" checked>
-              <span class="slider"></span>
-            </label>
-            <span style="font-size: 0.82rem; font-weight: 800; color: #475569;">Policy Impact Toggle</span>
-          </div>
-        </div>
-
-        <button class="btn-solid-dark" style="padding: 0.55rem 1.25rem; font-size: 0.85rem;" onclick="alert('Applying selected filters to public health datasets...')">Apply Filters</button>
-      </div>
-    </div>
-
-    <!-- Layout Grid 1: KPIs and Map -->
-    <div style="display: grid; grid-template-columns: 1fr 2.3fr; gap: 1.5rem; margin-bottom: 1.5rem;">
-      
-      <!-- Left Stack: 4 KPI Cards -->
-      <div class="kpi-vertical-stack">
-        <!-- KPI 1: Prevalence Rate -->
-        <div class="kpi-card-ph accent-blue">
-          <div class="kpi-title-row">
-            <span class="kpi-label">Prevalence Rate</span>
-            <span class="kpi-badge red">+1.2% from LY</span>
-          </div>
-          <span class="kpi-val">{{ totals.avg_risk if totals else '14.2' }}%</span>
-        </div>
-
-        <!-- KPI 2: Total Affected -->
-        <div class="kpi-card-ph accent-cyan">
-          <div class="kpi-title-row">
-            <span class="kpi-label">Total Affected</span>
-            <span class="kpi-badge green" style="background:#e0f2fe; color:#0369a1;">Aggregated</span>
-          </div>
-          <span class="kpi-val">3.4M</span>
-        </div>
-
-        <!-- KPI 3: Mortality Rate -->
-        <div class="kpi-card-ph accent-red">
-          <div class="kpi-title-row">
-            <span class="kpi-label">Mortality Rate</span>
-            <span class="kpi-badge green">-0.4% Improvement</span>
-          </div>
-          <span class="kpi-val">2.81%</span>
-        </div>
-
-        <!-- KPI 4: Healthcare Access -->
-        <div class="kpi-card-ph accent-purple">
-          <span class="kpi-label">Healthcare Access</span>
-          <div>
-            <span class="kpi-val" style="font-size:1.6rem;">68/100</span>
-            <div class="kpi-progress" style="background:#ddd6fe;"><div class="kpi-progress-bar" style="width:68%; background:#8b5cf6;"></div></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Right: India map distribution -->
-      <div class="dash-card" style="margin-bottom: 0; display: flex; flex-direction: column;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
-          <h3 style="margin:0; font-size: 1.05rem; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 0.5rem;">
-            <i data-lucide="compass" style="color: #3b82f6;"></i> Health Risk Geographic Distribution
-          </h3>
-          
-          <div class="map-legend">
-            <div class="legend-item"><span class="legend-dot" style="background: #ef4444;"></span> High Risk</div>
-            <div class="legend-item"><span class="legend-dot" style="background: #f59e0b;"></span> Moderate</div>
-            <div class="legend-item"><span class="legend-dot" style="background: #eab308;"></span> Low</div>
-            <div class="legend-item"><span class="legend-dot" style="background: #10b981;"></span> Optimum</div>
-          </div>
-        </div>
-
-        <div class="map-overlay-container" style="flex: 1;">
-          <img src="{{ url_for('static', filename='images/india_health_map.png') }}" style="width: 100%; height: auto; display: block;" alt="India health prevalence map">
-          
-          <div class="map-control-overlay">
-            <button class="map-control-btn" onclick="alert('Zooming in map layers...')">+</button>
-            <button class="map-control-btn" onclick="alert('Zooming out map layers...')">-</button>
-          </div>
-
-          <div class="map-tabs">
-            <button class="map-tab-btn active">Facilities Map</button>
-          </div>
-
-          <button style="position: absolute; top: 1rem; left: 4rem; background: white; border: 1px solid #cbd5e1; padding: 0.4rem 0.75rem; border-radius: 6px; font-size: 0.72rem; font-weight: 800; color:#334155; cursor:pointer;" onclick="alert('Density heatmap overlay enabled')">Density Overlay</button>
-
-          <!-- Focus district details overlay -->
-          <div style="position: absolute; bottom: 1rem; right: 1rem; background: rgba(255,255,255,0.95); border:1px solid #cbd5e1; border-radius: 8px; padding: 0.65rem 0.85rem; width: 14rem; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
-            <span style="font-size:0.62rem; font-weight:800; color:#64748b; letter-spacing:0.5px; text-transform:uppercase;">DISTRICT FOCUS</span>
-            <h4 style="margin: 0.15rem 0 0.35rem; font-size:0.9rem; font-weight:800; color:#1e293b;">Tumkur, Karnataka</h4>
-            <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-weight:600; margin-bottom:0.2rem;">
-              <span>Prevalence:</span>
-              <strong style="color:#ef4444;">18.4%</strong>
+<div class="flex min-h-[calc(100vh-64px)]">
+    <!-- SideNavBar -->
+    <aside class="hidden lg:flex flex-col h-[calc(100vh-64px)] p-sm bg-surface-container-low dark:bg-surface-dim border-r border-outline-variant w-64 fixed left-0 top-16 transition-all z-40">
+        <div class="flex flex-col gap-xs mb-lg">
+            <div class="p-3 bg-primary text-white rounded-xl flex items-center justify-between cursor-pointer shadow-md hover:opacity-90 active:scale-95 transition-all" onclick="alert('Loading Policy Assessment Wizard...')">
+                <span class="font-label-md text-label-md font-bold">New Analysis</span>
+                <span class="material-symbols-outlined">add</span>
             </div>
-            <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-weight:600;">
-              <span>Beds/1k:</span>
-              <strong>1.2</strong>
-            </div>
-          </div>
         </div>
-      </div>
-
-    </div>
-
-    <!-- Layout Grid 2: Urban vs Rural and Socioeconomic -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
-      <!-- Left Panel: Urban vs Rural progress bars -->
-      <div class="dash-card" style="margin-bottom: 0;">
-        <h3><i data-lucide="bar-chart-3" style="color: #3b82f6; width:1.2rem; height:1.2rem;"></i> Urban vs Rural Health Risk Matrix</h3>
         
-        <div class="comparison-progress-wrap" style="margin-top: 1rem;">
-          <div class="comparison-row">
-            <div class="comparison-labels">
-              <span>DIABETES PREVALENCE</span>
-              <span style="color: #1e3a8a;">URBAN (High)</span>
+        <nav class="flex flex-col gap-1 flex-1 text-sm font-semibold">
+            <a class="flex items-center gap-md px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg cursor-pointer transition-colors" href="{{ url_for('clinical.clinical_dashboard') }}">
+                <span class="material-symbols-outlined">clinical_notes</span>
+                <span class="font-label-md text-label-md">Clinical Views</span>
+            </a>
+            <div class="flex items-center gap-md px-4 py-3 bg-primary-container text-on-primary-container rounded-lg font-bold scale-98 cursor-pointer">
+                <span class="material-symbols-outlined">policy</span>
+                <span class="font-label-md text-label-md">Policy Impact</span>
             </div>
-            <div class="comparison-bar-track">
-              <div class="comparison-bar-fill" style="width: 72%; background: #3b82f6;"></div>
-            </div>
-            <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:#64748b; font-weight:700; margin-top:1px;">
-              <span>72% Urban</span>
-              <span>48% Rural</span>
-            </div>
-          </div>
-
-          <div class="comparison-row" style="margin-top: 0.5rem;">
-            <div class="comparison-labels">
-              <span>HEALTHCARE ACCESS INDEX</span>
-              <span style="color: #06b6d4;">RURAL (Gap)</span>
-            </div>
-            <div class="comparison-bar-track">
-              <div class="comparison-bar-fill" style="width: 88%; background: #06b6d4;"></div>
-            </div>
-            <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:#64748b; font-weight:700; margin-top:1px;">
-              <span>88% Urban</span>
-              <span>32% Rural</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Right Panel: Socioeconomic correlation scatter plot -->
-      <div class="dash-card" style="margin-bottom: 0;">
-        <h3><i data-lucide="bubble-chart" style="color: #a855f7; width:1.2rem; height:1.2rem;"></i> Socioeconomic Correlation (Income vs Rate)</h3>
-        <div style="height: 10rem; width: 100%; position: relative;">
-          <canvas id="socioeconomicScatterChart"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <!-- Layout Grid 3: Policy Impact and Resource Allocation -->
-    <div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
-      <!-- Left: Policy simulation builder -->
-      <div class="dash-card" style="margin-bottom: 0;">
-        <h3><i data-lucide="sliders" style="color: #3b82f6;"></i> Policy Impact Simulation Builder</h3>
+            <a class="flex items-center gap-md px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg cursor-pointer transition-colors" href="{{ url_for('dashboard.clinical_analytics_page') }}">
+                <span class="material-symbols-outlined">analytics</span>
+                <span class="font-label-md text-label-md">Resource Allocation</span>
+            </a>
+            <a class="flex items-center gap-md px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg cursor-pointer transition-colors" href="{{ url_for('dashboard.heart_disease_story') }}">
+                <span class="material-symbols-outlined">groups</span>
+                <span class="font-label-md text-label-md">Population Analytics</span>
+            </a>
+        </nav>
         
-        <div style="display: grid; grid-template-columns: 1fr 1.6fr; gap: 1.5rem; align-items: center; margin-top: 1rem;">
-          <!-- Left Sliders block -->
-          <div class="parameter-slider-wrap">
-            <div class="slider-item">
-              <div class="slider-item-header">
-                <span>Intervention Intensity</span>
-                <span id="intensity-val">65%</span>
-              </div>
-              <input type="range" min="10" max="100" value="65" style="width: 100%; cursor: pointer;" oninput="document.getElementById('intensity-val').textContent = this.value + '%'; updateSimulationChart(this.value, document.getElementById('budget-slider').value)">
-            </div>
+        <div class="border-t border-outline-variant pt-md mt-auto text-sm font-semibold">
+            <a class="flex items-center gap-md px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all duration-200 cursor-pointer" href="{{ url_for('dashboard.settings_page') }}">
+                <span class="material-symbols-outlined">settings</span>
+                <span class="font-label-md text-label-md">Settings</span>
+            </a>
+            <a class="flex items-center gap-md px-4 py-3 text-on-surface-variant hover:bg-surface-container-high transition-all duration-200 cursor-pointer" href="#" onclick="alert('Connecting support desk...')">
+                <span class="material-symbols-outlined">help</span>
+                <span class="font-label-md text-label-md">Support</span>
+            </a>
+        </div>
+    </aside>
 
-            <div class="slider-item">
-              <div class="slider-item-header">
-                <span>Budget Allocation</span>
-                <span id="budget-val">₹420Cr</span>
-              </div>
-              <input type="range" min="50" max="800" value="420" id="budget-slider" style="width: 100%; cursor: pointer;" oninput="document.getElementById('budget-val').textContent = '₹' + this.value + 'Cr'; updateSimulationChart(document.getElementById('intensity-val').textContent, this.value)">
-            </div>
-
-            <button class="btn-run-simulation" onclick="alert('Running ML prediction modules...')">Run Prediction</button>
-          </div>
-
-          <!-- Right outcome chart -->
-          <div style="background:#f8fafc; border: 1px solid #cbd5e1; border-radius: 12px; padding: 1rem; position: relative;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
-              <span style="font-size:0.65rem; font-weight:800; color:#1e3a8a; text-transform:uppercase;">PREDICTED OUTCOME (5yr)</span>
-              <span style="font-size:0.65rem; font-weight:800; color:#10b981; background:#ecfdf5; padding:0.1rem 0.35rem; border-radius:4px;">Confidence: 94%</span>
+    <!-- Main Content Area -->
+    <main class="flex-1 ml-0 lg:ml-64 p-margin-desktop bg-surface-light">
+        <!-- Summary Row -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-md mb-lg">
+            <div class="clinical-card border-l-4 border-status-critical">
+                <div class="flex justify-between items-start mb-sm">
+                    <span class="font-label-md text-label-md text-on-surface-variant font-bold">Prevalence Rate</span>
+                    <span class="material-symbols-outlined text-status-critical">trending_up</span>
+                </div>
+                <div class="flex items-end gap-xs">
+                    <span class="font-headline-lg text-headline-lg text-primary" id="kpiPrevalence">{{ stats.prevalence }}%</span>
+                    <span class="text-status-critical font-label-sm text-label-sm pb-1 font-bold">+2.1% YoY</span>
+                </div>
+                <div class="mt-md w-full bg-surface-muted h-1 rounded-full">
+                    <div class="bg-status-critical h-full rounded-full" style="width: 75%"></div>
+                </div>
             </div>
             
-            <div style="height: 7rem; position: relative;">
-              <canvas id="simulationOutcomeChart"></canvas>
+            <div class="clinical-card border-l-4 border-primary">
+                <div class="flex justify-between items-start mb-sm">
+                    <span class="font-label-md text-label-md text-on-surface-variant font-bold">Mortality Trend</span>
+                    <span class="material-symbols-outlined text-primary">analytics</span>
+                </div>
+                <div class="flex items-end gap-xs">
+                    <span class="font-headline-lg text-headline-lg text-primary">4.2</span>
+                    <span class="text-primary font-label-sm text-label-sm pb-1 font-bold">per 1k pop</span>
+                </div>
+                <div class="mt-md w-full bg-surface-muted h-1 rounded-full">
+                    <div class="bg-primary h-full rounded-full" style="width: 40%"></div>
+                </div>
             </div>
-            <!-- Expected reduction indicator tag -->
-            <div style="position: absolute; right: 1rem; top: 2.2rem; text-align: right;">
-              <span style="font-size:0.65rem; font-weight:700; color:#64748b; display:block;">Expected Reduction</span>
-              <strong style="font-size: 1.15rem; color:#10b981;" id="sim-reduction-val">-22.4%</strong>
+            
+            <div class="clinical-card border-l-4 border-status-stable">
+                <div class="flex justify-between items-start mb-sm">
+                    <span class="font-label-md text-label-md text-on-surface-variant font-bold">Healthcare Access Index</span>
+                    <span class="material-symbols-outlined text-status-stable">medical_services</span>
+                </div>
+                <div class="flex items-end gap-xs">
+                    <span class="font-headline-lg text-headline-lg text-primary">0.82</span>
+                    <span class="text-status-stable font-label-sm text-label-sm pb-1 font-bold">High Accuracy</span>
+                </div>
+                <div class="mt-md w-full bg-surface-muted h-1 rounded-full">
+                    <div class="bg-status-stable h-full rounded-full" style="width: 82%"></div>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
 
-      <!-- Right: Resource gap analysis table -->
-      <div class="dash-card" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: space-between;">
-        <h3>Resource Gap Analysis</h3>
-        
-        <table class="gap-table">
-          <thead>
-            <tr>
-              <th>RESOURCE</th>
-              <th>CURRENT</th>
-              <th>RECOMMENDED</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Beds/1k</td>
-              <td>1.4</td>
-              <td style="color:#ef4444;">3.0</td>
-            </tr>
-            <tr>
-              <td>Doctors/1k</td>
-              <td>0.8</td>
-              <td style="color:#ef4444;">1.5</td>
-            </tr>
-            <tr>
-              <td>Dialysis Units</td>
-              <td>42</td>
-              <td style="color:#f59e0b;">120</td>
-            </tr>
-            <tr>
-              <td>Mobile Clinics</td>
-              <td>14</td>
-              <td style="color:#f59e0b;">35</td>
-            </tr>
-            <tr>
-              <td>Lab Techs</td>
-              <td>220</td>
-              <td style="color:#10b981;">250</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <button class="btn-outline-brand" style="width:100%; font-size:0.78rem; padding:0.5rem; margin-top:0.75rem;" onclick="alert('Loading comprehensive resource allocation index charts...')">View Allocation Details</button>
-      </div>
-    </div>
-
-    <!-- Layout Grid 4: Projection Trends & Stakeholder Reporting -->
-    <div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 1.5rem;">
-      
-      <!-- Left: 5-Year Prevalence line chart -->
-      <div class="dash-card" style="margin-bottom: 0;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-          <h3>5-Year Prevalence & Projection Trends</h3>
-          <div class="map-legend">
-            <div class="legend-item"><span class="legend-dot" style="background:#3b82f6;"></span> Actual</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#94a3b8; border-radius: 0; width: 8px; height: 2px;"></span> Projected</div>
-          </div>
-        </div>
-        <div style="height: 12rem; position: relative;">
-          <canvas id="prevalenceTrendsChart"></canvas>
-        </div>
-      </div>
-
-      <!-- Right: Reporting links -->
-      <div class="dash-card" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
-        <div>
-          <h3><i data-lucide="book-open" style="color: #a855f7;"></i> Reporting</h3>
-          <p style="margin: 0 0 1rem; font-size: 0.78rem; color: #64748b; line-height: 1.4;">
-            Generate and schedule administrative insights for health board stakeholders.
-          </p>
-
-          <a href="#" class="reporting-action-card" onclick="alert('Opening Custom Report builder studio...')">
-            <div class="reporting-action-icon-wrap"><i data-lucide="layout-grid" style="width:1.15rem; height:1.15rem;"></i></div>
-            <div>
-              <h5 style="margin: 0; font-size: 0.8rem; font-weight: 750; color: #1e293b;">Custom Report</h5>
-              <small style="font-size:0.7rem; color:#64748b;">Builder Studio</small>
+        <!-- Bento Layout Content -->
+        <div class="bento-grid">
+            <!-- Large Interactive Map -->
+            <div class="col-span-12 lg:col-span-8 clinical-card h-[600px] flex flex-col relative overflow-hidden p-0">
+                <div class="p-md flex justify-between items-center bg-white/80 backdrop-blur absolute top-0 left-0 right-0 z-10 border-b border-outline-variant/30">
+                    <h3 class="font-headline-md text-headline-md text-primary">Regional Disease Prevalence</h3>
+                    <div class="flex gap-sm items-center font-bold text-xs">
+                        <div class="flex items-center gap-xs">
+                            <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                            <span class="text-label-sm font-label-sm">&gt;15%</span>
+                        </div>
+                        <div class="flex items-center gap-xs">
+                            <span class="w-3 h-3 rounded-full bg-orange-500"></span>
+                            <span class="text-label-sm font-label-sm">8-15%</span>
+                        </div>
+                        <div class="flex items-center gap-xs">
+                            <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                            <span class="text-label-sm font-label-sm">3-8%</span>
+                        </div>
+                        <div class="flex items-center gap-xs">
+                            <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                            <span class="text-label-sm font-label-sm">&lt;3%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Map Layer -->
+                <div class="flex-1 bg-surface-muted relative cursor-crosshair">
+                    <div class="absolute inset-0 w-full h-full opacity-60 mix-blend-multiply" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuByeO3YKTo9r4YxFyFfqfp2IS941MXsEKz661bDVCz1IH60kIZ3fI4ZxgC--Pku7T6e3gBCJoUYDFBbB0KOLlqk58p103m1Npu7fIjpw0rbaDh9YSbzrrZw_tvc9B5R33iKKoPjHsKqYMKkV18NzuPPI5ypvau5dxyzBm9Q-hu0zgzkaUkWAyQINsxlOIVJ4w6KBM774DSQg33sfNzEjnMElsb5w0vf7BGnIRLEvFYWrAzHbYfuH5x50zQWrSodIap9YybTCISFcRQ'); background-size: cover; background-position: center;">
+                    </div>
+                    <!-- Overlay Markers -->
+                    <div class="absolute top-1/2 left-1/3 w-4 h-4 bg-red-500 rounded-full animate-ping"></div>
+                    <div class="absolute top-1/2 left-1/3 w-4 h-4 bg-red-600 rounded-full border-2 border-white shadow-lg cursor-pointer" onclick="alert('Region Hyderabad: 12.4% Prevalence')"></div>
+                    <div class="absolute bottom-1/4 right-1/4 w-3 h-3 bg-primary rounded-full animate-pulse cursor-pointer" onclick="alert('Region Chennai: 14.8% Prevalence')"></div>
+                    
+                    <!-- Floating details panel -->
+                    <div class="absolute bottom-md left-md bg-white p-sm rounded-lg shadow-xl border border-outline-variant flex flex-col gap-1 text-xs">
+                        <span class="text-label-sm font-bold text-primary">District Focus: Hyderabad</span>
+                        <span class="text-body-md font-label-md font-semibold text-slate-600">Prevalence: 12.4%</span>
+                        <span class="text-body-md font-label-md font-semibold text-slate-600">Pop Density: 18.5k/km²</span>
+                    </div>
+                </div>
             </div>
-          </a>
-
-          <a href="#" class="reporting-action-card" onclick="alert('Compiling Executive Summary report for download...')">
-            <div class="reporting-action-icon-wrap" style="color: #ef4444;"><i data-lucide="file-text" style="width:1.15rem; height:1.15rem;"></i></div>
-            <div>
-              <h5 style="margin: 0; font-size: 0.8rem; font-weight: 750; color: #1e293b;">One-click PDF</h5>
-              <small style="font-size:0.7rem; color:#64748b;">Executive Summary</small>
+            
+            <!-- Policy Impact Simulator -->
+            <div class="col-span-12 lg:col-span-4 clinical-card flex flex-col gap-md">
+                <h3 class="font-headline-md text-headline-md text-primary">Policy Impact Simulator</h3>
+                <p class="text-label-sm text-on-surface-variant -mt-2">Predictive outcome shifts based on intervention adjustments.</p>
+                <div class="space-y-6 mt-sm text-xs font-bold text-slate-700">
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span>Healthcare Subsidy</span>
+                            <span class="text-primary" id="subsidyLabel">45%</span>
+                        </div>
+                        <input id="subsidySlider" class="w-full h-2 bg-surface-container-high rounded-lg appearance-none cursor-pointer accent-primary" type="range" min="10" max="90" value="45" oninput="updatePredictiveOutcome()"/>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span>Education Campaign</span>
+                            <span class="text-primary" id="eduLabel">70%</span>
+                        </div>
+                        <input id="eduSlider" class="w-full h-2 bg-surface-container-high rounded-lg appearance-none cursor-pointer accent-primary" type="range" min="10" max="90" value="70" oninput="updatePredictiveOutcome()"/>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span>Infrastructure Dev</span>
+                            <span class="text-primary" id="infraLabel">30%</span>
+                        </div>
+                        <input id="infraSlider" class="w-full h-2 bg-surface-container-high rounded-lg appearance-none cursor-pointer accent-primary" type="range" min="10" max="90" value="30" oninput="updatePredictiveOutcome()"/>
+                    </div>
+                </div>
+                
+                <div class="mt-auto pt-md border-t border-outline-variant">
+                    <div class="flex justify-between items-end mb-xs">
+                        <span class="text-label-sm font-bold text-slate-500">Predicted Outcome</span>
+                        <span class="text-headline-md text-status-stable font-extrabold" id="outcomeLabel">-12% Prevalence</span>
+                    </div>
+                    <!-- Mini Trend Chart in CSS -->
+                    <div class="h-20 w-full flex items-end gap-1 px-1">
+                        <div class="bg-primary/20 w-full h-[80%] rounded-t-sm"></div>
+                        <div class="bg-primary/30 w-full h-[70%] rounded-t-sm"></div>
+                        <div class="bg-primary/40 w-full h-[65%] rounded-t-sm"></div>
+                        <div class="bg-primary/50 w-full h-[50%] rounded-t-sm"></div>
+                        <div class="bg-primary/60 w-full h-[45%] rounded-t-sm"></div>
+                        <div class="bg-primary/80 w-full h-[40%] rounded-t-sm"></div>
+                        <div class="bg-status-stable w-full h-[35%] rounded-t-sm" id="predTrendBar"></div>
+                    </div>
+                </div>
             </div>
-          </a>
-
-          <a href="#" class="reporting-action-card" onclick="alert('Opening report schedule manager...')">
-            <div class="reporting-action-icon-wrap" style="color: #10b981;"><i data-lucide="calendar" style="width:1.15rem; height:1.15rem;"></i></div>
-            <div>
-              <h5 style="margin: 0; font-size: 0.8rem; font-weight: 750; color: #1e293b;">Schedule Report</h5>
-              <small style="font-size:0.7rem; color:#64748b;">Weekly Automation</small>
+            
+            <!-- Urban vs Rural Comparison -->
+            <div class="col-span-12 lg:col-span-6 clinical-card">
+                <div class="flex justify-between items-center mb-md">
+                    <h3 class="font-headline-md text-headline-md text-primary">Urban vs Rural Analysis</h3>
+                    <span class="material-symbols-outlined text-on-surface-variant">compare_arrows</span>
+                </div>
+                
+                <div class="flex gap-md h-64 items-end">
+                    <div class="flex-grow flex flex-col gap-2 h-full justify-end">
+                        <div class="flex gap-sm items-end h-[80%]">
+                            <div class="bg-primary w-full h-[85%] rounded-lg transition-all hover:opacity-80 cursor-pointer" title="Urban: 18.2%"></div>
+                            <div class="bg-secondary w-full h-[60%] rounded-lg transition-all hover:opacity-80 cursor-pointer" title="Rural: 12.4%"></div>
+                        </div>
+                        <span class="text-center text-label-sm font-label-sm font-semibold text-slate-500">Prevalence (%)</span>
+                    </div>
+                    
+                    <div class="flex-grow flex flex-col gap-2 h-full justify-end">
+                        <div class="flex gap-sm items-end h-[80%]">
+                            <div class="bg-primary w-full h-[40%] rounded-lg transition-all hover:opacity-80 cursor-pointer" title="Urban: 4k"></div>
+                            <div class="bg-secondary w-full h-[90%] rounded-lg transition-all hover:opacity-80 cursor-pointer" title="Rural: 9k"></div>
+                        </div>
+                        <span class="text-center text-label-sm font-label-sm font-semibold text-slate-500">Budget Gap ($)</span>
+                    </div>
+                </div>
+                
+                <div class="mt-md flex justify-center gap-lg text-xs font-semibold">
+                    <div class="flex items-center gap-xs">
+                        <span class="w-3 h-3 rounded bg-primary"></span>
+                        <span>Urban Centres</span>
+                    </div>
+                    <div class="flex items-center gap-xs">
+                        <span class="w-3 h-3 rounded bg-secondary"></span>
+                        <span>Rural Clusters</span>
+                    </div>
+                </div>
             </div>
-          </a>
+            
+            <!-- Socioeconomic Analysis -->
+            <div class="col-span-12 lg:col-span-6 clinical-card">
+                <h3 class="font-headline-md text-headline-md text-primary mb-md">Income Correlation</h3>
+                <div class="relative h-64 w-full border-b border-l border-outline-variant">
+                    <!-- Scatter plot points -->
+                    <div class="absolute bottom-1/4 left-1/4 w-3 h-3 bg-primary/40 rounded-full cursor-pointer hover:scale-125 transition-transform" onclick="alert('Income Cohort A: 12.4% rate')"></div>
+                    <div class="absolute bottom-1/2 left-1/3 w-4 h-4 bg-primary/60 rounded-full cursor-pointer hover:scale-125 transition-transform" onclick="alert('Income Cohort B: 15.2% rate')"></div>
+                    <div class="absolute bottom-1/3 left-1/2 w-3 h-3 bg-primary/40 rounded-full cursor-pointer hover:scale-125 transition-transform" onclick="alert('Income Cohort C: 11.8% rate')"></div>
+                    <div class="absolute bottom-2/3 left-2/3 w-5 h-5 bg-primary/80 rounded-full cursor-pointer hover:scale-125 transition-transform" onclick="alert('Income Cohort D: 16.5% rate')"></div>
+                    <div class="absolute bottom-3/4 left-3/4 w-3 h-3 bg-primary/40 rounded-full cursor-pointer hover:scale-125 transition-transform" onclick="alert('Income Cohort E: 9.8% rate')"></div>
+                    <div class="absolute top-4 right-4 w-4 h-4 bg-primary rounded-full cursor-pointer hover:scale-125 transition-transform" onclick="alert('Income Cohort F: 7.2% rate')"></div>
+                    
+                    <div class="absolute bottom-0 left-0 h-full w-px bg-outline-variant/30"></div>
+                    <div class="absolute bottom-0 left-0 w-full h-px bg-outline-variant/30"></div>
+                    <div class="absolute -left-12 top-1/2 -rotate-90 text-[10px] font-bold text-on-surface-variant">Disease Rate</div>
+                    <div class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-on-surface-variant">Income Level (INR)</div>
+                </div>
+                
+                <div class="mt-lg grid grid-cols-4 gap-2 text-[10px] font-bold">
+                    <div class="bg-red-50 p-2 rounded text-center text-red-800">High Risk: Agric</div>
+                    <div class="bg-orange-50 p-2 rounded text-center text-orange-800">Med: Industrial</div>
+                    <div class="bg-yellow-50 p-2 rounded text-center text-yellow-800 font-bold text-yellow-800">Low: Service</div>
+                    <div class="bg-green-50 p-2 rounded text-center text-green-800">Safe: Tech</div>
+                </div>
+            </div>
+            
+            <!-- Trend Analysis -->
+            <div class="col-span-12 lg:col-span-8 clinical-card">
+                <div class="flex justify-between items-center mb-md">
+                    <h3 class="font-headline-md text-headline-md text-primary">5-Year Historical &amp; 10-Year Projections</h3>
+                    <div class="flex gap-sm text-[10px] font-bold">
+                        <button class="px-3 py-1 bg-surface-muted rounded-full hover:opacity-85" onclick="alert('Switching to Linear projections model')">Linear</button>
+                        <button class="px-3 py-1 bg-primary text-white rounded-full">Polynomial</button>
+                    </div>
+                </div>
+                
+                <div class="h-64 w-full relative">
+                    <svg class="w-full h-full overflow-visible" viewbox="0 0 1000 200">
+                        <!-- Historical -->
+                        <path d="M0,150 L100,140 L200,145 L300,130 L400,120 L500,110" fill="none" stroke="#001255" stroke-width="3"></path>
+                        <!-- Projection -->
+                        <path d="M500,110 L600,105 L700,95 L800,80 L900,60 L1000,45" fill="none" stroke="#001255" stroke-dasharray="5,5" stroke-width="3"></path>
+                        <!-- Grid lines -->
+                        <line stroke="#CBD5E1" stroke-width="0.5" x1="0" x2="1000" y1="180" y2="180"></line>
+                        <line stroke="#CBD5E1" stroke-dasharray="2,2" stroke-width="1" x1="500" x2="500" y1="0" y2="200"></line>
+                        <text class="text-[10px] font-bold" fill="#454650" x="5" y="195">2019</text>
+                        <text class="text-[10px] font-bold" fill="#001255" x="480" y="195">2024 (Now)</text>
+                        <text class="text-[10px] font-bold" fill="#454650" x="960" y="195">2034</text>
+                    </svg>
+                </div>
+            </div>
+            
+            <!-- Stakeholder Reporting -->
+            <div class="col-span-12 lg:col-span-4 clinical-card bg-gradient-to-br from-primary to-primary-container text-white">
+                <h3 class="font-headline-md text-headline-md mb-sm">Stakeholder Summary</h3>
+                <p class="text-label-md opacity-80 mb-lg text-xs leading-relaxed">Institutional Public Health Management automation for quarterly reviews.</p>
+                <div class="flex flex-col gap-sm text-xs font-bold">
+                    <button class="w-full py-4 bg-white/10 hover:bg-white/20 rounded-xl flex items-center justify-center gap-md transition-all" onclick="alert('Executive quarterly summary report has been compiled and emailed.')">
+                        <span class="material-symbols-outlined">auto_awesome</span>
+                        <span>Generate Executive Summary</span>
+                    </button>
+                    <button class="w-full py-4 bg-white/10 hover:bg-white/20 rounded-xl flex items-center justify-center gap-md transition-all" onclick="alert('Downloading analytical PDF presentation...')">
+                        <span class="material-symbols-outlined">picture_as_pdf</span>
+                        <span>Export Analytical PDF</span>
+                    </button>
+                </div>
+                <div class="mt-lg pt-lg border-t border-white/10 text-xs font-bold">
+                    <div class="flex justify-between items-center">
+                        <span class="opacity-60 uppercase tracking-wider text-[10px]">Status</span>
+                        <span class="flex items-center gap-xs text-green-400">
+                            <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                            HIPAA Compliant
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Resource Planning Table -->
+            <div class="col-span-12 clinical-card">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-lg gap-md">
+                    <h3 class="font-headline-md text-headline-md text-primary">Resource Allocation Analysis</h3>
+                    <div class="relative w-full sm:w-64">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
+                        <input id="tableSearch" class="w-full pl-9 pr-4 py-2 border border-outline-variant rounded-lg text-xs font-bold focus:ring-0" placeholder="Search districts..." type="text" oninput="filterTable(this.value)"/>
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto scrollbar-hide text-xs">
+                    <table class="w-full text-left" id="resourceTable">
+                        <thead class="border-b border-outline-variant">
+                            <tr class="font-bold text-slate-500">
+                                <th class="py-md px-sm">Resource Category</th>
+                                <th class="py-md px-sm">Current Allocation</th>
+                                <th class="py-md px-sm">Recommended Level</th>
+                                <th class="py-md px-sm">Gap Analysis</th>
+                                <th class="py-md px-sm text-right">Budget Required</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-outline-variant/30 font-semibold text-slate-700">
+                            <tr class="hover:bg-surface-container-low transition-colors table-row-item">
+                                <td class="py-md px-sm flex items-center gap-md">
+                                    <div class="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                                        <span class="material-symbols-outlined">vaccines</span>
+                                    </div>
+                                    <div>
+                                        <span class="block font-bold text-slate-800">Immunization Stocks</span>
+                                        <span class="text-[10px] text-on-surface-variant font-bold uppercase">Category A Essential</span>
+                                    </div>
+                                </td>
+                                <td class="py-md px-sm font-data-mono">45,000 Units</td>
+                                <td class="py-md px-sm font-data-mono">68,000 Units</td>
+                                <td class="py-md px-sm">
+                                    <div class="flex items-center gap-sm">
+                                        <span class="text-status-critical font-bold">-33.8%</span>
+                                        <div class="flex-1 max-w-[100px] bg-surface-muted h-1 rounded-full">
+                                            <div class="bg-status-critical h-full rounded-full" style="width: 66%"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-md px-sm text-right font-extrabold text-primary">₹12.4M</td>
+                            </tr>
+                            <tr class="hover:bg-surface-container-low transition-colors table-row-item">
+                                <td class="py-md px-sm flex items-center gap-md">
+                                    <div class="w-10 h-10 rounded-lg bg-status-stable/10 text-status-stable flex items-center justify-center">
+                                        <span class="material-symbols-outlined">person_pin</span>
+                                    </div>
+                                    <div>
+                                        <span class="block font-bold text-slate-800">Public Health Workers</span>
+                                        <span class="text-[10px] text-on-surface-variant font-bold uppercase">Frontline Personnel</span>
+                                    </div>
+                                </td>
+                                <td class="py-md px-sm font-data-mono">1,240 FTE</td>
+                                <td class="py-md px-sm font-data-mono">1,400 FTE</td>
+                                <td class="py-md px-sm">
+                                    <div class="flex items-center gap-sm">
+                                        <span class="text-orange-500 font-bold">-11.4%</span>
+                                        <div class="flex-1 max-w-[100px] bg-surface-muted h-1 rounded-full">
+                                            <div class="bg-orange-500 h-full rounded-full" style="width: 88%"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-md px-sm text-right font-extrabold text-primary">₹4.8M</td>
+                            </tr>
+                            <tr class="hover:bg-surface-container-low transition-colors table-row-item">
+                                <td class="py-md px-sm flex items-center gap-md">
+                                    <div class="w-10 h-10 rounded-lg bg-green-100 text-green-700 flex items-center justify-center">
+                                        <span class="material-symbols-outlined">local_hospital</span>
+                                    </div>
+                                    <div>
+                                        <span class="block font-bold text-slate-800">Diagnostic Labs</span>
+                                        <span class="text-[10px] text-on-surface-variant font-bold uppercase">Tertiary Infrastructure</span>
+                                    </div>
+                                </td>
+                                <td class="py-md px-sm font-data-mono">12 Active</td>
+                                <td class="py-md px-sm font-data-mono">10 Active</td>
+                                <td class="py-md px-sm">
+                                    <div class="flex items-center gap-sm">
+                                        <span class="text-green-600 font-bold">Surplus</span>
+                                        <div class="flex-1 max-w-[100px] bg-surface-muted h-1 rounded-full">
+                                            <div class="bg-green-600 h-full rounded-full" style="width: 100%"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-md px-sm text-right font-extrabold text-primary">₹0.0M</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-        
-        <span style="font-size: 0.68rem; color: #94a3b8; font-weight: 700; margin-top: 0.5rem; display: block;"><i data-lucide="refresh-cw" style="width: 0.85rem; height: 0.85rem; display:inline-block; vertical-align:middle; margin-right:2px;"></i> Last sync: 12m ago</span>
-
-        <!-- Floating Zoom button -->
-        <button class="floating-zoom-btn" title="Zoom analysis" onclick="alert('Expanding report builder canvas...')">
-          <i data-lucide="maximize-2" style="width: 1.15rem; height: 1.15rem;"></i>
-        </button>
-      </div>
-
-    </div>
-
-  </main>
+    </main>
 </div>
 
-{% endblock %}
-
-{% block scripts %}
-<!-- Load Chart.js CDN -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Footer -->
+<footer class="bg-surface-container dark:bg-surface-container-lowest w-full py-md mt-auto border-t border-outline-variant dark:border-outline flat no shadows flex flex-col items-center justify-center space-y-xs px-margin-desktop text-center text-xs">
+    <span class="font-label-md text-label-md font-black text-on-surface dark:text-on-surface-variant uppercase tracking-wider">Institutional Public Health Management</span>
+    <div class="flex gap-md flex-wrap justify-center font-bold text-slate-500">
+        <a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy Policy</a>
+        <a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Institutional Terms</a>
+        <a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Data Governance</a>
+        <a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Regulatory Standards</a>
+    </div>
+    <p class="font-label-sm text-label-sm text-on-surface-variant mt-sm">© 2024 Institutional Public Health Management. All Rights Reserved. Compliance: HIPAA/DISHA Compliant.</p>
+</footer>
 
 <script>
-  // Sidebar toggle animation
-  const sidebarToggle = document.getElementById("sidebar-toggle");
-  const dbContainer = document.getElementById("dashboard-container");
-  const toggleIcon = document.getElementById("toggle-icon");
-  
-  if (sidebarToggle && dbContainer) {
-    sidebarToggle.addEventListener("click", () => {
-      dbContainer.classList.toggle("collapsed");
-      if (dbContainer.classList.contains("collapsed")) {
-        toggleIcon.setAttribute("data-lucide", "chevrons-right");
-      } else {
-        toggleIcon.setAttribute("data-lucide", "chevrons-left");
-      }
-      if (window.lucide) {
-        window.lucide.createIcons();
-      }
+    // Micro-interactions for dashboard elements
+    document.querySelectorAll('.clinical-card').forEach(card => {
+        card.addEventListener('mouseenter', () => {
+            const icon = card.querySelector('.material-symbols-outlined');
+            if (icon) icon.style.transform = 'translateY(-2px)';
+        });
+        card.addEventListener('mouseleave', () => {
+            const icon = card.querySelector('.material-symbols-outlined');
+            if (icon) icon.style.transform = 'translateY(0)';
+        });
     });
-  }
 
-  // Settlement Type toggle highlight helper
-  function toggleSettlement(mode) {
-    const btnUrban = document.getElementById("btn-settle-urban");
-    const btnRural = document.getElementById("btn-settle-rural");
-    if (!btnUrban || !btnRural) return;
-
-    if (mode === 'urban') {
-      btnUrban.classList.add("active");
-      btnRural.classList.remove("active");
-      alert("Switched filter scope to: Urban settlement profiles");
-    } else {
-      btnRural.classList.add("active");
-      btnUrban.classList.remove("active");
-      alert("Switched filter scope to: Rural settlement profiles");
+    // Urban Rural toggles
+    function toggleUrb(isUrban) {
+        const uBtn = document.getElementById('urbanBtn');
+        const rBtn = document.getElementById('ruralBtn');
+        if (isUrban) {
+            uBtn.className = "px-3 py-1 rounded-full bg-primary text-white";
+            rBtn.className = "px-3 py-1 text-on-surface-variant rounded-full";
+            alert("Filtered public health datasets for Urban districts.");
+        } else {
+            rBtn.className = "px-3 py-1 rounded-full bg-primary text-white";
+            uBtn.className = "px-3 py-1 text-on-surface-variant rounded-full";
+            alert("Filtered public health datasets for Rural zones.");
+        }
     }
-  }
 
-  // ----------------------------------------------------
-  // Chart.js visualizations initializations
-  // ----------------------------------------------------
-  let socioeconomicChart = null;
-  let simulationChart = null;
-  let prevalenceTrendsChart = null;
+    // Predictive impact outcomes sliders calculations
+    function updatePredictiveOutcome() {
+        const sub = parseInt(document.getElementById('subsidySlider').value);
+        const edu = parseInt(document.getElementById('eduSlider').value);
+        const infra = parseInt(document.getElementById('infraSlider').value);
 
-  document.addEventListener("DOMContentLoaded", () => {
-    // A. Socioeconomic Scatter Plot
-    const socioCtx = document.getElementById("socioeconomicScatterChart").getContext("2d");
-    socioeconomicChart = new Chart(socioCtx, {
-      type: 'scatter',
-      data: {
-        datasets: [
-          {
-            label: 'Under $5k',
-            data: [{ x: 2, y: 15.5 }, { x: 3.5, y: 14.8 }, { x: 1.8, y: 17.2 }],
-            backgroundColor: '#ef4444',
-            pointRadius: 6
-          },
-          {
-            label: '$5k - $15k',
-            data: [{ x: 6, y: 11.2 }, { x: 8, y: 9.8 }, { x: 10, y: 8.5 }],
-            backgroundColor: '#f59e0b',
-            pointRadius: 6
-          },
-          {
-            label: '$15k+',
-            data: [{ x: 14, y: 5.4 }, { x: 16, y: 4.8 }, { x: 18, y: 4.2 }],
-            backgroundColor: '#10b981',
-            pointRadius: 6
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { 
-            title: { display: true, text: 'Income Level', font: { size: 9, weight: '700' } }, 
-            grid: { display: false }
-          },
-          y: { 
-            title: { display: true, text: 'Disease Rate (%)', font: { size: 9, weight: '700' } },
-            grid: { color: '#f1f5f9' }
-          }
-        }
-      }
-    });
+        // Update labels
+        document.getElementById('subsidyLabel').innerText = sub + '%';
+        document.getElementById('eduLabel').innerText = edu + '%';
+        document.getElementById('infraLabel').innerText = infra + '%';
 
-    // B. Policy Simulation Chart
-    const simCtx = document.getElementById("simulationOutcomeChart").getContext("2d");
-    simulationChart = new Chart(simCtx, {
-      type: 'line',
-      data: {
-        labels: ['Year 0', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5'],
-        datasets: [{
-          data: [14.2, 13.5, 12.8, 12.0, 11.4, 11.0],
-          borderColor: '#1e3a8a',
-          backgroundColor: 'rgba(30, 58, 138, 0.05)',
-          fill: true,
-          tension: 0.3
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { grid: { display: false } },
-          y: { grid: { color: '#f1f5f9' }, min: 5, max: 16 }
-        }
-      }
-    });
+        // Calculate simulated reduction
+        const baseReduction = Math.round((sub * 0.12) + (edu * 0.08) + (infra * 0.15));
+        document.getElementById('outcomeLabel').innerText = `-${baseReduction}% Prevalence`;
 
-    // C. 5-Year Prevalence line chart
-    const prevCtx = document.getElementById("prevalenceTrendsChart").getContext("2d");
-    prevalenceTrendsChart = new Chart(prevCtx, {
-      type: 'line',
-      data: {
-        labels: ['2020', '2021', '2022', '2023 (Now)', '2024 (Proj)'],
-        datasets: [
-          {
-            label: 'Actual',
-            data: [11.2, 12.4, 13.5, 14.2, null],
-            borderColor: '#3b82f6',
-            backgroundColor: 'rgba(59, 130, 246, 0.08)',
-            fill: true,
-            tension: 0.35,
-            pointBackgroundColor: '#3b82f6',
-            pointRadius: 5
-          },
-          {
-            label: 'Projected',
-            data: [null, null, null, 14.2, 15.6],
-            borderColor: '#94a3b8',
-            borderDash: [5, 5],
-            fill: false,
-            tension: 0.35,
-            pointBackgroundColor: '#94a3b8',
-            pointRadius: 5
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { grid: { display: false } },
-          y: { grid: { color: '#f1f5f9' } }
-        }
-      }
-    });
+        // Update mini trend chart preview bar height
+        const barHeight = Math.max(15, 100 - baseReduction * 2.2);
+        document.getElementById('predTrendBar').style.height = barHeight + '%';
+    }
 
-  });
-
-  // Dynamic slider interactive updates
-  function updateSimulationChart(intensity, budget) {
-    if (!simulationChart) return;
-    
-    // Parse numeric values
-    const intVal = parseFloat(intensity) || 65;
-    const budVal = parseFloat(budget) || 420;
-
-    // Calculate reduction factor
-    const factor = (intVal / 65.0) * (budVal / 420.0);
-    const expectedReduction = -22.4 * factor;
-
-    // Limit maximum reduction boundary
-    const finalReduction = Math.max(-50.0, Math.min(-5.0, expectedReduction));
-
-    // Update reduction text tag
-    document.getElementById("sim-reduction-val").textContent = finalReduction.toFixed(1) + "%";
-
-    // Re-calculate projection dataset values
-    simulationChart.data.datasets[0].data = [
-      14.2,
-      Math.max(5.0, 14.2 - 0.6 * factor),
-      Math.max(4.5, 14.2 - 1.4 * factor),
-      Math.max(4.0, 14.2 - 2.2 * factor),
-      Math.max(3.5, 14.2 - 2.8 * factor),
-      Math.max(3.0, 14.2 - (14.2 * Math.abs(finalReduction)/100))
-    ];
-    simulationChart.update();
-  }
+    // Filter allocation table
+    function filterTable(val) {
+        const query = val.toLowerCase().trim();
+        document.querySelectorAll('.table-row-item').forEach(row => {
+            const text = row.innerText.toLowerCase();
+            if (text.includes(query)) {
+                row.classList.remove('hidden');
+            } else {
+                row.classList.add('hidden');
+            }
+        });
+    }
 </script>
-{% endblock %}
+</body>
+</html>

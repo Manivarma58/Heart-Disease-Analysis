@@ -1,552 +1,783 @@
 {% extends "base.html" %}
-{% block title %}Alert Center - CardioViz{% endblock %}
+{% block title %}Alert Center - CardioPulse{% endblock %}
 {% block content %}
-<style>
-  /* Layout Grid Container */
-  .dashboard-container {
-    display: grid;
-    grid-template-columns: 16rem 1fr;
-    min-height: calc(100vh - 70px);
-    background: #f8fafc;
-    transition: grid-template-columns 0.3s ease;
-  }
-  .dashboard-container.collapsed {
-    grid-template-columns: 4.8rem 1fr;
-  }
-
-  /* Sidebar Navigation */
-  .sidebar {
-    background: white;
-    border-right: 1px solid #e2e8f0;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 1.5rem 1rem;
-    overflow-y: auto;
-    transition: padding 0.3s ease;
-  }
-  .dashboard-container.collapsed .sidebar {
-    padding: 1.5rem 0.5rem;
-    align-items: center;
-  }
-
-  .sidebar-brand-section {
-    transition: opacity 0.2s;
-  }
-  .dashboard-container.collapsed .sidebar-brand-section {
-    opacity: 0;
-    display: none;
-  }
-
-  .sidebar-menu {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-    margin-bottom: 2rem;
-  }
-  .sidebar-menu-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #64748b;
-    transition: all 0.2s ease;
-    border-left: 3px solid transparent;
-    text-decoration: none;
-    cursor: pointer;
-  }
-  .sidebar-menu-item:hover {
-    background: #f1f5f9;
-    color: #1e293b;
-  }
-  .sidebar-menu-item.active {
-    background: #eff6ff;
-    color: #3b82f6;
-    border-left-color: #3b82f6;
-    border-radius: 0 8px 8px 0;
-  }
-  .sidebar-menu-item i {
-    width: 1.25rem;
-    height: 1.25rem;
-    flex-shrink: 0;
-  }
-  
-  .menu-text {
-    transition: opacity 0.2s;
-  }
-  .dashboard-container.collapsed .menu-text {
-    opacity: 0;
-    display: none;
-  }
-
-  .sidebar-toggle-btn {
-    align-self: flex-end;
-    background: transparent;
-    border: 0;
-    color: #64748b;
-    cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 6px;
-    margin-bottom: 1rem;
-    transition: background 0.2s;
-  }
-  .sidebar-toggle-btn:hover {
-    background: #f1f5f9;
-    color: #1e293b;
-  }
-
-  /* Workspace */
-  .workspace {
-    padding: 2rem clamp(1rem, 4vw, 2.5rem);
-    overflow-y: auto;
-    max-width: 1400px;
-    margin: 0 auto;
-    width: 100%;
-  }
-
-  /* Top full-width banner */
-  .system-banner-ds {
-    background: #0b3c5d;
-    color: white;
-    padding: 0.85rem 1.25rem;
-    border-radius: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.82rem;
-    margin-bottom: 2rem;
-  }
-  .system-banner-ds h4 {
-    margin: 0 0 0.15rem;
-    font-weight: 800;
-  }
-  .system-banner-ds p {
-    margin: 0;
-    opacity: 0.85;
-  }
-
-  /* Col Layouts */
-  .alert-suite-grid {
-    display: grid;
-    grid-template-columns: 1.1fr 1.3fr 1.3fr;
-    gap: 1.5rem;
-  }
-  @media (max-width: 1000px) {
-    .alert-suite-grid {
-      grid-template-columns: 1fr;
+<!-- Load Tailwind CDN and Config for this layout section -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "surface": "#faf8ff",
+                "on-secondary-container": "#610001",
+                "secondary-fixed-dim": "#ffb4a9",
+                "primary-fixed-dim": "#b9c3ff",
+                "on-secondary-fixed": "#410000",
+                "surface-muted": "#F1F5F9",
+                "secondary-container": "#fe5c4a",
+                "secondary": "#b4271d",
+                "surface-variant": "#dfe1f8",
+                "tertiary-fixed-dim": "#ffb4a9",
+                "on-tertiary-fixed": "#410000",
+                "tertiary-fixed": "#ffdad5",
+                "outline": "#767681",
+                "surface-tint": "#4b5a9e",
+                "primary": "#001255",
+                "surface-container-highest": "#dfe1f8",
+                "secondary-fixed": "#ffdad5",
+                "background": "#faf8ff",
+                "surface-dim": "#d6d9f0",
+                "surface-bright": "#faf8ff",
+                "surface-light": "#F8FAFC",
+                "outline-variant": "#c6c5d2",
+                "on-primary": "#ffffff",
+                "tertiary": "#400000",
+                "on-primary-fixed-variant": "#334284",
+                "surface-container-lowest": "#ffffff",
+                "on-primary-container": "#8594dc",
+                "primary-container": "#1a2a6c",
+                "inverse-primary": "#b9c3ff",
+                "status-critical": "#E74C3C",
+                "primary-fixed": "#dde1ff",
+                "surface-container-low": "#f3f2ff",
+                "on-surface-variant": "#454650",
+                "surface-container-high": "#e4e7fe",
+                "on-error-container": "#93000a",
+                "gradient-vital": "linear-gradient(135deg, #1a2a6c 0%, #c0392b 100%)",
+                "status-stable": "#1a2a6c",
+                "tertiary-container": "#680001",
+                "surface-container": "#ebedff",
+                "on-tertiary-container": "#fe6653",
+                "on-surface": "#171b2b",
+                "on-error": "#ffffff",
+                "inverse-on-surface": "#efefff",
+                "on-tertiary": "#ffffff",
+                "on-background": "#171b2b",
+                "error": "#ba1a1a",
+                "on-tertiary-fixed-variant": "#8e130c",
+                "on-secondary": "#ffffff",
+                "error-container": "#ffdad6",
+                "on-primary-fixed": "#001356",
+                "inverse-surface": "#2c3041",
+                "on-secondary-fixed-variant": "#910807"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+        },
+        "spacing": {
+                "sm": "16px",
+                "margin-desktop": "40px",
+                "lg": "32px",
+                "gutter": "24px",
+                "md": "24px",
+                "xl": "48px",
+                "base": "4px",
+                "margin-mobile": "16px",
+                "xs": "8px"
+        }
+      }
     }
   }
+</script>
 
-  /* Alerts Banners / Toast notifications */
-  .toast-wrapper-ds {
-    display: flex;
-    flex-direction: column;
-    gap: 0.85rem;
-  }
-  .toast-card-ds {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-left: 4px solid #3b82f6;
-    border-radius: 0 10px 10px 0;
-    padding: 0.85rem 1rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-    position: relative;
-    display: flex;
-    gap: 0.75rem;
-  }
-  .toast-card-ds.success { border-left-color: #10b981; }
-  .toast-card-ds.warning { border-left-color: #f59e0b; }
-  .toast-card-ds.error { border-left-color: #ef4444; }
-
-  .toast-card-ds h5 {
-    margin: 0 0 0.15rem;
-    font-size: 0.82rem;
-    font-weight: 800;
-    color: #1e293b;
-  }
-  .toast-card-ds p {
-    margin: 0;
-    font-size: 0.75rem;
-    color: #64748b;
-    line-height: 1.35;
-  }
-
-  /* Notification Center */
-  .notification-center-card {
-    background: white;
-    border: 1px solid #cbd5e1;
-    border-radius: 16px;
-    padding: 1.25rem 1.5rem;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.005);
-  }
-  .center-header-ds {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1.5px solid #e2e8f0;
-    padding-bottom: 0.75rem;
-    margin-bottom: 1rem;
-  }
-  .center-header-ds h3 {
-    margin: 0;
-    font-size: 0.95rem;
-    font-weight: 850;
-    color: #0f172a;
-  }
-
-  /* Item list */
-  .center-item-list {
-    display: flex;
-    flex-direction: column;
-  }
-  .center-item-row {
-    display: flex;
-    gap: 0.75rem;
-    padding: 0.95rem 0;
-    border-bottom: 1px solid #f1f5f9;
-  }
-  .center-item-row:last-child {
-    border-bottom: 0;
-  }
-  .item-badge-wrap {
-    width: 2.2rem;
-    height: 2.2rem;
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    flex-shrink: 0;
-  }
-  .item-badge-wrap.critical { background: #fee2e2; color: #ef4444; }
-  .item-badge-wrap.success { background: #d1fae5; color: #10b981; }
-  .item-badge-wrap.info { background: #dbeafe; color: #3b82f6; }
-  .item-badge-wrap.user { background: #f1f5f9; color: #64748b; }
-
-  .center-item-content {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-  }
-  .center-item-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.15rem;
-  }
-  .center-item-top h4 {
-    margin: 0;
-    font-size: 0.82rem;
-    font-weight: 800;
-    color: #1e293b;
-  }
-  .center-item-top span {
-    font-size: 0.65rem;
-    color: #94a3b8;
-    font-weight: 700;
-  }
-  .center-item-content p {
-    margin: 0 0 0.5rem;
-    font-size: 0.75rem;
-    color: #64748b;
-    line-height: 1.35;
-  }
-
-  /* Dialog Suite Card */
-  .dialog-card-ds {
-    background: white;
-    border: 1px solid #cbd5e1;
-    border-radius: 12px;
-    padding: 1.25rem;
-    margin-bottom: 1.25rem;
-  }
-  .dialog-card-header {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.75rem;
-  }
-  .dialog-card-header i {
-    width: 1.15rem;
-    height: 1.15rem;
-  }
-  .dialog-card-header h4 {
-    margin: 0;
-    font-size: 0.88rem;
-    font-weight: 850;
-    color: #0f172a;
-  }
-  .dialog-card-ds p {
-    margin: 0 0 1.25rem;
-    font-size: 0.78rem;
-    color: #475569;
-    line-height: 1.4;
-  }
-  .dialog-actions-row {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.5rem;
-  }
-
-  /* Modal Buttons */
-  .btn-dialog {
-    border: 1px solid #cbd5e1;
-    background: white;
-    color: #475569;
-    border-radius: 6px;
-    padding: 0.45rem 1rem;
-    font-size: 0.78rem;
-    font-weight: 750;
-    cursor: pointer;
-  }
-  .btn-dialog.danger {
-    background: #b91c1c;
-    border-color: #b91c1c;
-    color: white;
-  }
-  .btn-dialog.warning {
-    background: #d97706;
-    border-color: #d97706;
-    color: white;
-  }
-  .btn-dialog.info {
-    background: #2563eb;
-    border-color: #2563eb;
-    color: white;
-  }
+<style>
+    /* Styling to blend design system inside template */
+    .glass-effect {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
+    .scroll-hide::-webkit-scrollbar { display: none; }
+    .scroll-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    /* Toast positioning container */
+    .toast-position-container {
+        position: fixed;
+        z-index: 9999;
+        pointer-events: none;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .pos-top-right { top: 80px; right: 20px; }
+    .pos-top-left { top: 80px; left: 20px; }
+    .pos-bottom-right { bottom: 20px; right: 20px; }
+    .pos-bottom-left { bottom: 20px; left: 20px; }
+    .pos-top-center { top: 80px; left: 50%; transform: translateX(-50%); }
+    .pos-bottom-center { bottom: 20px; left: 50%; transform: translateX(-50%); }
 </style>
 
-<div class="dashboard-container" id="dashboard-container">
-  <!-- Sidebar Navigation -->
-  <aside class="sidebar">
-    <div>
-      <button class="sidebar-toggle-btn" id="sidebar-toggle">
-        <i data-lucide="chevrons-left" id="toggle-icon"></i>
-      </button>
-
-      <div class="sidebar-brand-section" style="padding-left: 1rem; margin-bottom: 1.5rem; margin-top: 0.5rem;">
-        <span style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.5px;">Alert Center</span>
-        <span style="font-size: 1.15rem; font-weight: 800; color: #3b82f6; display: block; font-family: Poppins, sans-serif; margin-top: 0.15rem;">Managing 14 Nodes</span>
-      </div>
-
-      <nav class="sidebar-menu">
-        <a href="{{ url_for('dashboard.home') }}" class="sidebar-menu-item">
-          <i data-lucide="layout-grid"></i>
-          <span class="menu-text">Dashboard</span>
-        </a>
-        <a href="{{ url_for('clinical.clinical_dashboard') }}" class="sidebar-menu-item">
-          <i data-lucide="users"></i>
-          <span class="menu-text">Patients</span>
-        </a>
-        <a href="{{ url_for('dashboard.tableau_style_dashboard') }}" class="sidebar-menu-item">
-          <i data-lucide="line-chart"></i>
-          <span class="menu-text">Analytics</span>
-        </a>
-        <a href="{{ url_for('dashboard.heart_disease_story') }}" class="sidebar-menu-item">
-          <i data-lucide="file-text"></i>
-          <span class="menu-text">Reporting</span>
-        </a>
-        <a href="{{ url_for('dashboard.notifications_components_page') }}" class="sidebar-menu-item active">
-          <i data-lucide="bell"></i>
-          <span class="menu-text">Alerts Hub</span>
-        </a>
-      </nav>
-    </div>
-
-    <div class="sidebar-footer">
-      <a href="{{ url_for('dashboard.settings_page') }}" class="sidebar-menu-item" style="margin: 0;"><i data-lucide="settings"></i> <span class="menu-text">Settings</span></a>
-      <a href="#" class="sidebar-menu-item" style="margin: 0;"><i data-lucide="help-circle"></i> <span class="menu-text">Support</span></a>
-    </div>
-  </aside>
-
-  <!-- Workspace content -->
-  <main class="workspace">
-    <!-- Top System Banner -->
-    <div class="system-banner-ds" id="top-maintenance-banner">
-      <div>
-        <h4>System Maintenance Scheduled</h4>
-        <p>Database optimization on Sunday, Oct 22 at 02:00 UTC.</p>
-      </div>
-      <button style="background:transparent; border:0; color:white; font-size:1.2rem; cursor:pointer;" onclick="document.getElementById('top-maintenance-banner').remove()">&times;</button>
-    </div>
-
-    <!-- Alert Suite layouts -->
-    <div class="alert-suite-grid">
-      <!-- Column 1: Toast notifications -->
-      <div class="toast-wrapper-ds">
-        <span style="font-size: 0.65rem; font-weight:800; color:#94a3b8; letter-spacing:0.5px; text-transform:uppercase; display:block; margin-bottom:0.25rem;">TOASTS & BANNERS</span>
-        
-        <div class="toast-card-ds success" id="toast-sync">
-          <i data-lucide="check-circle" style="color:#10b981; flex-shrink:0;"></i>
-          <div>
-            <h5>Sync Complete</h5>
-            <p>Biometric database successfully mapped.</p>
-          </div>
-          <button style="position:absolute; right:8px; top:8px; background:transparent; border:0; color:#cbd5e1; cursor:pointer;" onclick="document.getElementById('toast-sync').remove()">&times;</button>
-        </div>
-
-        <div class="toast-card-ds error" id="toast-conn">
-          <i data-lucide="alert-triangle" style="color:#ef4444; flex-shrink:0;"></i>
-          <div>
-            <h5>Connection Failed</h5>
-            <p>Local gateway node is offline. Consider archiving.</p>
-          </div>
-          <button style="position:absolute; right:8px; top:8px; background:transparent; border:0; color:#cbd5e1; cursor:pointer;" onclick="document.getElementById('toast-conn').remove()">&times;</button>
-        </div>
-      </div>
-
-      <!-- Column 2: Notification Center -->
-      <div>
-        <span style="font-size: 0.65rem; font-weight:800; color:#94a3b8; letter-spacing:0.5px; text-transform:uppercase; display:block; margin-bottom:0.25rem;">NOTIFICATION CENTER</span>
-        
-        <div class="notification-center-card">
-          <div class="center-header-ds">
-            <h3>Notifications</h3>
-            <div style="display:flex; gap:0.75rem; font-size:0.7rem; font-weight:800;">
-              <a href="#" style="color:#2563eb; text-decoration:none;" onclick="alert('All records updated to read status.')">Mark all as read</a>
-              <a href="#" style="color:#b91c1c; text-decoration:none;" onclick="document.getElementById('notify-center-items').innerHTML = '<div style=\'text-align:center; padding:2rem; color:#94a3b8; font-weight:700;\'>No notifications</div>'">Clear all</a>
-            </div>
-          </div>
-
-          <div class="center-item-list" id="notify-center-items">
-            <!-- Item 1 -->
-            <div class="center-item-row">
-              <div class="item-badge-wrap critical"><i data-lucide="alert-octagon"></i></div>
-              <div class="center-item-content">
-                <div class="center-item-top">
-                  <h4>Critical Alert</h4>
-                  <span>2m ago</span>
-                </div>
-                <p>Patient PAT-8821 Risk Spike detected in Vitals Monitor.</p>
-                <div style="display:flex; gap:0.5rem;">
-                  <button class="btn-new-report" style="padding:0.35rem 0.65rem; font-size:0.68rem; background:#b91c1c;" onclick="alert('Reviewing vitals metrics...')">Review Now</button>
-                  <button class="btn-export" style="padding:0.35rem 0.65rem; font-size:0.68rem; border-color:#cbd5e1;" onclick="this.parentElement.parentElement.parentElement.remove()">Dismiss</button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Item 2 -->
-            <div class="center-item-row">
-              <div class="item-badge-wrap success"><i data-lucide="refresh-cw"></i></div>
-              <div class="center-item-content">
-                <div class="center-item-top">
-                  <h4>Sync Complete</h4>
-                  <span>1h ago</span>
-                </div>
-                <p>Biometric database successfully synced with centralized node 04.</p>
-              </div>
-            </div>
-
-            <!-- Item 3 -->
-            <div class="center-item-row">
-              <div class="item-badge-wrap info"><i data-lucide="file-text"></i></div>
-              <div class="center-item-content">
-                <div class="center-item-top">
-                  <h4>Weekly Report Ready</h4>
-                  <span>4h ago</span>
-                </div>
-                <p>The performance audit for Ward 7-B is now available for download.</p>
-              </div>
-            </div>
-
-            <!-- Item 4 -->
-            <div class="center-item-row">
-              <div class="item-badge-wrap user"><i data-lucide="user-plus"></i></div>
-              <div class="center-item-content">
-                <div class="center-item-top">
-                  <h4>User Joined</h4>
-                  <span>Yesterday</span>
-                </div>
-                <p>Dr. Sarah Chen has joined the Oncology protocol workspace.</p>
-              </div>
-            </div>
-          </div>
-
-          <button class="btn-export" style="width:100%; border:1.5px solid #cbd5e1; background:white; color:#3b82f6; font-size:0.78rem; font-weight:800; justify-content:center; display:flex; margin-top:1.25rem;" onclick="alert('Opening full notifications history logs...')">View All Notifications</button>
-        </div>
-      </div>
-
-      <!-- Column 3: Modal Dialog Suite -->
-      <div>
-        <span style="font-size: 0.65rem; font-weight:800; color:#94a3b8; letter-spacing:0.5px; text-transform:uppercase; display:block; margin-bottom:0.25rem;">MODAL DIALOG SUITE</span>
-        
-        <!-- Dialog 1 -->
-        <div class="dialog-card-ds">
-          <div class="dialog-card-header">
-            <i data-lucide="trash-2" style="color:#ef4444;"></i>
-            <h4>Delete Analysis?</h4>
-          </div>
-          <p>This action will permanently remove the "Quarterly Cardiac Trends" dataset. This cannot be undone.</p>
-          <div class="dialog-actions-row">
-            <button class="btn-dialog" onclick="alert('Action cancelled.')">Cancel</button>
-            <button class="btn-dialog danger" onclick="alert('Dataset permanently deleted.')">Delete</button>
-          </div>
-        </div>
-
-        <!-- Dialog 2 -->
-        <div class="dialog-card-ds">
-          <div class="dialog-card-header">
-            <i data-lucide="alert-triangle" style="color:#f59e0b;"></i>
-            <h4>Unsaved Changes</h4>
-          </div>
-          <p>You have unsaved changes in the Patient Intake form. If you leave now, your progress will be lost.</p>
-          <div class="dialog-actions-row">
-            <button class="btn-dialog" onclick="alert('Staying on form page.')">Stay</button>
-            <button class="btn-dialog warning" onclick="alert('Leaving page. Progress discarded.')">Leave</button>
-          </div>
-        </div>
-
-        <!-- Dialog 3 -->
-        <div class="dialog-card-ds">
-          <div class="dialog-card-header">
-            <i data-lucide="info" style="color:#2563eb;"></i>
-            <h4>System Update</h4>
-          </div>
-          <p>The clinical intelligence core has been updated to v4.2.0. Check the documentation for new AI diagnostic capabilities.</p>
-          <div class="dialog-actions-row">
-            <button class="btn-dialog info" style="width:100%;" onclick="alert('Welcome to v4.2.0!')">Got it</button>
-          </div>
-        </div>
-
-        <!-- Fullscreen dialog trigger -->
-        <div class="dialog-card-ds" style="background:#003366; color:white; border-color:#003366;">
-          <div style="display:flex; justify-content:space-between; align-items:center; font-weight:800; font-size:0.85rem;">
-            <span>Full-Screen Data Entry</span>
-            <i data-lucide="maximize" style="cursor:pointer;" onclick="alert('Expanding into full-screen diagnostic console...')"></i>
-          </div>
-          
-          <div style="border:1px dashed rgba(255,255,255,0.3); border-radius:6px; background:rgba(255,255,255,0.05); padding:1rem; text-align:center; font-size:0.65rem; font-weight:750; margin-top:0.75rem;">
-            Miniaturized Preview
-            <div style="height:3px; background:rgba(255,255,255,0.2); width:3rem; margin:0.35rem auto; border-radius:99px;"></div>
-            <div style="background:rgba(255,255,255,0.1); border-radius:4px; padding:0.65rem 0.5rem; margin-top:0.5rem;">Form Content Area</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </main>
+<!-- Floating notifications parent wrapper -->
+<div id="toast-anchors">
+    <div id="toast-tr" class="toast-position-container pos-top-right"></div>
+    <div id="toast-tl" class="toast-position-container pos-top-left"></div>
+    <div id="toast-br" class="toast-position-container pos-bottom-right"></div>
+    <div id="toast-bl" class="toast-position-container pos-bottom-left"></div>
+    <div id="toast-tc" class="toast-position-container pos-top-center"></div>
+    <div id="toast-bc" class="toast-position-container pos-bottom-center"></div>
 </div>
+
+<div class="fixed top-0 w-full z-[100] flex flex-col pointer-events-none mt-16" id="banners">
+    <!-- Component 3: Banner Alert -->
+    <div class="bg-primary text-white py-2 px-margin-desktop flex items-center justify-between text-xs pointer-events-auto shadow-sm" id="banner-maintenance">
+        <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-[16px]">info</span>
+            <span>System Maintenance: Diagnostic Hub will be offline for 15 minutes starting 02:00 AM UTC.</span>
+        </div>
+        <button class="opacity-70 hover:opacity-100 transition-opacity" onclick="document.getElementById('banner-maintenance').remove()"><span class="material-symbols-outlined text-[16px]">close</span></button>
+    </div>
+    <div class="bg-status-critical text-white py-2 px-margin-desktop flex items-center justify-between text-xs pointer-events-auto shadow-sm" id="banner-critical">
+        <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-[16px]">emergency</span>
+            <span class="font-bold">CRITICAL ALERT:</span>
+            <span>Unscheduled server downtime detected in Wing A Cardiology unit. Switch to manual logging.</span>
+        </div>
+        <button class="opacity-70 hover:opacity-100 transition-opacity" onclick="document.getElementById('banner-critical').remove()"><span class="material-symbols-outlined text-[16px]">close</span></button>
+    </div>
+</div>
+
+<div class="min-h-screen bg-surface text-on-surface font-sans flex mt-[112px]">
+    
+    <!-- Collapsible Sidebar -->
+    <aside class="w-64 bg-surface-container-lowest border-r border-outline-variant py-md px-sm flex flex-col">
+        <div class="px-4 mb-8">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-10 h-10 rounded-lg overflow-hidden border border-outline-variant">
+                    <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYcx8WtnY_COpeMaImN8a6_YGvZE_9QiknDWtLhwNTyqyuXwVqi1Pi5B9GUZkltNpbs2uh9Mu0Y6pWDfYh1kEV-J_lZzdWvSlo8w-dbHrk-7MLz9jdFspFj-9aS4mRR_tF4zrekxGRNf0jMLX076tNNXmLe0OMaUkgQioPVcD53sADzjURViPDMotFwqLW3sL4Nd_h8U5sNuBC7m8P9s9Lq1naFSkvnE0a-GI7O6BIqyiWRlQHLsIjiL9m0WsWTe8bSTbyds_FcvAM" alt="Admin headshot"/>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-on-surface">Admin HeartCare</p>
+                    <p class="text-[10px] text-on-surface-variant">CardioPulse Node</p>
+                </div>
+            </div>
+            
+            <button class="w-full mt-4 bg-primary text-on-primary py-2.5 rounded-lg text-xs font-bold flex items-center justify-center gap-2 hover:shadow-md transition-all active:scale-95" onclick="triggerAlertFromConsole('Level 5: System', 'database', 'Manual sync complete. Database backup status: STABLE.')">
+                <span class="material-symbols-outlined text-[16px]">sync</span>
+                Force Sync
+            </button>
+        </div>
+        
+        <nav class="flex-1 space-y-1">
+            <div class="px-4 text-[10px] font-bold text-outline uppercase tracking-wider mb-2">Platform Navigation</div>
+            <a class="flex items-center gap-3 px-4 py-2.5 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all text-xs font-bold" href="{{ url_for('dashboard.home') }}">
+                <span class="material-symbols-outlined text-[18px]">dashboard</span>
+                <span>Dashboard</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-2.5 bg-primary-container text-on-primary-container font-black rounded-lg transition-all text-xs" href="#">
+                <span class="material-symbols-outlined text-[18px]">notifications_active</span>
+                <span>Alert System</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-2.5 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all text-xs font-bold" href="{{ url_for('dashboard.tableau_style_dashboard') }}">
+                <span class="material-symbols-outlined text-[18px]">analytics</span>
+                <span>Clinical Analytics</span>
+            </a>
+        </nav>
+        
+        <div class="border-t border-outline-variant pt-4 space-y-1">
+            <a class="flex items-center gap-3 px-4 py-2.5 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all text-xs font-bold" href="{{ url_for('dashboard.api_docs_page') }}">
+                <span class="material-symbols-outlined text-[18px]">code</span>
+                <span>API Documentation</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-2.5 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-all text-xs font-bold" href="{{ url_for('auth.logout') }}">
+                <span class="material-symbols-outlined text-[18px]">logout</span>
+                <span>Logout</span>
+            </a>
+        </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="flex-1 pb-xl px-margin-desktop">
+        <div class="max-w-6xl mx-auto space-y-8 mt-6">
+            <header class="flex justify-between items-start">
+                <div>
+                    <h1 class="text-3xl font-black text-primary">Notification & Alert System</h1>
+                    <p class="text-sm text-on-surface-variant max-w-3xl mt-1">Telemetry alert controls, semantic levels, preferences, and debugging utilities.</p>
+                </div>
+                
+                <!-- Component 5: Notification Bell with Badge & Dropdown Preview -->
+                <div class="relative group">
+                    <button class="p-2.5 rounded-full hover:bg-surface-container-high transition-colors relative cursor-pointer active:scale-95 duration-150 border">
+                        <span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+                        <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-error rounded-full border-2 border-surface-container-lowest" id="bell-badge"></span>
+                    </button>
+                    
+                    <!-- Dropdown Preview Panel -->
+                    <div class="invisible group-hover:visible absolute right-0 top-full mt-2 w-[340px] bg-surface-container-lowest shadow-lg rounded-xl border border-outline-variant overflow-hidden z-[60] origin-top-right transform transition-all text-xs">
+                        <div class="px-4 py-3 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+                            <span class="font-black text-sm">Notifications</span>
+                            <span class="text-primary font-bold cursor-pointer hover:underline" onclick="markAllNotificationsAsRead()">Mark all as read</span>
+                        </div>
+                        <div class="max-h-[300px] overflow-y-auto divide-y" id="bell-dropdown-list">
+                            <div class="p-3 flex gap-3 hover:bg-surface-container-low transition-colors cursor-pointer">
+                                <div class="w-8 h-8 rounded-full bg-secondary-fixed flex items-center justify-center flex-shrink-0 text-on-secondary-fixed"><span class="material-symbols-outlined text-[16px]">ecg_heart</span></div>
+                                <div>
+                                    <p class="font-bold text-on-surface">ECG Arrhythmia - Patient PAT-9912</p>
+                                    <p class="text-[10px] text-on-surface-variant mt-0.5">Spike in variability detected over 3-min threshold.</p>
+                                </div>
+                            </div>
+                            <div class="p-3 flex gap-3 hover:bg-surface-container-low transition-colors cursor-pointer">
+                                <div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center flex-shrink-0 text-on-primary-fixed"><span class="material-symbols-outlined text-[16px]">shield</span></div>
+                                <div>
+                                    <p class="font-bold text-on-surface">Security: Password Changed</p>
+                                    <p class="text-[10px] text-on-surface-variant mt-0.5">Credentials updated from terminal node 12B.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- BENTO GRID SYSTEM -->
+            <div class="grid grid-cols-12 gap-gutter">
+                
+                <!-- Section 1: Alert Levels & Variants (Component 1 & Component 6) -->
+                <section class="col-span-12 lg:col-span-7 space-y-6">
+                    <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant">
+                        <h2 class="text-base font-black text-on-surface mb-4 border-b pb-2 flex items-center gap-2"><span class="text-blue-600">01 //</span> Semantic Alert Variants</h2>
+                        <div class="space-y-3 text-xs">
+                            <!-- Success -->
+                            <div class="flex items-start gap-3.5 p-3.5 rounded-lg bg-emerald-50 border border-emerald-200">
+                                <span class="material-symbols-outlined text-emerald-600">check_circle</span>
+                                <div class="flex-1">
+                                    <p class="font-bold text-emerald-900">Diagnosis Submitted Successfully (Level 2)</p>
+                                    <p class="text-emerald-800 text-[11px] mt-0.5">Patient PAT-8820 diagnostic metrics successfully synced with central repository.</p>
+                                </div>
+                            </div>
+                            <!-- Warning -->
+                            <div class="flex items-start gap-3.5 p-3.5 rounded-lg bg-orange-50 border border-orange-200">
+                                <span class="material-symbols-outlined text-orange-600">warning</span>
+                                <div class="flex-1">
+                                    <p class="font-bold text-orange-900">Weak Signal Strength (Level 3)</p>
+                                    <p class="text-orange-800 text-[11px] mt-0.5">ECG Lead III is reporting intermittent impedance mismatch. Check probe.</p>
+                                </div>
+                            </div>
+                            <!-- Info -->
+                            <div class="flex items-start gap-3.5 p-3.5 rounded-lg bg-blue-50 border border-blue-200">
+                                <span class="material-symbols-outlined text-blue-600">info</span>
+                                <div class="flex-1">
+                                    <p class="font-bold text-blue-900">Software Update Available (Level 1)</p>
+                                    <p class="text-blue-800 text-[11px] mt-0.5">Version 2.4.1 includes updated arrhythmia detection neural weights.</p>
+                                </div>
+                            </div>
+                            <!-- Error -->
+                            <div class="flex items-start gap-3.5 p-3.5 rounded-lg bg-red-50 border border-red-200">
+                                <span class="material-symbols-outlined text-red-600">error</span>
+                                <div class="flex-1">
+                                    <p class="font-bold text-red-900">Telemetry Tunnel Encrypt Failed (Level 4)</p>
+                                    <p class="text-red-800 text-[11px] mt-0.5">Communication channel handshaking failed. Retrying in 12s.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Floating Toasts Configuration (Component 2 & 3) -->
+                    <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant">
+                        <h2 class="text-base font-black text-on-surface mb-2">Floating Toasts Simulator</h2>
+                        <p class="text-[11px] text-on-surface-variant mb-4">Choose position and trigger custom ephemeral toast warnings.</p>
+                        
+                        <div class="flex items-center gap-3 flex-wrap text-xs">
+                            <select id="toast-pos-select" class="rounded border-slate-300 py-1.5 px-3">
+                                <option value="tr">Top Right (Default)</option>
+                                <option value="tl">Top Left</option>
+                                <option value="br">Bottom Right</option>
+                                <option value="bl">Bottom Left</option>
+                                <option value="tc">Top Center</option>
+                                <option value="bc">Bottom Center</option>
+                            </select>
+                            <button onclick="triggerToastDemo()" class="bg-primary text-on-primary font-bold px-4 py-2 rounded-lg hover:opacity-90 active:scale-95 transition-all">Launch Preview Toast</button>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Section 2: Security & Patient specific events (Component 12 & 13) -->
+                <section class="col-span-12 lg:col-span-5 flex flex-col gap-gutter text-xs">
+                    <!-- Security Alerts (Component 13) -->
+                    <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant">
+                        <div class="flex items-center gap-2 border-b pb-2 mb-3">
+                            <span class="material-symbols-outlined text-primary text-[18px]">security</span>
+                            <h2 class="font-black text-sm text-on-surface">Security Incidents</h2>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-surface-container rounded-lg border border-outline-variant hover:border-primary transition-all cursor-pointer flex justify-between items-start">
+                                <div>
+                                    <p class="font-bold">Login: New Terminal Node</p>
+                                    <p class="text-[10px] text-on-surface-variant mt-0.5">Chrome/Linux • Node ID 9012A</p>
+                                </div>
+                                <span class="text-[10px] text-outline font-bold">10:45 AM</span>
+                            </div>
+                            <div class="p-3 bg-surface-container rounded-lg border border-outline-variant flex justify-between items-start">
+                                <div>
+                                    <p class="font-bold">Password Reset Confirmed</p>
+                                    <p class="text-[10px] text-on-surface-variant mt-0.5">Admin Security Pin changed.</p>
+                                </div>
+                                <span class="material-symbols-outlined text-emerald-600 text-[18px]">verified</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Patient specific notifications -->
+                    <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant">
+                        <div class="flex items-center gap-2 border-b pb-2 mb-3">
+                            <span class="material-symbols-outlined text-primary text-[18px]">patient_list</span>
+                            <h2 class="font-black text-sm text-on-surface">Patient Health Events</h2>
+                        </div>
+                        <div class="space-y-2.5">
+                            <div class="flex gap-3 p-3 bg-blue-50 border-l-4 border-blue-600 rounded-r">
+                                <span class="material-symbols-outlined text-blue-600 text-[18px]">medication</span>
+                                <div>
+                                    <p class="font-bold">Medication Due (PAT-4402)</p>
+                                    <p class="text-[10px] text-blue-800 mt-0.5">Due for Warfarin 5mg dosage at 14:00.</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3 p-3 bg-surface-container border-l-4 border-primary rounded-r">
+                                <span class="material-symbols-outlined text-primary text-[18px]">event</span>
+                                <div>
+                                    <p class="font-bold">Cardiology Post-Op Follow-up</p>
+                                    <p class="text-[10px] text-on-surface-variant mt-0.5">David Chen at 09:30 AM Tomorrow.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 3: In-App Alerts (Component 10) -->
+                <section class="col-span-12 grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
+                    <!-- Modal 1 -->
+                    <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant space-y-3">
+                        <div class="flex items-center gap-2 font-bold text-red-700">
+                            <span class="material-symbols-outlined">delete</span>
+                            <span>Component 10: Delete Confirmation</span>
+                        </div>
+                        <p class="text-on-surface-variant leading-relaxed">Permanently delete historical patient EEG telemetry logs? This action is irreversible.</p>
+                        <div class="flex justify-end gap-2">
+                            <button onclick="alert('Cancelled')" class="border px-3 py-1.5 rounded font-bold hover:bg-slate-50">Cancel</button>
+                            <button onclick="alert('EEG Logs Deleted')" class="bg-red-700 text-white px-3 py-1.5 rounded font-bold hover:bg-red-800">Delete</button>
+                        </div>
+                    </div>
+
+                    <!-- Modal 2 -->
+                    <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant space-y-3">
+                        <div class="flex items-center gap-2 font-bold text-orange-700">
+                            <span class="material-symbols-outlined">warning</span>
+                            <span>Component 10: Unsaved Form Warn</span>
+                        </div>
+                        <p class="text-on-surface-variant leading-relaxed">You have unsaved telemetry clinical notes. Leaving now will discard edits.</p>
+                        <div class="flex justify-end gap-2">
+                            <button onclick="alert('Staying')" class="border px-3 py-1.5 rounded font-bold hover:bg-slate-50">Stay</button>
+                            <button onclick="alert('Changes discarded')" class="bg-orange-700 text-white px-3 py-1.5 rounded font-bold hover:bg-orange-850">Discard</button>
+                        </div>
+                    </div>
+
+                    <!-- Modal 3 -->
+                    <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant space-y-3">
+                        <div class="flex items-center gap-2 font-bold text-blue-700">
+                            <span class="material-symbols-outlined">info</span>
+                            <span>Component 10: System Notice</span>
+                        </div>
+                        <p class="text-on-surface-variant leading-relaxed">The clinical intelligence processor core has been upgraded to v4.2.0 stable release.</p>
+                        <div class="flex justify-end gap-2">
+                            <button onclick="alert('Acknowledged')" class="bg-blue-750 text-white px-4 py-1.5 rounded font-bold hover:opacity-90 w-full text-center">Got it</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 4: Full Inbox Preview (Component 5 & 7) -->
+                <section class="col-span-12">
+                    <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant overflow-hidden">
+                        <div class="p-md border-b border-outline-variant flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                                <h2 class="text-lg font-black text-on-surface">Inbox Preview</h2>
+                                <p class="text-xs text-on-surface-variant">Centralized telemetry alert inbox.</p>
+                            </div>
+                            <div class="flex items-center gap-2 text-xs">
+                                <button class="px-3.5 py-2 border rounded-lg hover:bg-slate-100 font-bold transition-all" onclick="markSelectedNotificationsRead()">Mark Read</button>
+                                <button class="px-3.5 py-2 border rounded-lg hover:bg-slate-100 font-bold transition-all text-red-650" onclick="archiveSelectedNotifications()">Archive Selected</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Tabs -->
+                        <div class="bg-surface-container-low px-md border-b border-outline-variant flex gap-6 text-xs">
+                            <button onclick="switchInboxTab('all')" id="tab-inbox-all" class="py-3 border-b-2 border-primary text-primary font-black">All Notifications <span class="bg-primary/10 px-2 py-0.5 rounded-full text-[10px] ml-1" id="inbox-all-badge">3</span></button>
+                            <button onclick="switchInboxTab('unread')" id="tab-inbox-unread" class="py-3 border-b-2 border-transparent text-on-surface-variant hover:text-on-surface font-bold">Unread <span class="bg-status-critical text-white px-2 py-0.5 rounded-full text-[10px] ml-1" id="inbox-unread-badge">2</span></button>
+                            <button onclick="switchInboxTab('archived')" id="tab-inbox-archived" class="py-3 border-b-2 border-transparent text-on-surface-variant hover:text-on-surface font-bold">Archives</button>
+                        </div>
+
+                        <!-- Rows list -->
+                        <div class="divide-y divide-outline-variant/30 text-xs" id="inbox-rows-list">
+                            <!-- Row 1 -->
+                            <div class="p-4 flex items-center gap-4 hover:bg-surface-container-low transition-colors group cursor-pointer relative" id="row-inbox-1" data-unread="true" data-archived="false">
+                                <div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+                                <input type="checkbox" class="inbox-checkbox rounded border-outline-variant text-primary focus:ring-primary h-4.5 w-4.5" value="1"/>
+                                <div class="w-10 h-10 rounded-full bg-secondary-fixed flex items-center justify-center flex-shrink-0 text-on-secondary-fixed">
+                                    <span class="material-symbols-outlined text-[18px]">ecg_heart</span>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2">
+                                        <p class="font-bold text-on-surface">Arrhythmia Risk: PAT-9912</p>
+                                        <span class="px-2 py-0.5 bg-error-container text-on-error-container text-[9px] font-black rounded uppercase">Critical</span>
+                                    </div>
+                                    <p class="text-on-surface-variant text-[11px] mt-0.5">Ventricular flutter rate detected over 120s span. immediate nurse follow-up advised.</p>
+                                </div>
+                                <div class="flex flex-col items-end gap-1">
+                                    <span class="text-[10px] text-outline">Just now</span>
+                                    <div class="opacity-0 group-hover:opacity-100 flex gap-1 transition-opacity">
+                                        <button onclick="archiveRow(1)" class="p-1.5 hover:bg-surface-container-high rounded-full" title="Archive"><span class="material-symbols-outlined text-[16px]">archive</span></button>
+                                        <button onclick="deleteRow(1)" class="p-1.5 hover:bg-surface-container-high rounded-full text-red-600" title="Delete"><span class="material-symbols-outlined text-[16px]">delete</span></button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Row 2 -->
+                            <div class="p-4 flex items-center gap-4 hover:bg-surface-container-low transition-colors group cursor-pointer relative" id="row-inbox-2" data-unread="true" data-archived="false">
+                                <div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+                                <input type="checkbox" class="inbox-checkbox rounded border-outline-variant text-primary focus:ring-primary h-4.5 w-4.5" value="2"/>
+                                <div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center flex-shrink-0">
+                                    <span class="material-symbols-outlined text-[18px]">description</span>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2">
+                                        <p class="font-bold text-on-surface">Clinical Diagnostics Signed Off</p>
+                                        <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[9px] font-black rounded uppercase">Clinical</span>
+                                    </div>
+                                    <p class="text-on-surface-variant text-[11px] mt-0.5">Dr. Ramesh Chandra finalized lab observations for Ward 4 cardiology patient.</p>
+                                </div>
+                                <div class="flex flex-col items-end gap-1">
+                                    <span class="text-[10px] text-outline">45 mins ago</span>
+                                    <div class="opacity-0 group-hover:opacity-100 flex gap-1 transition-opacity">
+                                        <button onclick="archiveRow(2)" class="p-1.5 hover:bg-surface-container-high rounded-full" title="Archive"><span class="material-symbols-outlined text-[16px]">archive</span></button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Row 3 -->
+                            <div class="p-4 flex items-center gap-4 hover:bg-surface-container-low transition-colors group cursor-pointer opacity-75" id="row-inbox-3" data-unread="false" data-archived="false">
+                                <input type="checkbox" class="inbox-checkbox rounded border-outline-variant text-primary focus:ring-primary h-4.5 w-4.5" value="3"/>
+                                <div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center flex-shrink-0">
+                                    <span class="material-symbols-outlined text-[18px]">update</span>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2">
+                                        <p class="font-bold text-on-surface">Nightly Redundancy Sync Complete</p>
+                                        <span class="px-2 py-0.5 bg-surface-container-high text-on-surface-variant text-[9px] font-black rounded uppercase">System</span>
+                                    </div>
+                                    <p class="text-on-surface-variant text-[11px] mt-0.5">Full secondary node mirrors updated successfully. Data loss danger: NONE.</p>
+                                </div>
+                                <div class="flex flex-col items-end gap-1">
+                                    <span class="text-[10px] text-outline">Yesterday</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 5: Preferences & Testing Console (Component 11, 14, 16) -->
+                <section class="col-span-12 grid grid-cols-1 lg:grid-cols-2 gap-gutter text-xs">
+                    <!-- Delivery Preferences (Component 11) -->
+                    <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant space-y-4">
+                        <h2 class="text-base font-black text-on-surface border-b pb-2">Component 11: Notification Preferences</h2>
+                        
+                        <div class="space-y-3 font-semibold">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p>Emergency Critical Alarms</p>
+                                    <p class="text-[10px] text-on-surface-variant font-normal">Push notification and local auditory beep</p>
+                                </div>
+                                <input type="checkbox" checked class="rounded text-primary focus:ring-primary h-4 w-4"/>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p>Email Digest reports</p>
+                                    <p class="text-[10px] text-on-surface-variant font-normal">Send weekly cardiology cases summaries</p>
+                                </div>
+                                <input type="checkbox" checked class="rounded text-primary focus:ring-primary h-4 w-4"/>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p>Mobile SMS alerts</p>
+                                    <p class="text-[10px] text-on-surface-variant font-normal">Direct SMS alerts on pager lines</p>
+                                </div>
+                                <input type="checkbox" class="rounded text-primary focus:ring-primary h-4 w-4"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Debugging Console (Component 16) -->
+                    <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant space-y-4">
+                        <h2 class="text-base font-black text-on-surface border-b pb-2">Component 16: Test & Debug Console</h2>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block font-bold mb-1">Alert Level</label>
+                                <select id="debug-level" class="w-full rounded border-slate-300 py-1.5 px-3">
+                                    <option>Level 1: Information</option>
+                                    <option>Level 2: Success</option>
+                                    <option>Level 3: Warning</option>
+                                    <option>Level 4: Error</option>
+                                    <option>Level 5: System</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block font-bold mb-1">Custom Message</label>
+                                <input id="debug-message" type="text" class="w-full rounded border-slate-300 py-1.5 px-3" value="Telemetry test alert generated on local node."/>
+                            </div>
+                            <button onclick="triggerDebugAlert()" class="w-full bg-secondary text-white font-bold py-2 rounded-lg hover:brightness-110 active:scale-95 transition-all">Trigger Live Test Alert</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 6: Accessibility Guidelines (Component 15) -->
+                <section class="col-span-12">
+                    <div class="p-md bg-primary-container text-on-primary-container rounded-xl flex items-center gap-6">
+                        <div class="w-16 h-16 bg-on-primary-container/20 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="material-symbols-outlined text-3xl text-on-primary-container">accessibility_new</span>
+                        </div>
+                        <div class="text-xs">
+                            <h3 class="text-sm font-black">Accessibility & Screen-Reader Compliance (Component 15)</h3>
+                            <p class="mt-1 opacity-90 leading-relaxed">All alerts in the CardioPulse system must include appropriate <code class="bg-primary/20 px-1 rounded font-mono">aria-live</code> regions and <code class="bg-primary/20 px-1 rounded font-mono">role="alert"</code> attributes to ensure screen readers prioritize clinical emergencies. Color is never used as the sole indicator of status; semantic icons and clear label text are required.</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+</div>
+
 {% endblock %}
 
 {% block scripts %}
 <script>
-  // Sidebar toggle animation
-  const sidebarToggle = document.getElementById("sidebar-toggle");
-  const dbContainer = document.getElementById("dashboard-container");
-  const toggleIcon = document.getElementById("toggle-icon");
-  
-  if (sidebarToggle && dbContainer) {
-    sidebarToggle.addEventListener("click", () => {
-      dbContainer.classList.toggle("collapsed");
-      if (dbContainer.classList.contains("collapsed")) {
-        toggleIcon.setAttribute("data-lucide", "chevrons-right");
-      } else {
-        toggleIcon.setAttribute("data-lucide", "chevrons-left");
-      }
-      if (window.lucide) {
-        window.lucide.createIcons();
-      }
-    });
-  }
+    // Notifications memory array
+    let notificationCount = 3;
+    let notifications = [
+        { id: 1, title: 'Arrhythmia Risk: PAT-9912', desc: 'Ventricular flutter rate detected over 120s span.', unread: true, level: 'Critical', archived: false },
+        { id: 2, title: 'Clinical Diagnostics Signed Off', desc: 'Dr. Ramesh Chandra finalized lab observations.', unread: true, level: 'Clinical', archived: false },
+        { id: 3, title: 'Nightly Redundancy Sync Complete', desc: 'Full secondary node mirrors updated successfully.', unread: false, level: 'System', archived: false }
+    ];
+
+    // Trigger toast in the selected location
+    function triggerToast(title, desc, level = 'info', position = 'tr') {
+        const anchor = document.getElementById('toast-' + position);
+        if (!anchor) return;
+        
+        let borderClass = 'border-l-4 border-blue-600';
+        let icon = 'info';
+        if (level === 'success') { borderClass = 'border-l-4 border-emerald-600'; icon = 'check_circle'; }
+        if (level === 'warning') { borderClass = 'border-l-4 border-orange-600'; icon = 'warning'; }
+        if (level === 'error') { borderClass = 'border-l-4 border-red-650'; icon = 'error'; }
+        if (level === 'system') { borderClass = 'border-l-4 border-slate-700'; icon = 'settings'; }
+
+        const toastId = 'toast-inst-' + Date.now();
+        const toastHTML = `
+            <div id="${toastId}" class="p-4 bg-white shadow-xl rounded-lg border border-outline-variant flex gap-3 text-xs pointer-events-auto transition-all duration-300 max-w-[300px] ${borderClass}">
+                <span class="material-symbols-outlined text-[18px]">${icon}</span>
+                <div class="flex-1">
+                    <p class="font-black text-on-surface">${title}</p>
+                    <p class="text-[10px] text-on-surface-variant mt-0.5">${desc}</p>
+                </div>
+                <button onclick="document.getElementById('${toastId}').remove()" class="opacity-60 hover:opacity-100"><span class="material-symbols-outlined text-[16px]">close</span></button>
+            </div>
+        `;
+        anchor.insertAdjacentHTML('beforeend', toastHTML);
+
+        // Auto dismiss after 5s
+        setTimeout(() => {
+            const el = document.getElementById(toastId);
+            if (el) el.remove();
+        }, 5000);
+    }
+
+    function triggerToastDemo() {
+        const pos = document.getElementById('toast-pos-select').value;
+        triggerToast('Local Sync Complete', 'Telemetry data synced successfully.', 'success', pos);
+    }
+
+    function triggerDebugAlert() {
+        const levelSelect = document.getElementById('debug-level').value;
+        const msg = document.getElementById('debug-message').value;
+        
+        let level = 'info';
+        if (levelSelect.includes('Success')) level = 'success';
+        if (levelSelect.includes('Warning')) level = 'warning';
+        if (levelSelect.includes('Error')) level = 'error';
+        if (levelSelect.includes('System')) level = 'system';
+
+        triggerAlertFromConsole(levelSelect, level, msg);
+    }
+
+    function triggerAlertFromConsole(levelName, levelType, messageText) {
+        notificationCount++;
+        const newId = notificationCount;
+        
+        // Add to array
+        notifications.unshift({
+            id: newId,
+            title: levelName + ' Triggered',
+            desc: messageText,
+            unread: true,
+            level: levelType,
+            archived: false
+        });
+
+        // Trigger toast
+        triggerToast(levelName + ' Alert', messageText, levelType, 'tr');
+        
+        // Update bell lists & inbox UI
+        updateNotificationsUI();
+    }
+
+    function updateNotificationsUI() {
+        // Update badge
+        const unreadCount = notifications.filter(n => n.unread && !n.archived).length;
+        const badge = document.getElementById('bell-badge');
+        if (unreadCount > 0) {
+            badge.classList.remove('hidden');
+            badge.innerText = '';
+        } else {
+            badge.classList.add('hidden');
+        }
+
+        // Update Inbox Badges
+        document.getElementById('inbox-all-badge').innerText = notifications.filter(n => !n.archived).length;
+        document.getElementById('inbox-unread-badge').innerText = notifications.filter(n => n.unread && !n.archived).length;
+
+        // Render Bell Dropdown
+        const dropdownList = document.getElementById('bell-dropdown-list');
+        dropdownList.innerHTML = '';
+        notifications.filter(n => !n.archived).slice(0, 3).forEach(n => {
+            let icon = 'notifications';
+            if (n.level === 'success') icon = 'check_circle';
+            if (n.level === 'warning') icon = 'warning';
+            if (n.level === 'error') icon = 'error';
+            if (n.level === 'system') icon = 'settings';
+
+            dropdownList.innerHTML += `
+                <div class="p-3 flex gap-3 hover:bg-surface-container-low transition-colors cursor-pointer">
+                    <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0"><span class="material-symbols-outlined text-[16px]">${icon}</span></div>
+                    <div>
+                        <p class="font-bold text-on-surface">${n.title}</p>
+                        <p class="text-[10px] text-on-surface-variant mt-0.5">${n.desc}</p>
+                    </div>
+                </div>
+            `;
+        });
+
+        // Render Inbox Rows
+        renderInboxRows();
+    }
+
+    function renderInboxRows(filter = 'all') {
+        const list = document.getElementById('inbox-rows-list');
+        list.innerHTML = '';
+        
+        let filtered = notifications;
+        if (filter === 'unread') filtered = notifications.filter(n => n.unread && !n.archived);
+        else if (filter === 'archived') filtered = notifications.filter(n => n.archived);
+        else filtered = notifications.filter(n => !n.archived);
+
+        if (filtered.length === 0) {
+            list.innerHTML = `<div class="p-8 text-center text-slate-400 font-bold">No notifications found in this segment.</div>`;
+            return;
+        }
+
+        filtered.forEach(n => {
+            let icon = 'notifications';
+            let bgClass = 'bg-surface-container-highest';
+            if (n.level === 'success' || n.level.includes('Success')) { icon = 'check_circle'; bgClass = 'bg-emerald-100 text-emerald-800'; }
+            if (n.level === 'warning' || n.level.includes('Warning')) { icon = 'warning'; bgClass = 'bg-orange-100 text-orange-800'; }
+            if (n.level === 'error' || n.level.includes('Error')) { icon = 'error'; bgClass = 'bg-red-100 text-red-800'; }
+            if (n.level === 'system' || n.level.includes('System')) { icon = 'settings'; bgClass = 'bg-slate-200 text-slate-700'; }
+
+            const readOpacity = n.unread ? '' : 'opacity-70 bg-surface-container-lowest';
+            const accentIndicator = n.unread ? '<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>' : '';
+
+            list.innerHTML += `
+                <div class="p-4 flex items-center gap-4 hover:bg-surface-container-low transition-colors group cursor-pointer relative ${readOpacity}" id="row-inbox-${n.id}">
+                    ${accentIndicator}
+                    <input type="checkbox" class="inbox-checkbox rounded border-outline-variant text-primary focus:ring-primary h-4.5 w-4.5" value="${n.id}"/>
+                    <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
+                        <span class="material-symbols-outlined text-[18px]">${icon}</span>
+                    </div>
+                    <div class="flex-1" onclick="toggleReadState(${n.id})">
+                        <div class="flex items-center gap-2">
+                            <p class="font-bold text-on-surface">${n.title}</p>
+                            <span class="px-2 py-0.5 text-[9px] font-black rounded uppercase ${bgClass}">${n.level}</span>
+                        </div>
+                        <p class="text-on-surface-variant text-[11px] mt-0.5">${n.desc}</p>
+                    </div>
+                    <div class="flex flex-col items-end gap-1">
+                        <span class="text-[10px] text-outline">Just now</span>
+                        <div class="opacity-0 group-hover:opacity-100 flex gap-1 transition-opacity">
+                            <button onclick="archiveRow(${n.id})" class="p-1.5 hover:bg-surface-container-high rounded-full" title="Archive"><span class="material-symbols-outlined text-[16px]">archive</span></button>
+                            <button onclick="deleteRow(${n.id})" class="p-1.5 hover:bg-surface-container-high rounded-full text-red-650" title="Delete"><span class="material-symbols-outlined text-[16px]">delete</span></button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    let activeTab = 'all';
+    function switchInboxTab(tab) {
+        activeTab = tab;
+        document.getElementById('tab-inbox-all').className = 'py-3 border-b-2 border-transparent text-on-surface-variant hover:text-on-surface font-bold';
+        document.getElementById('tab-inbox-unread').className = 'py-3 border-b-2 border-transparent text-on-surface-variant hover:text-on-surface font-bold';
+        document.getElementById('tab-inbox-archived').className = 'py-3 border-b-2 border-transparent text-on-surface-variant hover:text-on-surface font-bold';
+        
+        document.getElementById('tab-inbox-' + tab).className = 'py-3 border-b-2 border-primary text-primary font-black';
+        renderInboxRows(tab);
+    }
+
+    function toggleReadState(id) {
+        const item = notifications.find(n => n.id === id);
+        if (item) {
+            item.unread = !item.unread;
+            updateNotificationsUI();
+        }
+    }
+
+    function archiveRow(id) {
+        const item = notifications.find(n => n.id === id);
+        if (item) {
+            item.archived = true;
+            updateNotificationsUI();
+        }
+    }
+
+    function deleteRow(id) {
+        notifications = notifications.filter(n => n.id !== id);
+        updateNotificationsUI();
+    }
+
+    function markAllNotificationsAsRead() {
+        notifications.forEach(n => n.unread = false);
+        updateNotificationsUI();
+    }
+
+    function getSelectedCheckboxIds() {
+        const checkboxes = document.querySelectorAll('.inbox-checkbox:checked');
+        return Array.from(checkboxes).map(cb => parseInt(cb.value));
+    }
+
+    function markSelectedNotificationsRead() {
+        const ids = getSelectedCheckboxIds();
+        notifications.forEach(n => {
+            if (ids.includes(n.id)) n.unread = false;
+        });
+        updateNotificationsUI();
+    }
+
+    function archiveSelectedNotifications() {
+        const ids = getSelectedCheckboxIds();
+        notifications.forEach(n => {
+            if (ids.includes(n.id)) n.archived = true;
+        });
+        updateNotificationsUI();
+    }
+
+    // Initialize UI on load
+    updateNotificationsUI();
 </script>
 {% endblock %}

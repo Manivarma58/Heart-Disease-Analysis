@@ -1,807 +1,801 @@
-{% extends "base.html" %}
-{% block title %}Register - CardioViz{% endblock %}
-{% block content %}
-<style>
-  /* Header overrides for Register page */
-  .topbar {
-    display: none !important; /* Hide base header for custom clean header */
-  }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Register | CardioViz</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#001255",
+                        "secondary": "#b4271d",
+                        "surface-light": "#F8FAFC",
+                        "outline-variant": "#c6c5d2"
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .btn-gradient { background: linear-gradient(135deg, #1a2a6c 0%, #c0392b 100%); }
+        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px); }
+        .step-inactive { opacity: 0.4; }
+        .strength-bar { transition: width 0.3s ease, background-color 0.3s ease; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between text-slate-900">
 
-  .reg-page-body {
-    min-height: 100vh;
-    background: #f8fafc;
-    font-family: 'Inter', sans-serif;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* Custom Clean Header */
-  .reg-header {
-    background: white;
-    border-bottom: 1px solid #e2e8f0;
-    padding: 0.75rem 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .reg-brand {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    text-decoration: none;
-  }
-  .reg-brand-mark {
-    background: #3b82f6;
-    color: white;
-    display: grid;
-    place-items: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 8px;
-  }
-  .reg-brand span {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 800;
-    font-size: 1.25rem;
-    color: #1e293b;
-  }
-  .reg-login-prompt {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    font-size: 0.88rem;
-    color: #64748b;
-    font-weight: 600;
-  }
-  .btn-ghost-login {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 2.3rem;
-    padding: 0.5rem 1.25rem;
-    border: 1.5px solid #3b82f6;
-    border-radius: 6px;
-    background: transparent;
-    color: #3b82f6;
-    font-weight: 700;
-    font-size: 0.85rem;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all 0.2s;
-  }
-  .btn-ghost-login:hover {
-    background: #3b82f6;
-    color: white;
-  }
-
-  /* Title / Intro */
-  .reg-intro {
-    text-align: center;
-    margin: 3.5rem auto 2.5rem;
-    max-width: 40rem;
-    padding: 0 1rem;
-  }
-  .reg-intro h1 {
-    font-family: 'Poppins', sans-serif;
-    font-size: 2.2rem;
-    font-weight: 800;
-    color: #0f172a;
-    margin-bottom: 0.5rem;
-  }
-  .reg-intro p {
-    font-size: 0.95rem;
-    color: #64748b;
-    margin: 0;
-    line-height: 1.6;
-  }
-
-  /* Layout Container */
-  .reg-layout {
-    display: grid;
-    grid-template-columns: 1fr 2.2fr;
-    gap: 3.5rem;
-    max-width: 58rem;
-    width: 100%;
-    margin: 0 auto;
-    padding: 0 1.5rem 5rem;
-  }
-
-  /* Left Column: Timeline Indicator */
-  .timeline-sidebar {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    padding-top: 1.5rem;
-  }
-  .timeline-step {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-  .step-circle {
-    width: 2.3rem;
-    height: 2.3rem;
-    border-radius: 50%;
-    background: transparent;
-    border: 2px solid #cbd5e1;
-    color: #64748b;
-    font-weight: 700;
-    display: grid;
-    place-items: center;
-    font-size: 0.9rem;
-    transition: all 0.3s;
-  }
-  .step-info {
-    display: flex;
-    flex-direction: column;
-  }
-  .step-info span.step-title {
-    font-size: 0.68rem;
-    font-weight: 800;
-    letter-spacing: 1px;
-    color: #94a3b8;
-    text-transform: uppercase;
-  }
-  .step-info span.step-desc {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: #64748b;
-  }
-
-  /* Active/Completed states */
-  .timeline-step.active .step-circle {
-    background: #3b82f6;
-    border-color: #3b82f6;
-    color: white;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
-  }
-  .timeline-step.active .step-info span.step-title {
-    color: #3b82f6;
-  }
-  .timeline-step.active .step-info span.step-desc {
-    color: #1e293b;
-  }
-  .timeline-step.completed .step-circle {
-    background: #10b981;
-    border-color: #10b981;
-    color: white;
-  }
-  .timeline-step.completed .step-info span.step-desc {
-    color: #64748b;
-    text-decoration: line-through;
-  }
-
-  /* Right Column: Card */
-  .reg-card {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-left: 4px solid #3b82f6; /* Left accent border */
-    border-radius: 12px;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-    padding: 3rem 2.5rem;
-    transition: transform 0.3s;
-  }
-
-  /* Form Step Content */
-  .form-step {
-    display: none;
-  }
-  .form-step.active {
-    display: block;
-    animation: fadeIn 0.4s ease-out;
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .reg-card h2 {
-    font-family: 'Poppins', sans-serif;
-    font-size: 1.45rem;
-    font-weight: 700;
-    color: #0f172a;
-    margin-bottom: 1.5rem;
-  }
-
-  /* Fields spacing */
-  .field-group {
-    margin-bottom: 1.5rem;
-  }
-  .field-group label {
-    display: block;
-    font-size: 0.74rem;
-    font-weight: 800;
-    color: #1e293b;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 0.5rem;
-  }
-
-  /* Input wrapper & styling */
-  .input-wrapper {
-    position: relative;
-  }
-  .input-wrapper i.input-icon {
-    position: absolute;
-    left: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #94a3b8;
-    width: 1.15rem;
-    height: 1.15rem;
-    pointer-events: none;
-  }
-  .input-control {
-    width: 100%;
-    min-height: 3rem;
-    background: white;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    padding: 0.75rem 1rem 0.75rem 2.75rem;
-    font-size: 0.9rem;
-    color: #1e293b;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-  .input-control:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  }
-
-  /* Select dropdown */
-  .select-control {
-    width: 100%;
-    min-height: 3rem;
-    background: white;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    padding: 0.75rem 1rem;
-    font-size: 0.9rem;
-    color: #1e293b;
-    outline: none;
-    appearance: none;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 1rem center;
-    background-size: 1rem;
-    cursor: pointer;
-  }
-  .select-control:focus {
-    border-color: #3b82f6;
-  }
-
-  /* Password Strength styling */
-  .strength-container {
-    margin-top: 0.5rem;
-  }
-  .strength-bars {
-    display: flex;
-    gap: 0.35rem;
-    margin-bottom: 0.4rem;
-  }
-  .strength-bar {
-    height: 4px;
-    flex: 1;
-    background-color: #e2e8f0;
-    border-radius: 2px;
-    transition: background-color 0.3s;
-  }
-  .strength-text {
-    font-size: 0.74rem;
-    font-weight: 600;
-    color: #64748b;
-    display: block;
-    margin-top: 0.2rem;
-  }
-
-  /* Captcha Box */
-  .captcha-box {
-    border: 1px solid #cbd5e1;
-    background: #f8fafc;
-    border-radius: 6px;
-    padding: 0.75rem 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    user-select: none;
-  }
-  .captcha-left {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #334155;
-  }
-  .captcha-checkbox {
-    width: 1.45rem;
-    height: 1.45rem;
-    border: 2px solid #cbd5e1;
-    border-radius: 3px;
-    background: white;
-    cursor: pointer;
-    display: grid;
-    place-items: center;
-    transition: border-color 0.2s;
-  }
-  .captcha-checkbox.checked {
-    border-color: #10b981;
-  }
-  .captcha-checkbox.checked::after {
-    content: "✓";
-    color: #10b981;
-    font-weight: 900;
-    font-size: 1.1rem;
-  }
-  .captcha-logo {
-    text-align: right;
-    font-size: 0.65rem;
-    color: #64748b;
-    font-weight: 600;
-  }
-  .captcha-logo img {
-    width: 1.6rem;
-    display: block;
-    margin: 0 auto;
-  }
-
-  /* Terms and privacy */
-  .checkbox-group {
-    display: flex;
-    gap: 0.6rem;
-    align-items: flex-start;
-    margin-bottom: 1.75rem;
-  }
-  .checkbox-group input {
-    margin-top: 0.15rem;
-    width: 1.1rem;
-    height: 1.1rem;
-    accent-color: #3b82f6;
-  }
-  .checkbox-group label {
-    font-size: 0.8rem;
-    color: #64748b;
-    line-height: 1.4;
-  }
-  .checkbox-group a {
-    color: #3b82f6;
-    text-decoration: none;
-    font-weight: 600;
-  }
-  .checkbox-group a:hover {
-    text-decoration: underline;
-  }
-
-  /* Buttons */
-  .btn-next {
-    width: 100%;
-    min-height: 3rem;
-    background: #3b82f6;
-    color: white;
-    border: 0;
-    border-radius: 8px;
-    font-weight: 700;
-    font-size: 0.95rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.25);
-    transition: all 0.2s;
-  }
-  .btn-next:hover {
-    background: #2563eb;
-    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.35);
-  }
-  .btn-back-step {
-    display: block;
-    text-align: center;
-    margin-top: 1.25rem;
-    font-size: 0.82rem;
-    color: #64748b;
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: none;
-  }
-  .btn-back-step:hover {
-    color: #1e293b;
-    text-decoration: underline;
-  }
-
-  /* Footer */
-  .reg-footer {
-    margin-top: auto;
-    text-align: center;
-    padding: 2rem 1rem;
-    font-size: 0.72rem;
-    color: #94a3b8;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    border-top: 1px solid #e2e8f0;
-    background: white;
-  }
-</style>
-
-<div class="reg-page-body">
-  <!-- Custom Header -->
-  <header class="reg-header">
-    <a class="reg-brand" href="{{ url_for('dashboard.index') }}" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none;">
-      <div style="width: 1.8rem; height: 1.8rem; border-radius: 6px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-        <img src="{{ url_for('static', filename='images/cardioviz_logo.png') }}" alt="CardioViz Logo" style="width: 100%; height: 100%; object-fit: cover;">
-      </div>
-      <span>CardioViz</span>
-    </a>
-    <div class="reg-login-prompt">
-      <span>Already have an account?</span>
-      <a class="btn-ghost-login" href="{{ url_for('auth.login') }}">Login</a>
-    </div>
-  </header>
-
-  <!-- Title section -->
-  <div class="reg-intro">
-    <h1>Join the Precision Pulse</h1>
-    <p>Access clinical-grade intelligence and optimize cardiovascular patient outcomes with CardioViz.</p>
-  </div>
-
-  <!-- Layout -->
-  <div class="reg-layout">
-    <!-- Left Indicator Timeline -->
-    <div class="timeline-sidebar">
-      <div class="timeline-step active" id="time-step-1">
-        <div class="step-circle" id="circle-1">1</div>
-        <div class="step-info">
-          <span class="step-title">ACCOUNT</span>
-          <span class="step-desc">Security Details</span>
+    <!-- Header Navigation -->
+    <header class="bg-white border-b border-slate-200 py-4 px-6 md:px-12 flex justify-between items-center shadow-sm">
+        <a class="flex items-center gap-2" href="/">
+            <div class="w-10 h-10 flex items-center justify-center bg-red-600/10 rounded-xl">
+                <span class="material-symbols-outlined text-red-600 text-[28px]" style="font-variation-settings: 'FILL' 1;">monitor_heart</span>
+            </div>
+            <span class="font-bold text-xl tracking-tight text-primary">CardioViz</span>
+        </a>
+        <div class="text-sm font-semibold text-slate-500">
+            Already have an account? <a href="{{ url_for('auth.login') }}" class="text-red-600 hover:text-red-500 transition-colors ml-1">Log in</a>
         </div>
-      </div>
-      <div class="timeline-step" id="time-step-2">
-        <div class="step-circle" id="circle-2">2</div>
-        <div class="step-info">
-          <span class="step-title">PROFILE</span>
-          <span class="step-desc">Personal Info</span>
-        </div>
-      </div>
-      <div class="timeline-step" id="time-step-3">
-        <div class="step-circle" id="circle-3">3</div>
-        <div class="step-info">
-          <span class="step-title">CLINICAL</span>
-          <span class="step-desc">Organization</span>
-        </div>
-      </div>
-    </div>
+    </header>
 
-    <!-- Right Form Card -->
-    <div class="reg-card">
-      <form method="post" id="register-wizard-form" action="{{ url_for('auth.register') }}">
+    <!-- Main Container -->
+    <main class="flex-grow flex items-center justify-center py-12 px-4 sm:px-6">
+        <div class="w-full max-w-[640px] space-y-8 bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-xl relative overflow-hidden">
+            
+            <!-- Dynamic Flash Message -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flex flex-col gap-2 mb-4">
+                        {% for category, message in messages %}
+                            <div class="px-4 py-3 rounded-xl shadow border flex items-center gap-2 text-sm font-semibold {% if category == 'error' or category == 'warning' or category == 'danger' %}bg-red-50 border-red-200 text-red-800{% else %}bg-green-50 border-green-200 text-green-800{% endif %}">
+                                <span class="material-symbols-outlined {% if category == 'error' or category == 'warning' or category == 'danger' %}text-red-500{% else %}text-green-500{% endif %} text-lg">error</span>
+                                <span>{{ message }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <!-- Role Indicator Badge and Toggle -->
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="px-4 py-2 rounded-full border bg-red-50 border-red-200 text-red-700 font-bold text-xs flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[16px]">verified</span>
+                    <span id="role-badge">Doctor/Healthcare Professional Registration</span>
+                </div>
+                <!-- Role Toggle -->
+                <div class="flex gap-2 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-semibold">
+                    <button type="button" id="toggle-doctor" class="px-3 py-1.5 rounded-lg transition-all">Doctor</button>
+                    <button type="button" id="toggle-patient" class="px-3 py-1.5 rounded-lg transition-all">Patient</button>
+                </div>
+            </div>
+
+            <!-- Progress Stepper -->
+            <div class="border-t border-slate-200 pt-6">
+                <div class="flex items-center justify-between text-xs font-bold text-slate-400">
+                    <div class="flex items-center gap-2 text-primary" id="step-nav-1">
+                        <span class="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center">1</span>
+                        <span>Personal</span>
+                    </div>
+                    <div class="w-12 h-[2px] bg-slate-200 flex-grow mx-2"></div>
+                    <div class="flex items-center gap-2" id="step-nav-2">
+                        <span class="w-6 h-6 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center">2</span>
+                        <span id="step-nav-2-label">Professional</span>
+                    </div>
+                    <div class="w-12 h-[2px] bg-slate-200 flex-grow mx-2"></div>
+                    <div class="flex items-center gap-2" id="step-nav-3">
+                        <span class="w-6 h-6 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center">3</span>
+                        <span>Security</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Multi-step wrapper -->
+            <form id="registration-form" method="post" class="space-y-6" enctype="multipart/form-data">
+                <input type="hidden" name="role" id="role-input" value="doctor" />
+
+                <!-- ================= STEP 1: Personal Details ================= -->
+                <div class="form-step space-y-6" id="step-1">
+                    <h3 class="text-xl font-bold text-slate-900 border-b pb-2">Step 1: Personal Details</h3>
+
+                    <!-- Profile Photo Upload -->
+                    <div class="flex flex-col sm:flex-row items-center gap-4">
+                        <div class="relative w-24 h-24 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center overflow-hidden" id="photo-preview-box">
+                            <span class="material-symbols-outlined text-slate-400 text-[40px]" id="photo-placeholder-icon">account_circle</span>
+                            <img id="photo-preview" class="w-full h-full object-cover hidden" />
+                        </div>
+                        <div class="space-y-1">
+                            <label class="block text-sm font-bold text-slate-700">Profile Photo</label>
+                            <input type="file" name="profile_photo" id="profile_photo" accept="image/png, image/jpeg" class="hidden" />
+                            <button type="button" onclick="document.getElementById('profile_photo').click()" class="px-4 py-2 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors text-xs font-semibold">Upload Photo</button>
+                            <p class="text-[10px] text-slate-400">JPG or PNG. Max size 5MB.</p>
+                        </div>
+                    </div>
+
+                    <!-- Full Name -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label class="block text-sm font-bold text-slate-700" for="first_name">First Name</label>
+                            <input type="text" name="first_name" id="first_name" required minlength="2" placeholder="John"
+                                   class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all text-sm"/>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="block text-sm font-bold text-slate-700" for="last_name">Last Name</label>
+                            <input type="text" name="last_name" id="last_name" required minlength="2" placeholder="Smith"
+                                   class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all text-sm"/>
+                        </div>
+                    </div>
+
+                    <!-- Email Address -->
+                    <div class="space-y-1">
+                        <label class="block text-sm font-bold text-slate-700" for="email" id="email-label">Professional Email Address</label>
+                        <input type="email" name="email" id="email" required placeholder="john.smith@hospital.com"
+                               class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all text-sm"/>
+                        <p class="text-[10px] text-slate-400" id="email-hint">Must belong to a clinic or hospital domain.</p>
+                    </div>
+
+                    <!-- DOB & Gender -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label class="block text-sm font-bold text-slate-700" for="dob">Date of Birth</label>
+                            <input type="date" name="dob" id="dob" required
+                                   class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all text-sm"/>
+                            <p class="text-[10px] text-red-500 hidden" id="dob-error">Must be 25+ years old.</p>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="block text-sm font-bold text-slate-700">Gender Identity</label>
+                            <div class="flex flex-wrap gap-x-4 gap-y-2 py-3">
+                                <label class="flex items-center text-xs font-semibold text-slate-600">
+                                    <input type="radio" name="gender" value="Male" required class="w-4 h-4 text-red-600 focus:ring-red-500 mr-1"/> Male
+                                </label>
+                                <label class="flex items-center text-xs font-semibold text-slate-600">
+                                    <input type="radio" name="gender" value="Female" class="w-4 h-4 text-red-600 focus:ring-red-500 mr-1"/> Female
+                                </label>
+                                <label class="flex items-center text-xs font-semibold text-slate-600">
+                                    <input type="radio" name="gender" value="Other" class="w-4 h-4 text-red-600 focus:ring-red-500 mr-1"/> Other
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Phone Number -->
+                    <div class="space-y-1">
+                        <label class="block text-sm font-bold text-slate-700" for="phone" id="phone-label">Phone Number</label>
+                        <input type="tel" name="phone" id="phone" required placeholder="+1 (555) 123-4567"
+                               class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all text-sm"/>
+                    </div>
+                </div>
+
+                <!-- ================= STEP 2: Doctor Professional Details ================= -->
+                <div class="form-step space-y-6 hidden" id="step-2-doctor">
+                    <h3 class="text-xl font-bold text-slate-900 border-b pb-2">Step 2: Professional Information</h3>
+
+                    <div class="space-y-1">
+                        <label class="block text-sm font-bold text-slate-700" for="license_number">Medical License Number</label>
+                        <input type="text" name="license_number" id="reg_license" placeholder="MED-12345"
+                               class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all text-sm"/>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="block text-sm font-bold text-slate-700">Specialization</label>
+                        <select name="specialization" id="specialization" multiple class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-red-500 outline-none">
+                            <option value="Cardiology">Cardiology</option>
+                            <option value="Cardiovascular Surgery">Cardiovascular Surgery</option>
+                            <option value="Internal Medicine">Internal Medicine</option>
+                            <option value="Family Medicine">Family Medicine</option>
+                            <option value="Public Health">Public Health</option>
+                            <option value="Cardiac Nursing">Cardiac Nursing</option>
+                            <option value="Cardiac Rehabilitation">Cardiac Rehabilitation</option>
+                            <option value="Research">Research</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <p class="text-[10px] text-slate-400">Hold Ctrl (Cmd) to select multiple.</p>
+                    </div>
+
+                    <div class="space-y-1">
+                        <div class="flex justify-between items-center text-sm font-bold text-slate-700">
+                            <span>Years of Experience</span>
+                            <span id="exp-val" class="text-red-600">5</span>
+                        </div>
+                        <input type="range" name="experience" id="experience" min="0" max="45" value="5"
+                               class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-red-600"/>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="block text-sm font-bold text-slate-700" for="affiliation">Hospital/Clinic Affiliation</label>
+                        <input type="text" name="affiliation" id="affiliation" placeholder="Metropolitan Hospital"
+                               class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all text-sm"/>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label class="block text-sm font-bold text-slate-700" for="department">Department</label>
+                            <input type="text" name="department" id="department" placeholder="Cardiology Department"
+                                   class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all text-sm"/>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="block text-sm font-bold text-slate-700" for="position">Position</label>
+                            <input type="text" name="position" id="position" placeholder="Senior Cardiologist"
+                                   class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all text-sm"/>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <div class="flex justify-between items-center text-sm font-bold text-slate-700">
+                            <label for="bio">Professional Bio</label>
+                            <span class="text-xs font-semibold text-slate-400"><span id="bio-count">0</span> / 500</span>
+                        </div>
+                        <textarea name="bio" id="bio" maxlength="500" placeholder="Tell us about your experience and expertise..." rows="3"
+                                  class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all text-sm resize-none"></textarea>
+                    </div>
+                </div>
+
+                <!-- ================= STEP 2: Patient Health Details ================= -->
+                <div class="form-step space-y-6 hidden" id="step-2-patient">
+                    <h3 class="text-xl font-bold text-slate-900 border-b pb-2">Step 2: Health Background</h3>
+
+                    <div class="space-y-1">
+                        <label class="block text-sm font-bold text-slate-700" for="primary_physician">Primary Care Physician</label>
+                        <input type="text" name="primary_physician" id="primary_physician" placeholder="Dr. Sarah Sharma"
+                               class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all text-sm"/>
+                    </div>
+
+                    <!-- Family History -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-bold text-slate-700">Family History of Cardiovascular Issues</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <label class="flex items-center text-xs font-semibold text-slate-600 bg-slate-50 p-3 border rounded-xl cursor-pointer">
+                                <input type="checkbox" name="family_history[]" value="Heart Disease" class="w-4 h-4 text-red-600 border-slate-200 rounded mr-2"/> Heart Disease
+                            </label>
+                            <label class="flex items-center text-xs font-semibold text-slate-600 bg-slate-50 p-3 border rounded-xl cursor-pointer">
+                                <input type="checkbox" name="family_history[]" value="Diabetes" class="w-4 h-4 text-red-600 border-slate-200 rounded mr-2"/> Diabetes
+                            </label>
+                            <label class="flex items-center text-xs font-semibold text-slate-600 bg-slate-50 p-3 border rounded-xl cursor-pointer">
+                                <input type="checkbox" name="family_history[]" value="Hypertension" class="w-4 h-4 text-red-600 border-slate-200 rounded mr-2"/> Hypertension
+                            </label>
+                            <label class="flex items-center text-xs font-semibold text-slate-600 bg-slate-50 p-3 border rounded-xl cursor-pointer">
+                                <input type="checkbox" name="family_history[]" value="Stroke" class="w-4 h-4 text-red-600 border-slate-200 rounded mr-2"/> Stroke
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Existing Conditions -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-bold text-slate-700">Existing Medical Conditions</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <label class="flex items-center text-xs font-semibold text-slate-600 bg-slate-50 p-3 border rounded-xl cursor-pointer">
+                                <input type="checkbox" name="existing_conditions[]" value="Diabetes" class="w-4 h-4 text-red-600 border-slate-200 rounded mr-2"/> Diabetes
+                            </label>
+                            <label class="flex items-center text-xs font-semibold text-slate-600 bg-slate-50 p-3 border rounded-xl cursor-pointer">
+                                <input type="checkbox" name="existing_conditions[]" value="High Blood Pressure" class="w-4 h-4 text-red-600 border-slate-200 rounded mr-2"/> High BP
+                            </label>
+                            <label class="flex items-center text-xs font-semibold text-slate-600 bg-slate-50 p-3 border rounded-xl cursor-pointer">
+                                <input type="checkbox" name="existing_conditions[]" value="High Cholesterol" class="w-4 h-4 text-red-600 border-slate-200 rounded mr-2"/> High Cholesterol
+                            </label>
+                            <label class="flex items-center text-xs font-semibold text-slate-600 bg-slate-50 p-3 border rounded-xl cursor-pointer">
+                                <input type="checkbox" name="existing_conditions[]" value="Heart Disease" class="w-4 h-4 text-red-600 border-slate-200 rounded mr-2"/> Heart Disease
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Lifestyle Habits -->
+                    <div class="space-y-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <label class="block text-sm font-bold text-slate-700">Lifestyle Habits</label>
+                        
+                        <div class="space-y-1">
+                            <span class="text-xs font-semibold text-slate-600">Smoking Habit</span>
+                            <div class="flex gap-4">
+                                <label class="flex items-center text-xs font-medium text-slate-600"><input type="radio" name="smoking" value="Never" checked class="w-4 h-4 text-red-600 mr-1"/> Never</label>
+                                <label class="flex items-center text-xs font-medium text-slate-600"><input type="radio" name="smoking" value="Former" class="w-4 h-4 text-red-600 mr-1"/> Former</label>
+                                <label class="flex items-center text-xs font-medium text-slate-600"><input type="radio" name="smoking" value="Current" class="w-4 h-4 text-red-600 mr-1"/> Current</label>
+                            </div>
+                        </div>
+
+                        <div class="space-y-1">
+                            <span class="text-xs font-semibold text-slate-600">Alcohol Intake</span>
+                            <div class="flex gap-4">
+                                <label class="flex items-center text-xs font-medium text-slate-600"><input type="radio" name="alcohol" value="Never" checked class="w-4 h-4 text-red-600 mr-1"/> Never</label>
+                                <label class="flex items-center text-xs font-medium text-slate-600"><input type="radio" name="alcohol" value="Occasionally" class="w-4 h-4 text-red-600 mr-1"/> Occasionally</label>
+                                <label class="flex items-center text-xs font-medium text-slate-600"><input type="radio" name="alcohol" value="Regularly" class="w-4 h-4 text-red-600 mr-1"/> Regularly</label>
+                            </div>
+                        </div>
+
+                        <div class="space-y-1">
+                            <span class="text-xs font-semibold text-slate-600">Physical Activity</span>
+                            <div class="flex gap-4">
+                                <label class="flex items-center text-xs font-medium text-slate-600"><input type="radio" name="activity" value="Sedentary" checked class="w-4 h-4 text-red-600 mr-1"/> Sedentary</label>
+                                <label class="flex items-center text-xs font-medium text-slate-600"><input type="radio" name="activity" value="Light" class="w-4 h-4 text-red-600 mr-1"/> Light</label>
+                                <label class="flex items-center text-xs font-medium text-slate-600"><input type="radio" name="activity" value="Moderate" class="w-4 h-4 text-red-600 mr-1"/> Moderate</label>
+                                <label class="flex items-center text-xs font-medium text-slate-600"><input type="radio" name="activity" value="Active" class="w-4 h-4 text-red-600 mr-1"/> Active</label>
+                            </div>
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="block text-xs font-semibold text-slate-600" for="diet">Typical Diet</label>
+                            <input type="text" name="diet" id="diet" placeholder="Describe your typical diet (e.g. Vegetarian, Low sodium)"
+                                   class="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-red-500"/>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="block text-sm font-bold text-slate-700" for="insurance">Insurance Provider</label>
+                        <input type="text" name="insurance" id="insurance" placeholder="Insurance Provider Name"
+                               class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all text-sm"/>
+                    </div>
+                </div>
+
+                <!-- ================= STEP 3: Account Setup & Credentials ================= -->
+                <div class="form-step space-y-6 hidden" id="step-3">
+                    <h3 class="text-xl font-bold text-slate-900 border-b pb-2">Step 3: Account Credentials</h3>
+
+                    <div class="space-y-1">
+                        <label class="block text-sm font-bold text-slate-700" for="username">Username</label>
+                        <input type="text" name="username" id="username" required minlength="4" placeholder="john_smith"
+                               class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all text-sm"/>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="block text-sm font-bold text-slate-700" for="password">Password</label>
+                        <input type="password" name="password" id="password" required minlength="8" placeholder="Create strong password"
+                               class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all text-sm"/>
+                        
+                        <!-- Strength Meter -->
+                        <div class="space-y-1.5 pt-2">
+                            <div class="flex justify-between items-center text-xs font-semibold text-slate-400">
+                                <span>Security Level</span>
+                                <span id="strength-label">Waiting...</span>
+                            </div>
+                            <div class="h-1 bg-slate-100 rounded-full overflow-hidden">
+                                <div id="strength-bar" class="h-full w-0 bg-slate-300 strength-bar"></div>
+                            </div>
+                        </div>
+
+                        <!-- Requirements Checklist -->
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs font-semibold text-slate-500 grid grid-cols-2 gap-2 mt-2">
+                            <div class="flex items-center gap-1.5" id="req-length">
+                                <span class="material-symbols-outlined text-[14px]">circle</span> Min 8 chars
+                            </div>
+                            <div class="flex items-center gap-1.5" id="req-upper">
+                                <span class="material-symbols-outlined text-[14px]">circle</span> Uppercase letter
+                            </div>
+                            <div class="flex items-center gap-1.5" id="req-number">
+                                <span class="material-symbols-outlined text-[14px]">circle</span> Numeric value
+                            </div>
+                            <div class="flex items-center gap-1.5" id="req-special">
+                                <span class="material-symbols-outlined text-[14px]">circle</span> Special character
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="block text-sm font-bold text-slate-700" for="confirm_password">Confirm Password</label>
+                        <input type="password" name="confirm_password" id="confirm_password" required placeholder="Confirm password"
+                               class="w-full h-12 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all text-sm"/>
+                        <p class="text-[10px] text-red-500 hidden" id="password-match-error">Passwords do not match.</p>
+                    </div>
+
+                    <!-- Patient Preferences (Patient only) -->
+                    <div class="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-100 hidden" id="patient-preferences-group">
+                        <label class="block text-sm font-bold text-slate-700">Account Preferences</label>
+                        
+                        <div class="space-y-1">
+                            <span class="text-xs font-semibold text-slate-600">Dashboard Theme</span>
+                            <div class="flex gap-4">
+                                <label class="flex items-center text-xs font-medium text-slate-600"><input type="radio" name="theme" value="System" checked class="w-4 h-4 text-red-600 mr-1"/> System</label>
+                                <label class="flex items-center text-xs font-medium text-slate-600"><input type="radio" name="theme" value="Light" class="w-4 h-4 text-red-600 mr-1"/> Light</label>
+                                <label class="flex items-center text-xs font-medium text-slate-600"><input type="radio" name="theme" value="Dark" class="w-4 h-4 text-red-600 mr-1"/> Dark</label>
+                            </div>
+                        </div>
+
+                        <label class="flex items-center justify-between py-1 cursor-pointer">
+                            <div class="flex flex-col text-xs font-medium text-slate-600">
+                                <span>Receive health insights</span>
+                                <span class="text-[10px] text-slate-400">Regular wellness recommendations</span>
+                            </div>
+                            <input type="checkbox" name="notifications" value="1" checked class="w-4 h-4 text-red-600 border-slate-200 rounded"/>
+                        </label>
+
+                        <label class="flex items-center justify-between py-1 cursor-pointer">
+                            <div class="flex flex-col text-xs font-medium text-slate-600">
+                                <span>Anonymized research sharing</span>
+                                <span class="text-[10px] text-slate-400">Help advance cardiac therapies</span>
+                            </div>
+                            <input type="checkbox" name="research_share" value="1" checked class="w-4 h-4 text-red-600 border-slate-200 rounded"/>
+                        </label>
+                    </div>
+
+                    <!-- Agreements Checkboxes -->
+                    <div class="space-y-3 pt-2">
+                        <label class="flex items-start text-xs font-semibold text-slate-500 cursor-pointer">
+                            <input type="checkbox" name="agreements[]" value="Terms" required class="w-4 h-4 text-red-600 border-slate-200 rounded mt-0.5 mr-2"/>
+                            <span>I agree to the <a href="#" class="text-red-600">Terms of Service</a> and <a href="#" class="text-red-600">Privacy Policy</a>.</span>
+                        </label>
+                        <label class="flex items-start text-xs font-semibold text-slate-500 cursor-pointer" id="hipaa-agreement-group">
+                            <input type="checkbox" name="agreements[]" value="HIPAA" required class="w-4 h-4 text-red-600 border-slate-200 rounded mt-0.5 mr-2"/>
+                            <span>I sign the professional <a href="#" class="text-red-600">HIPAA Compliance Data Processing Agreement</a>.</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Navigation Controls -->
+                <div class="flex justify-between items-center gap-4 pt-6 border-t border-slate-200">
+                    <button type="button" id="back-btn" class="px-6 h-12 border border-slate-200 rounded-xl font-bold text-sm text-slate-600 hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center gap-2 hidden">
+                        <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+                        <span>Back</span>
+                    </button>
+                    <button type="button" id="next-btn" class="flex-grow h-12 btn-gradient text-white rounded-xl font-bold text-sm hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                        <span>Continue</span>
+                        <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer Security badges -->
+    <footer class="bg-white border-t border-slate-200 py-6 px-6 text-center space-y-2">
+        <div class="flex items-center justify-center gap-xs px-sm py-1 bg-slate-50 border rounded-full max-w-xs mx-auto text-slate-500 font-bold text-[10px] uppercase tracking-wider">
+            <span class="material-symbols-outlined text-red-600 text-[16px]" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+            <span>Secure Patient Data Custodian</span>
+        </div>
+        <p class="text-xs text-slate-400">All connections are encrypted with SSL and fully secure.</p>
+    </footer>
+
+    <!-- Form Wizard Logic Script -->
+    <script>
+        let currentStep = 1;
+        let selectedRole = 'doctor';
+
+        const roleInput = document.getElementById('role-input');
+        const roleBadge = document.getElementById('role-badge');
+        const toggleDoctor = document.getElementById('toggle-doctor');
+        const togglePatient = document.getElementById('toggle-patient');
         
-        <!-- STEP 1: ACCOUNT DETAILS -->
-        <div class="form-step active" id="step-1-content">
-          <h2>Create Your Secure Account</h2>
-          
-          <div class="field-group">
-            <label for="email">Professional Email Address</label>
-            <div class="input-wrapper">
-              <i data-lucide="mail" class="input-icon"></i>
-              <input class="input-control" type="email" id="email" name="email" placeholder="dr.sharma@hospital.org" required>
-            </div>
-          </div>
-
-          <div class="field-group">
-            <label for="password">Password</label>
-            <div class="input-wrapper">
-              <i data-lucide="lock" class="input-icon"></i>
-              <input class="input-control" type="password" id="password" name="password" placeholder="••••••••" required oninput="evaluatePassword(this.value);">
-            </div>
-            <!-- Strength Indicator -->
-            <div class="strength-container">
-              <div class="strength-bars">
-                <div class="strength-bar" id="bar-1"></div>
-                <div class="strength-bar" id="bar-2"></div>
-                <div class="strength-bar" id="bar-3"></div>
-                <div class="strength-bar" id="bar-4"></div>
-              </div>
-              <span class="strength-text" id="strength-lbl">Enter a secure password</span>
-            </div>
-          </div>
-
-          <div class="field-group">
-            <label for="confirm_password">Confirm Password</label>
-            <div class="input-wrapper">
-              <i data-lucide="shield-check" class="input-icon"></i>
-              <input class="input-control" type="password" id="confirm_password" placeholder="••••••••" required>
-            </div>
-          </div>
-
-          <!-- Captcha Box -->
-          <div class="captcha-box">
-            <div class="captcha-left">
-              <div class="captcha-checkbox" id="captcha-check" onclick="toggleCaptchaCheck();"></div>
-              <span>I'm not a robot</span>
-            </div>
-            <div class="captcha-logo">
-              <img src="https://www.gstatic.com/recaptcha/api2/logo_48.png" alt="reCAPTCHA logo">
-              reCAPTCHA
-            </div>
-          </div>
-
-          <!-- Terms checkbox -->
-          <div class="checkbox-group">
-            <input type="checkbox" id="terms" required>
-            <label for="terms">
-              I agree to the <a href="#">Terms and Conditions</a> and BAA requirements for clinical data handling and secure HIPAA compliance.
-            </label>
-          </div>
-
-          <button class="btn-next" type="button" onclick="goToStep(2);">
-            Next Step <i data-lucide="arrow-right" style="width: 1.15rem; height: 1.15rem;"></i>
-          </button>
-        </div>
-
-        <!-- STEP 2: PROFILE DETAILS -->
-        <div class="form-step" id="step-2-content">
-          <h2>Personal Information</h2>
-
-          <div class="field-group">
-            <label for="name">Full Name</label>
-            <div class="input-wrapper">
-              <i data-lucide="user" class="input-icon"></i>
-              <input class="input-control" type="text" id="name" name="name" placeholder="Dr. Amit Sharma">
-            </div>
-          </div>
-
-          <div class="field-group">
-            <label for="role">Role / Medical Specialty</label>
-            <select class="select-control" id="role" name="role" onchange="handleRoleChange();">
-              <option value="Cardiologist">Cardiologist (Clinical Persona)</option>
-              <option value="Healthcare Administrator">Healthcare Administrator (Public Health Persona)</option>
-              <option value="Patient Advocate">Patient Advocate (Personal Monitoring Persona)</option>
-              <option value="Patient">Patient (Personal Health Hub Persona)</option>
-            </select>
-          </div>
-
-          <div class="field-group">
-            <label for="org">Clinical Organization / Hospital</label>
-            <div class="input-wrapper">
-              <i data-lucide="building" class="input-icon"></i>
-              <input class="input-control" type="text" id="org" placeholder="City General Cardiology Clinic">
-            </div>
-          </div>
-
-          <button class="btn-next" type="button" onclick="goToStep(3);">
-            Next Step <i data-lucide="arrow-right" style="width: 1.15rem; height: 1.15rem;"></i>
-          </button>
-          <span class="btn-back-step" onclick="goToStep(1);">Back to account credentials</span>
-        </div>
-
-        <!-- STEP 3: CLINICAL ORGANIZATION & VERIFICATION -->
-        <div class="form-step" id="step-3-content">
-          <h2>Security Verification</h2>
-          <p style="font-size: 0.88rem; color: #64748b; line-height: 1.5; margin-bottom: 2rem;">
-            To ensure secure HIPAA onboarding, please enter the temporary verification code sent to your professional email.
-          </p>
-
-          <div class="field-group">
-            <label for="verification_code">Temporary Verification Code</label>
-            <div class="input-wrapper">
-              <i data-lucide="shield-check" class="input-icon"></i>
-              <input class="input-control" type="text" id="verification_code" placeholder="DV-XXXXXX">
-            </div>
-          </div>
-
-          <p style="font-size: 0.8rem; color: #64748b; text-align: center; margin-bottom: 2rem;">
-            Didn't receive a verification code? <a href="#" onclick="resendVerificationCode(); return false;" style="color:#3b82f6; font-weight: 700; text-decoration: none;">Resend Code</a>
-          </p>
-
-          <button class="btn-next" type="submit" id="submit-wizard-btn">
-            Complete Registration
-          </button>
-          <span class="btn-back-step" onclick="goToStep(2);">Back to profile details</span>
-        </div>
-
-      </form>
-    </div>
-  </div>
-
-  <!-- Footer -->
-  <footer class="reg-footer">
-    &copy; 2026 CARDIOVIZ CLINICAL INTELLIGENCE • SECURE HIPAA COMPLIANT REGISTRATION
-  </footer>
-</div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-  let currentStep = 1;
-  let captchaChecked = false;
-
-  function toggleCaptchaCheck() {
-    const box = document.getElementById("captcha-check");
-    captchaChecked = !captchaChecked;
-    box.classList.toggle("checked", captchaChecked);
-  }
-
-  // Password Strength Evaluator
-  function evaluatePassword(pass) {
-    const lbl = document.getElementById("strength-lbl");
-    const bars = [
-      document.getElementById("bar-1"),
-      document.getElementById("bar-2"),
-      document.getElementById("bar-3"),
-      document.getElementById("bar-4")
-    ];
-
-    // Reset bars
-    bars.forEach(b => {
-      b.style.backgroundColor = "#e2e8f0";
-    });
-
-    if (pass.length === 0) {
-      lbl.innerText = "Enter a secure password";
-      lbl.style.color = "#64748b";
-      return;
-    }
-
-    if (pass.length < 5) {
-      // Weak
-      bars[0].style.backgroundColor = "#ef4444"; // red
-      lbl.innerText = "Password strength: Weak";
-      lbl.style.color = "#ef4444";
-    } else if (pass.length < 9) {
-      // Medium
-      bars[0].style.backgroundColor = "#f97316"; // orange
-      bars[1].style.backgroundColor = "#f97316";
-      lbl.innerText = "Password strength: Medium";
-      lbl.style.color = "#f97316";
-    } else {
-      // Strong
-      bars.forEach(b => b.style.backgroundColor = "#10b981"); // green
-      lbl.innerText = "Password strength: Strong";
-      lbl.style.color = "#10b981";
-    }
-  }
-
-  // Multi-step Navigation
-  function goToStep(step) {
-    // Validation for Step 1
-    if (step === 2 && currentStep === 1) {
-      const email = document.getElementById("email").value.trim();
-      const pass = document.getElementById("password").value;
-      const confirm = document.getElementById("confirm_password").value;
-      const terms = document.getElementById("terms").checked;
-
-      if (!email || !pass || !confirm) {
-        alert("Please fill in all email and password fields.");
-        return;
-      }
-      if (pass !== confirm) {
-        alert("Passwords do not match.");
-        return;
-      }
-      if (!captchaChecked) {
-        alert("Please complete the CAPTCHA verify verification.");
-        return;
-      }
-      if (!terms) {
-        alert("You must agree to the Terms and Conditions to proceed.");
-        return;
-      }
-
-      // Transition timeline
-      document.getElementById("time-step-1").classList.remove("active");
-      document.getElementById("time-step-1").classList.add("completed");
-      document.getElementById("time-step-2").classList.add("active");
-    }
-
-    // Validation for Step 2
-    if (step === 3 && currentStep === 2) {
-      const name = document.getElementById("name").value.trim();
-      const role = document.getElementById("role").value;
-      const org = document.getElementById("org").value.trim();
-
-      if (!name || !org) {
-        alert("Please fill in your name and organization.");
-        return;
-      }
-
-      // Generate a random 6-digit code and send it to the real email
-      if (!window.generatedVerificationCode) {
-        const randCode = Math.floor(100000 + Math.random() * 900000);
-        window.generatedVerificationCode = `DV-${randCode}`;
+        const stepNav2 = document.getElementById('step-nav-2');
+        const stepNav2Label = document.getElementById('step-nav-2-label');
+        const stepNav3 = document.getElementById('step-nav-3');
         
-        const emailVal = document.getElementById("email").value.trim();
-        fetch(`/send-verification-code?email=${encodeURIComponent(emailVal)}&code=${encodeURIComponent(window.generatedVerificationCode)}`)
-          .then(res => res.json())
-          .then(data => {
-            console.log("Real verification code sent successfully to email!");
-          })
-          .catch(err => {
-            console.error("Error sending verification code to email:", err);
-          });
-      }
+        const step1 = document.getElementById('step-1');
+        const step2Doctor = document.getElementById('step-2-doctor');
+        const step2Patient = document.getElementById('step-2-patient');
+        const step3 = document.getElementById('step-3');
+        
+        const backBtn = document.getElementById('back-btn');
+        const nextBtn = document.getElementById('next-btn');
 
-      // Transition timeline
-      document.getElementById("time-step-2").classList.remove("active");
-      document.getElementById("time-step-2").classList.add("completed");
-      document.getElementById("time-step-3").classList.add("active");
-    }
+        const dobInput = document.getElementById('dob');
+        const dobError = document.getElementById('dob-error');
+        const emailInput = document.getElementById('email');
+        const emailLabel = document.getElementById('email-label');
+        const emailHint = document.getElementById('email-hint');
+        const phoneLabel = document.getElementById('phone-label');
+        const phoneInput = document.getElementById('phone');
+        
+        const hipaaAgreement = document.getElementById('hipaa-agreement-group');
+        const patientPrefGroup = document.getElementById('patient-preferences-group');
+        
+        // Experience Slider
+        const experienceSlider = document.getElementById('experience');
+        const expVal = document.getElementById('exp-val');
+        if (experienceSlider) {
+            experienceSlider.addEventListener('input', (e) => {
+                expVal.textContent = e.target.value;
+            });
+        }
 
-    // Going backwards
-    if (step === 1 && currentStep === 2) {
-      document.getElementById("time-step-2").classList.remove("active");
-      document.getElementById("time-step-1").classList.remove("completed");
-      document.getElementById("time-step-1").classList.add("active");
-    }
-    if (step === 2 && currentStep === 3) {
-      document.getElementById("time-step-3").classList.remove("active");
-      document.getElementById("time-step-2").classList.remove("completed");
-      document.getElementById("time-step-2").classList.add("active");
-    }
+        // Bio character count
+        const bioTextarea = document.getElementById('bio');
+        const bioCount = document.getElementById('bio-count');
+        if (bioTextarea) {
+            bioTextarea.addEventListener('input', (e) => {
+                bioCount.textContent = e.target.value.length;
+            });
+        }
 
-    // Show/Hide steps contents
-    document.getElementById(`step-${currentStep}-content`).classList.remove("active");
-    document.getElementById(`step-${step}-content`).classList.add("active");
-    currentStep = step;
-  }
+        function setRole(role) {
+            selectedRole = role;
+            roleInput.value = role;
 
-  // Handle Form Submission loading feedback
-  const wizardForm = document.getElementById("register-wizard-form");
-  const submitWizardBtn = document.getElementById("submit-wizard-btn");
+            if (role === 'doctor') {
+                toggleDoctor.className = "px-3 py-1.5 rounded-lg bg-red-600 text-white shadow-sm";
+                togglePatient.className = "px-3 py-1.5 rounded-lg text-slate-500 bg-transparent";
+                roleBadge.textContent = "Doctor/Healthcare Professional Registration";
+                stepNav2Label.textContent = "Professional";
+                
+                emailLabel.textContent = "Professional Email Address";
+                emailInput.placeholder = "john.smith@hospital.com";
+                emailHint.textContent = "Must belong to a clinic or hospital domain.";
+                phoneLabel.textContent = "Phone Number";
+                phoneInput.required = true;
+                
+                hipaaAgreement.classList.remove('hidden');
+                patientPrefGroup.classList.add('hidden');
+            } else {
+                togglePatient.className = "px-3 py-1.5 rounded-lg bg-red-600 text-white shadow-sm";
+                toggleDoctor.className = "px-3 py-1.5 rounded-lg text-slate-500 bg-transparent";
+                roleBadge.textContent = "Patient/Individual Registration";
+                stepNav2Label.textContent = "Health Background";
+                
+                emailLabel.textContent = "Personal Email Address";
+                emailInput.placeholder = "anita.patel@email.com";
+                emailHint.textContent = "Does not require domain verification.";
+                phoneLabel.textContent = "Phone Number (Optional)";
+                phoneInput.required = false;
+                
+                hipaaAgreement.classList.add('hidden');
+                patientPrefGroup.classList.remove('hidden');
+            }
 
-  if (wizardForm && submitWizardBtn) {
-    wizardForm.addEventListener("submit", (e) => {
-      const verificationCode = document.getElementById("verification_code").value.trim();
-      if (!verificationCode) {
-        e.preventDefault();
-        alert("Please enter your email verification code to complete sign up.");
-        return;
-      }
-      
-      // Real validation of the generated code
-      if (verificationCode.toUpperCase() !== window.generatedVerificationCode) {
-        e.preventDefault();
-        alert("Invalid verification code. Please enter the correct code sent to your email/phone.");
-        return;
-      }
-      
-      submitWizardBtn.disabled = true;
-      submitWizardBtn.innerText = "Creating Account and Registering Key...";
-    });
-  }
+            // Reset stepper state
+            currentStep = 1;
+            renderStep();
+        }
 
-  function resendVerificationCode() {
-    const randCode = Math.floor(100000 + Math.random() * 900000);
-    window.generatedVerificationCode = `DV-${randCode}`;
-    
-    const emailVal = document.getElementById("email").value.trim();
-    fetch(`/send-verification-code?email=${encodeURIComponent(emailVal)}&code=${encodeURIComponent(window.generatedVerificationCode)}`)
-      .then(res => res.json())
-      .then(data => {
-        alert("A new verification code has been successfully sent to your email!");
-      })
-      .catch(err => {
-        alert("Error resending code. Please check your network connection.");
-      });
-  }
+        toggleDoctor.addEventListener('click', () => setRole('doctor'));
+        togglePatient.addEventListener('click', () => setRole('patient'));
 
-  // Dynamically update form labels/placeholders based on Patient vs Professional role
-  function handleRoleChange() {
-    const role = document.getElementById("role").value;
-    const orgLabel = document.querySelector('label[for="org"]');
-    const orgInput = document.getElementById("org");
-    const nameInput = document.getElementById("name");
-    
-    if (role === 'Patient') {
-      if (orgLabel) orgLabel.innerText = "Primary Clinic / General Practitioner";
-      if (orgInput) orgInput.placeholder = "City General Health Center";
-      if (nameInput) nameInput.placeholder = "Anita Sharma";
-    } else {
-      if (orgLabel) orgLabel.innerText = "Clinical Organization / Hospital";
-      if (orgInput) orgInput.placeholder = "City General Cardiology Clinic";
-      if (nameInput) nameInput.placeholder = "Dr. Amit Sharma";
-    }
-  }
-</script>
-{% endblock %}
+        function validateStep1() {
+            // First/Last Name
+            const firstName = document.getElementById('first_name').value.trim();
+            const lastName = document.getElementById('last_name').value.trim();
+            if (firstName.length < 2 || lastName.length < 2) return false;
 
+            // Email
+            const email = emailInput.value.trim();
+            if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) return false;
+
+            // DOB
+            const dobVal = dobInput.value;
+            if (!dobVal) return false;
+            const birthDate = new Date(dobVal);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            
+            if (selectedRole === 'doctor') {
+                if (age < 25) {
+                    dobError.classList.remove('hidden');
+                    return false;
+                } else {
+                    dobError.classList.add('hidden');
+                }
+            } else {
+                if (age < 18) {
+                    dobError.textContent = "Must be 18+ years old.";
+                    dobError.classList.remove('hidden');
+                    return false;
+                } else {
+                    dobError.classList.add('hidden');
+                }
+            }
+
+            // Gender
+            const genderSelected = document.querySelector('input[name="gender"]:checked');
+            if (!genderSelected) return false;
+
+            // Phone
+            if (selectedRole === 'doctor' && phoneInput.value.trim() === '') return false;
+
+            return true;
+        }
+
+        function validateStep2() {
+            if (selectedRole === 'doctor') {
+                const license = document.getElementById('reg_license').value.trim();
+                if (license === '') return false;
+                const specialization = document.getElementById('specialization');
+                if (specialization.selectedOptions.length === 0) return false;
+                const affiliation = document.getElementById('affiliation').value.trim();
+                if (affiliation === '') return false;
+            }
+            return true;
+        }
+
+        function renderStep() {
+            // Hide all steps
+            step1.classList.add('hidden');
+            step2Doctor.classList.add('hidden');
+            step2Patient.classList.add('hidden');
+            step3.classList.add('hidden');
+            
+            // Step Navbar indicators styling
+            const stepCircle1 = document.querySelector('#step-nav-1 span');
+            const stepCircle2 = document.querySelector('#step-nav-2 span');
+            const stepCircle3 = document.querySelector('#step-nav-3 span');
+            
+            stepCircle1.className = "w-6 h-6 rounded-full flex items-center justify-center bg-slate-200 text-slate-500";
+            stepCircle2.className = "w-6 h-6 rounded-full flex items-center justify-center bg-slate-200 text-slate-500";
+            stepCircle3.className = "w-6 h-6 rounded-full flex items-center justify-center bg-slate-200 text-slate-500";
+            
+            document.getElementById('step-nav-1').classList.add('text-slate-400');
+            document.getElementById('step-nav-2').classList.add('text-slate-400');
+            document.getElementById('step-nav-3').classList.add('text-slate-400');
+
+            if (currentStep === 1) {
+                step1.classList.remove('hidden');
+                backBtn.classList.add('hidden');
+                nextBtn.querySelector('span:first-child').textContent = "Continue";
+                
+                stepCircle1.className = "w-6 h-6 rounded-full flex items-center justify-center bg-primary text-white";
+                document.getElementById('step-nav-1').classList.remove('text-slate-400');
+                document.getElementById('step-nav-1').classList.add('text-primary');
+            } else if (currentStep === 2) {
+                if (selectedRole === 'doctor') {
+                    step2Doctor.classList.remove('hidden');
+                } else {
+                    step2Patient.classList.remove('hidden');
+                }
+                backBtn.classList.remove('hidden');
+                nextBtn.querySelector('span:first-child').textContent = "Continue";
+                
+                stepCircle2.className = "w-6 h-6 rounded-full flex items-center justify-center bg-primary text-white";
+                document.getElementById('step-nav-2').classList.remove('text-slate-400');
+                document.getElementById('step-nav-2').classList.add('text-primary');
+            } else if (currentStep === 3) {
+                step3.classList.remove('hidden');
+                backBtn.classList.remove('hidden');
+                nextBtn.querySelector('span:first-child').textContent = "Create Account";
+                
+                stepCircle3.className = "w-6 h-6 rounded-full flex items-center justify-center bg-primary text-white";
+                document.getElementById('step-nav-3').classList.remove('text-slate-400');
+                document.getElementById('step-nav-3').classList.add('text-primary');
+            }
+        }
+
+        backBtn.addEventListener('click', () => {
+            if (currentStep > 1) {
+                currentStep--;
+                renderStep();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentStep === 1) {
+                if (validateStep1()) {
+                    currentStep = 2;
+                    renderStep();
+                } else {
+                    alert('Please fill out all required Step 1 fields correctly.');
+                }
+            } else if (currentStep === 2) {
+                if (validateStep2()) {
+                    currentStep = 3;
+                    renderStep();
+                } else {
+                    alert('Please fill out all required Step 2 fields correctly.');
+                }
+            } else if (currentStep === 3) {
+                // Submit Form
+                const username = document.getElementById('username').value.trim();
+                const pass = document.getElementById('password').value;
+                const confirmPass = document.getElementById('confirm_password').value;
+                const agreementsChecked = document.querySelectorAll('input[name="agreements[]"]:checked').length;
+                
+                if (username.length < 4) {
+                    alert('Username must be at least 4 characters.');
+                    return;
+                }
+                if (pass !== confirmPass) {
+                    alert('Passwords do not match.');
+                    return;
+                }
+                
+                // HIPAA validation for doctors
+                const requiredAgreements = selectedRole === 'doctor' ? 2 : 1;
+                if (agreementsChecked < requiredAgreements) {
+                    alert('You must accept the agreements to register.');
+                    return;
+                }
+                
+                document.getElementById('registration-form').submit();
+            }
+        });
+
+        // Image Preview upload trigger
+        const profilePhoto = document.getElementById('profile_photo');
+        const photoPreview = document.getElementById('photo-preview');
+        const placeholderIcon = document.getElementById('photo-placeholder-icon');
+        
+        profilePhoto.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File size exceeds 5MB.');
+                    profilePhoto.value = '';
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    photoPreview.src = event.target.result;
+                    photoPreview.classList.remove('hidden');
+                    placeholderIcon.classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Password Strength validator
+        const passwordInput = document.getElementById('password');
+        const strengthBar = document.getElementById('strength-bar');
+        const strengthLabel = document.getElementById('strength-label');
+        
+        const reqLength = document.getElementById('req-length');
+        const reqUpper = document.getElementById('req-upper');
+        const reqNumber = document.getElementById('req-number');
+        const reqSpecial = document.getElementById('req-special');
+
+        passwordInput.addEventListener('input', () => {
+            const val = passwordInput.value;
+            let strength = 0;
+            
+            const checks = {
+                length: val.length >= 8,
+                upper: /[A-Z]/.test(val),
+                number: /[0-9]/.test(val),
+                special: /[^A-Za-z0-9]/.test(val)
+            };
+
+            const toggleCheck = (el, met) => {
+                const icon = el.querySelector('.material-symbols-outlined');
+                if (met) {
+                    el.className = "flex items-center gap-1.5 text-emerald-600";
+                    icon.textContent = "check_circle";
+                    icon.style.fontVariationSettings = "'FILL' 1";
+                } else {
+                    el.className = "flex items-center gap-1.5 text-slate-400";
+                    icon.textContent = "circle";
+                    icon.style.fontVariationSettings = "'FILL' 0";
+                }
+            };
+
+            Object.keys(checks).forEach(key => {
+                if (key === 'length') toggleCheck(reqLength, checks.length);
+                if (key === 'upper') toggleCheck(reqUpper, checks.upper);
+                if (key === 'number') toggleCheck(reqNumber, checks.number);
+                if (key === 'special') toggleCheck(reqSpecial, checks.special);
+                if (checks[key]) strength++;
+            });
+
+            const colors = ['bg-slate-300', 'bg-red-500', 'bg-amber-500', 'bg-indigo-500', 'bg-emerald-500'];
+            const labels = ['Waiting...', 'Weak', 'Fair', 'Strong', 'Very Strong'];
+            
+            strengthBar.style.width = (strength * 25) + '%';
+            strengthBar.className = `h-full strength-bar ${colors[strength]}`;
+            strengthLabel.textContent = labels[strength];
+        });
+
+        // Passwords Match validation
+        const confirmPassInput = document.getElementById('confirm_password');
+        const confirmPassError = document.getElementById('password-match-error');
+        
+        confirmPassInput.addEventListener('input', () => {
+            if (passwordInput.value !== confirmPassInput.value) {
+                confirmPassError.classList.remove('hidden');
+            } else {
+                confirmPassError.classList.add('hidden');
+            }
+        });
+
+        // Initialize and read query params
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const roleParam = urlParams.get('role');
+            if (roleParam === 'patient') {
+                setRole('patient');
+            } else {
+                setRole('doctor');
+            }
+        });
+    </script>
+</body>
+</html>

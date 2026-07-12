@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>DataVibe | Visualization &amp; Table Showcase</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@450&amp;display=swap" rel="stylesheet"/>
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-dim": "#d8dadc",
+                    "on-error": "#ffffff",
+                    "on-secondary-fixed": "#0b1c30",
+                    "on-background": "#191c1e",
+                    "inverse-surface": "#2d3133",
+                    "on-secondary-container": "#54647a",
+                    "background": "#f7f9fb",
+                    "surface-container-low": "#f2f4f6",
+                    "surface": "#f7f9fb",
+                    "on-tertiary-fixed": "#360f00",
+                    "primary-fixed": "#d9e2ff",
+                    "on-tertiary-container": "#ffc0a7",
+                    "tertiary-container": "#993900",
+                    "error-container": "#ffdad6",
+                    "secondary": "#505f76",
+                    "on-surface": "#191c1e",
+                    "inverse-on-surface": "#eff1f3",
+                    "tertiary-fixed-dim": "#ffb596",
+                    "on-primary-fixed-variant": "#00419c",
+                    "surface-container-highest": "#e0e3e5",
+                    "surface-container": "#eceef0",
+                    "surface-bright": "#f7f9fb",
+                    "primary-container": "#0f52ba",
+                    "error": "#ba1a1a",
+                    "surface-container-high": "#e6e8ea",
+                    "on-secondary": "#ffffff",
+                    "on-secondary-fixed-variant": "#38485d",
+                    "on-primary": "#ffffff",
+                    "on-surface-variant": "#434653",
+                    "secondary-container": "#d0e1fb",
+                    "tertiary": "#732900",
+                    "inverse-primary": "#b0c6ff",
+                    "outline": "#737784",
+                    "on-error-container": "#93000a",
+                    "on-tertiary-fixed-variant": "#7d2d00",
+                    "on-primary-container": "#bcceff",
+                    "tertiary-fixed": "#ffdbcd",
+                    "surface-variant": "#e0e3e5",
+                    "on-tertiary": "#ffffff",
+                    "surface-tint": "#1d59c1",
+                    "surface-container-lowest": "#ffffff",
+                    "secondary-fixed": "#d3e4fe",
+                    "secondary-fixed-dim": "#b7c8e1",
+                    "primary-fixed-dim": "#b0c6ff",
+                    "primary": "#003c90",
+                    "on-primary-fixed": "#001945",
+                    "outline-variant": "#c3c6d5"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "panel-padding": "16px",
+                    "compact-gutter": "12px",
+                    "table-cell-padding": "8px 12px",
+                    "standard-margin": "24px",
+                    "base": "4px"
+            },
+            "fontFamily": {
+                    "body-sm": ["Plus Jakarta Sans"],
+                    "title-sm": ["Plus Jakarta Sans"],
+                    "mono-sm": ["JetBrains Mono"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "mono-md": ["JetBrains Mono"],
+                    "display-lg": ["Plus Jakarta Sans"],
+                    "label-caps": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                    "title-sm": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "mono-sm": ["11px", {"lineHeight": "16px", "fontWeight": "450"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "mono-md": ["13px", {"lineHeight": "20px", "fontWeight": "450"}],
+                    "display-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-caps": ["10px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f7f9fb;
+        }
+        .chart-container {
+            position: relative;
+            background: #ffffff;
+            border: 1px solid #c3c6d5;
+            transition: box-shadow 0.2s ease;
+        }
+        .chart-container:hover {
+            box-shadow: 0 4px 12px rgba(0, 60, 144, 0.04);
+        }
+        .sparkline-bar {
+            transition: height 0.3s ease;
+        }
+    </style>
+</head>
+<body class="text-on-surface">
+
+<!-- TopNavBar -->
+<nav class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 h-12 bg-surface border-b border-outline-variant">
+    <div class="flex items-center gap-8">
+        <a href="{{ url_for('dashboard.home') }}" class="text-title-sm font-title-sm font-bold text-primary tracking-tight">DataVibe</a>
+        <div class="hidden md:flex gap-6 items-center">
+            <a class="text-label-caps font-label-caps text-primary border-b-2 border-primary h-12 flex items-center" href="{{ url_for('dashboard.visualizations_library_page') }}">ANALYTICS</a>
+            <a class="text-label-caps font-label-caps text-on-surface-variant hover:bg-surface-container-low transition-colors px-2 h-12 flex items-center" href="{{ url_for('clinical.clinical_dashboard') }}">PATIENTS</a>
+            <a class="text-label-caps font-label-caps text-on-surface-variant hover:bg-surface-container-low transition-colors px-2 h-12 flex items-center" href="{{ url_for('dashboard.reports_dashboard_page') }}">REPORTS</a>
+        </div>
+    </div>
+    <div class="flex items-center gap-4 text-xs font-bold">
+        <div class="bg-surface-container-low flex items-center px-3 py-1 rounded-lg border border-outline-variant">
+            <span class="material-symbols-outlined text-[18px] text-outline" data-icon="search">search</span>
+            <input class="bg-transparent border-none focus:ring-0 text-body-sm w-48 font-semibold text-xs" placeholder="Global search..." type="text"/>
+        </div>
+        <a href="{{ url_for('dashboard.notifications_components_page') }}" class="material-symbols-outlined cursor-pointer text-on-surface-variant hover:text-primary flex items-center" data-icon="notifications">notifications</a>
+        <div class="flex items-center gap-2 cursor-pointer">
+            <div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant">
+                <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpe2Gw9S0BIlyOiHABv0Xol76whmNYYu3EOxDMZxcOK7tSe52vwu36IkzUB1LjcUSR7FCUQ-2SaOHif8qjpK870-b4_VhkTx07wYt1-ZuL6tHk_nq54-56t-1b3VBMMob4L8k9YkXhz1VkPaDokyUiyJ3a0yVz2BL2l19orOAIX2Rc-3oqIZhwocisev7yxAoOxxpDhj9AdFhOGOk9rCW9ksxfrwvgYkLd79sIsVT4AS84kK2pX13pFU4DzLzxxTijqZmlx218itVg" alt="Julian Vance Headshot"/>
+            </div>
+            <span class="hidden lg:block text-body-sm font-medium">Dr. Julian Vance</span>
+        </div>
+    </div>
+</nav>
+
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-12 h-[calc(100vh-48px)] w-64 bg-surface-container-low border-r border-outline-variant z-40 hidden lg:flex flex-col p-4">
+    <div class="mb-8">
+        <div class="flex items-center gap-3 p-2">
+            <span class="material-symbols-outlined text-primary" data-icon="clinical_notes">clinical_notes</span>
+            <div>
+                <div class="text-title-sm font-title-sm text-primary font-bold">Julian Vance</div>
+                <div class="text-body-sm font-body-sm text-on-surface-variant opacity-70">Cardiologist</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="flex-grow space-y-1 text-xs font-bold text-slate-500">
+        <div class="flex items-center gap-3 px-4 py-2 my-1 rounded-lg bg-secondary-container text-on-secondary-container font-semibold cursor-pointer" onclick="location.href='{{ url_for('dashboard.home') }}'">
+            <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+            <span class="text-body-sm font-body-sm">Dashboard</span>
+        </div>
+        <div class="flex items-center gap-3 px-4 py-2 my-1 rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-all cursor-pointer" onclick="location.href='{{ url_for('clinical.clinical_dashboard') }}'">
+            <span class="material-symbols-outlined" data-icon="group">group</span>
+            <span class="text-body-sm font-body-sm">Patients</span>
+        </div>
+        <div class="flex items-center gap-3 px-4 py-2 my-1 rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-all cursor-pointer" onclick="location.href='{{ url_for('dashboard.visualizations_library_page') }}'">
+            <span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+            <span class="text-body-sm font-body-sm">Analytics</span>
+        </div>
+        <div class="flex items-center gap-3 px-4 py-2 my-1 rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-all cursor-pointer" onclick="location.href='{{ url_for('dashboard.reports_dashboard_page') }}'">
+            <span class="material-symbols-outlined" data-icon="description">description</span>
+            <span class="text-body-sm font-body-sm">Reports</span>
+        </div>
+        <div class="flex items-center gap-3 px-4 py-2 my-1 rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-all cursor-pointer" onclick="alert('Inventory logs pipeline...')">
+            <span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+            <span class="text-body-sm font-body-sm">Inventory</span>
+        </div>
+    </div>
+    
+    <div class="border-t border-outline-variant pt-4 space-y-1 text-xs font-bold text-slate-500">
+        <div class="flex items-center gap-3 px-4 py-2 my-1 rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-all cursor-pointer" onclick="location.href='{{ url_for('dashboard.settings_page') }}'">
+            <span class="material-symbols-outlined" data-icon="settings">settings</span>
+            <span class="text-body-sm font-body-sm">Profile Settings</span>
+        </div>
+        <div class="flex items-center gap-3 px-4 py-2 my-1 rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-all cursor-pointer" onclick="alert('Contact Support service desk...')">
+            <span class="material-symbols-outlined" data-icon="help">help</span>
+            <span class="text-body-sm font-body-sm">Help &amp; Support</span>
+        </div>
+        <div class="flex items-center gap-3 px-4 py-2 my-1 rounded-lg text-error hover:bg-error-container/10 transition-all cursor-pointer" onclick="location.href='{{ url_for('auth.logout') }}'">
+            <span class="material-symbols-outlined" data-icon="logout">logout</span>
+            <span class="text-body-sm font-body-sm">Logout</span>
+        </div>
+    </div>
+</aside>
+
+<!-- Main Canvas -->
+<main class="pt-12 lg:pl-64 min-h-screen">
+    <div class="p-6 max-w-[1600px] mx-auto space-y-8">
+        <!-- Page Header -->
+        <header class="flex justify-between items-end text-xs font-bold">
+            <div>
+                <h1 class="font-display-lg text-display-lg text-primary tracking-tight font-bold text-3xl">System Visualizer</h1>
+                <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl font-semibold">High-precision longitudinal clinical data analysis. Visualizing institutional performance and patient registry metrics.</p>
+            </div>
+            <div class="flex gap-2">
+                <button class="bg-surface border border-primary text-primary px-4 py-2 rounded flex items-center gap-2 text-label-caps hover:bg-primary-container/10 transition-colors" onclick="alert('Exporting metrics visualization dataset...')">
+                    <span class="material-symbols-outlined text-[16px]" data-icon="ios_share">ios_share</span> EXPORT
+                </button>
+                <button class="bg-primary text-on-primary px-4 py-2 rounded flex items-center gap-2 text-label-caps hover:bg-primary/90 transition-colors" onclick="alert('New query prompt active...')">
+                    <span class="material-symbols-outlined text-[16px]" data-icon="add">add</span> NEW QUERY
+                </button>
+            </div>
+        </header>
+        
+        <!-- Section 1: Primary Charts -->
+        <section>
+            <div class="flex items-center gap-2 mb-4">
+                <div class="h-6 w-1 bg-primary"></div>
+                <h2 class="text-title-sm font-title-sm uppercase tracking-widest text-on-surface-variant text-[10px] font-bold">Primary Charts</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-compact-gutter">
+                <!-- Line Chart -->
+                <div class="lg:col-span-6 chart-container rounded-lg p-panel-padding text-xs">
+                    <div class="flex justify-between items-center mb-6 font-bold text-slate-700">
+                        <h3 class="text-body-md font-semibold text-sm">Patient Outcomes (90-Day Trend)</h3>
+                        <div class="flex gap-4">
+                            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-primary"></span><span class="text-mono-sm">Target</span></div>
+                            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-tertiary"></span><span class="text-mono-sm">Actual</span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="h-56 w-full flex items-end justify-between gap-1 border-l border-b border-outline-variant pb-1 pl-1">
+                        <div class="relative w-full h-full overflow-hidden flex items-end">
+                            <svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 400 100">
+                                <path d="M0,80 L40,75 L80,85 L120,60 L160,65 L200,40 L240,45 L280,30 L320,35 L360,10 L400,15" fill="none" stroke="#003c90" stroke-width="2" vector-effect="non-scaling-stroke"></path>
+                                <path d="M0,90 L40,82 L80,88 L120,70 L160,78 L200,55 L240,62 L280,48 L320,52 L360,25 L400,32" fill="none" stroke="#732900" stroke-dasharray="4 2" stroke-width="2" vector-effect="non-scaling-stroke"></path>
+                            </svg>
+                            <div class="absolute inset-0 grid grid-cols-10 pointer-events-none opacity-10">
+                                <div class="border-r border-outline"></div><div class="border-r border-outline"></div><div class="border-r border-outline"></div><div class="border-r border-outline"></div><div class="border-r border-outline"></div><div class="border-r border-outline"></div><div class="border-r border-outline"></div><div class="border-r border-outline"></div><div class="border-r border-outline"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between mt-2 text-mono-sm opacity-60 font-semibold font-mono text-[10px]">
+                        <span>AUG 01</span><span>SEP 01</span><span>OCT 01</span><span>NOV 01</span>
+                    </div>
+                </div>
+                
+                <!-- Bar Chart -->
+                <div class="lg:col-span-3 chart-container rounded-lg p-panel-padding text-xs">
+                    <h3 class="text-body-md font-bold text-slate-700 text-sm mb-6">Acuity Distribution</h3>
+                    <div class="h-56 flex items-end justify-around gap-2 px-2">
+                        <div class="w-full group relative">
+                            <div class="bg-primary/20 w-full rounded-t-sm h-[30%] group-hover:bg-primary/40 transition-colors"></div>
+                            <div class="absolute -top-6 left-1/2 -translate-x-1/2 text-mono-sm opacity-0 group-hover:opacity-100 transition-opacity font-bold">12%</div>
+                        </div>
+                        <div class="w-full group relative">
+                            <div class="bg-primary/40 w-full rounded-t-sm h-[65%] group-hover:bg-primary/60 transition-colors"></div>
+                            <div class="absolute -top-6 left-1/2 -translate-x-1/2 text-mono-sm opacity-0 group-hover:opacity-100 transition-opacity font-bold">48%</div>
+                        </div>
+                        <div class="w-full group relative">
+                            <div class="bg-primary/80 w-full rounded-t-sm h-[85%] group-hover:bg-primary transition-colors"></div>
+                            <div class="absolute -top-6 left-1/2 -translate-x-1/2 text-mono-sm opacity-0 group-hover:opacity-100 transition-opacity font-bold">72%</div>
+                        </div>
+                        <div class="w-full group relative">
+                            <div class="bg-primary w-full rounded-t-sm h-[45%] group-hover:bg-primary transition-colors"></div>
+                            <div class="absolute -top-6 left-1/2 -translate-x-1/2 text-mono-sm opacity-0 group-hover:opacity-100 transition-opacity font-bold">30%</div>
+                        </div>
+                    </div>
+                    <div class="flex justify-around mt-4 text-mono-sm opacity-60 font-semibold font-mono text-[10px]">
+                        <span>LOW</span><span>MED</span><span>HIGH</span><span>CRIT</span>
+                    </div>
+                </div>
+                
+                <!-- Doughnut Chart -->
+                <div class="lg:col-span-3 chart-container rounded-lg p-panel-padding flex flex-col text-xs font-semibold">
+                    <h3 class="text-body-md font-bold text-slate-700 text-sm mb-4">Risk Stratification</h3>
+                    <div class="flex-grow flex items-center justify-center relative">
+                        <div class="w-32 h-32 rounded-full border-[12px] border-primary-fixed relative">
+                            <div class="absolute inset-0 rounded-full border-[12px] border-primary border-t-transparent border-r-transparent rotate-45"></div>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <span class="text-title-sm font-bold text-lg text-slate-800">64%</span>
+                                <span class="text-[9px] font-label-caps opacity-60 font-bold">STABLE</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 space-y-1 text-slate-600 font-semibold text-xs">
+                        <div class="flex justify-between items-center text-mono-sm">
+                            <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-primary"></span> Elevated</span>
+                            <span class="font-semibold">36%</span>
+                        </div>
+                        <div class="flex justify-between items-center text-mono-sm">
+                            <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-primary-fixed"></span> Baseline</span>
+                            <span class="font-semibold">64%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Section 2: Advanced Analytics -->
+        <section>
+            <div class="flex items-center gap-2 mb-4">
+                <div class="h-6 w-1 bg-tertiary"></div>
+                <h2 class="text-title-sm font-title-sm uppercase tracking-widest text-on-surface-variant text-[10px] font-bold">Advanced Analytics</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-compact-gutter">
+                <!-- Heat Map -->
+                <div class="chart-container rounded-lg p-panel-padding text-xs font-semibold">
+                    <h3 class="text-body-md font-bold text-slate-700 text-sm mb-4">Clinic Capacity (Heat Map)</h3>
+                    <div class="grid grid-cols-7 gap-1">
+                        <!-- Custom dynamic cells -->
+                        <div class="aspect-square rounded-sm bg-primary/20 hover:ring-1 ring-primary cursor-help"></div>
+                        <div class="aspect-square rounded-sm bg-primary/40 hover:ring-1 ring-primary cursor-help"></div>
+                        <div class="aspect-square rounded-sm bg-primary hover:ring-1 ring-primary cursor-help"></div>
+                        <div class="aspect-square rounded-sm bg-primary/70 hover:ring-1 ring-primary cursor-help"></div>
+                        <div class="aspect-square rounded-sm bg-surface-container hover:ring-1 ring-primary cursor-help"></div>
+                        <div class="aspect-square rounded-sm bg-primary/40 hover:ring-1 ring-primary cursor-help"></div>
+                        <div class="aspect-square rounded-sm bg-primary/20 hover:ring-1 ring-primary cursor-help"></div>
+                        
+                        <div class="aspect-square rounded-sm bg-primary/70 hover:ring-1 ring-primary cursor-help"></div>
+                        <div class="aspect-square rounded-sm bg-primary/20 hover:ring-1 ring-primary cursor-help"></div>
+                        <div class="aspect-square rounded-sm bg-surface-container hover:ring-1 ring-primary cursor-help"></div>
+                        <div class="aspect-square rounded-sm bg-primary/40 hover:ring-1 ring-primary cursor-help"></div>
+                        <div class="aspect-square rounded-sm bg-primary hover:ring-1 ring-primary cursor-help"></div>
+                        <div class="aspect-square rounded-sm bg-primary/20 hover:ring-1 ring-primary cursor-help"></div>
+                        <div class="aspect-square rounded-sm bg-primary/70 hover:ring-1 ring-primary cursor-help"></div>
+
+                        <div class="aspect-square rounded-sm bg-primary/40 hover:ring-1 ring-primary cursor-help"></div>
+                        <div class="aspect-square rounded-sm bg-primary hover:ring-1 ring-primary cursor-help"></div>
+                        <div class="aspect-square rounded-sm bg-primary/70 hover:ring-1 ring-primary cursor-help"></div>
+                        <div class="aspect-square rounded-sm bg-surface-container hover:ring-1 ring-primary cursor-help"></div>
+                        <div class="aspect-square rounded-sm bg-primary/20 hover:ring-1 ring-primary cursor-help"></div>
+                        <div class="aspect-square rounded-sm bg-primary/45 hover:ring-1 ring-primary cursor-help"></div>
+                        <div class="aspect-square rounded-sm bg-primary/70 hover:ring-1 ring-primary cursor-help"></div>
+
+                        <div class="aspect-square rounded-sm bg-primary/20 hover:ring-1 ring-primary cursor-help"></div>
+                        <div class="aspect-square rounded-sm bg-surface-container hover:ring-1 ring-primary cursor-help"></div>
+                        <div class="aspect-square rounded-sm bg-primary/40 hover:ring-1 ring-primary cursor-help"></div>
+                        <div class="aspect-square rounded-sm bg-primary hover:ring-1 ring-primary cursor-help"></div>
+                        <div class="aspect-square rounded-sm bg-primary/70 hover:ring-1 ring-primary cursor-help"></div>
+                        <div class="aspect-square rounded-sm bg-primary/40 hover:ring-1 ring-primary cursor-help"></div>
+                        <div class="aspect-square rounded-sm bg-primary/20 hover:ring-1 ring-primary cursor-help"></div>
+
+                        <div class="aspect-square rounded-sm bg-primary hover:ring-1 ring-primary cursor-help"></div>
+                        <div class="aspect-square rounded-sm bg-primary/70 hover:ring-1 ring-primary cursor-help"></div>
+                        <div class="aspect-square rounded-sm bg-primary/40 hover:ring-1 ring-primary cursor-help"></div>
+                        <div class="aspect-square rounded-sm bg-primary/20 hover:ring-1 ring-primary cursor-help"></div>
+                        <div class="aspect-square rounded-sm bg-surface-container hover:ring-1 ring-primary cursor-help"></div>
+                        <div class="aspect-square rounded-sm bg-primary/70 hover:ring-1 ring-primary cursor-help"></div>
+                        <div class="aspect-square rounded-sm bg-primary hover:ring-1 ring-primary cursor-help"></div>
+                    </div>
+                    <div class="mt-4 flex justify-between items-center text-[10px] font-mono-sm text-on-surface-variant opacity-60 font-bold font-mono">
+                        <span>08:00</span>
+                        <span>MON — SUN</span>
+                        <span>20:00</span>
+                    </div>
+                </div>
+                
+                <!-- Scatter Plot -->
+                <div class="chart-container rounded-lg p-panel-padding text-xs font-semibold">
+                    <h3 class="text-body-md font-bold text-slate-700 text-sm mb-4">Risk vs. Age</h3>
+                    <div class="h-40 w-full border-l border-b border-outline-variant relative">
+                        <div class="absolute bg-primary rounded-full" style="left: 12%; bottom: 35%; width: 6px; height: 6px; opacity: 0.8"></div>
+                        <div class="absolute bg-primary rounded-full" style="left: 24%; bottom: 15%; width: 8px; height: 8px; opacity: 0.9"></div>
+                        <div class="absolute bg-primary rounded-full" style="left: 45%; bottom: 78%; width: 5px; height: 5px; opacity: 0.6"></div>
+                        <div class="absolute bg-primary rounded-full" style="left: 62%; bottom: 44%; width: 9px; height: 9px; opacity: 0.75"></div>
+                        <div class="absolute bg-primary rounded-full" style="left: 78%; bottom: 92%; width: 10px; height: 10px; opacity: 0.95"></div>
+                        <div class="absolute bg-primary rounded-full" style="left: 32%; bottom: 60%; width: 7px; height: 7px; opacity: 0.5"></div>
+                        <div class="absolute bg-primary rounded-full" style="left: 88%; bottom: 25%; width: 6px; height: 6px; opacity: 0.7"></div>
+                        <div class="absolute bg-primary rounded-full" style="left: 55%; bottom: 50%; width: 8px; height: 8px; opacity: 0.85"></div>
+                    </div>
+                    <div class="flex justify-between mt-2 text-mono-sm opacity-60 font-semibold font-mono text-[10px]">
+                        <span>18Y</span><span>40Y</span><span>60Y</span><span>85Y+</span>
+                    </div>
+                </div>
+                
+                <!-- Gauge Chart -->
+                <div class="chart-container rounded-lg p-panel-padding text-xs font-semibold">
+                    <h3 class="text-body-md font-bold text-slate-700 text-sm mb-4">System Health</h3>
+                    <div class="relative h-40 flex items-center justify-center overflow-hidden">
+                        <div class="w-48 h-24 bg-surface-container rounded-t-full border-t border-l border-r border-outline-variant relative overflow-hidden">
+                            <div class="absolute bottom-0 left-0 w-full h-full bg-primary origin-bottom rotate-[140deg] transition-transform duration-1000"></div>
+                        </div>
+                        <div class="absolute bottom-4 flex flex-col items-center">
+                            <span class="text-display-lg leading-none font-bold text-slate-800">94.2</span>
+                            <span class="text-label-caps opacity-60 font-bold text-[9px]">OPTIMAL</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Section 3: Geographic & Structural -->
+        <section>
+            <div class="flex items-center gap-2 mb-4">
+                <div class="h-6 w-1 bg-secondary"></div>
+                <h2 class="text-title-sm font-title-sm uppercase tracking-widest text-on-surface-variant text-[10px] font-bold">Geographic &amp; Structural</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-compact-gutter">
+                <!-- Treemap -->
+                <div class="chart-container rounded-lg p-panel-padding text-xs">
+                    <h3 class="text-body-md font-bold text-slate-700 text-sm mb-4">Resource Allocation</h3>
+                    <div class="h-64 grid grid-cols-3 grid-rows-3 gap-1">
+                        <div class="col-span-2 row-span-2 bg-primary/90 rounded-sm p-3 text-white">
+                            <div class="text-label-caps opacity-80 font-bold text-[9px] tracking-wider">CARDIOLOGY</div>
+                            <div class="text-title-sm font-bold text-xl">42%</div>
+                        </div>
+                        <div class="bg-primary/60 rounded-sm p-3 text-white">
+                            <div class="text-label-caps opacity-80 font-bold text-[9px] tracking-wider">ONCOLOGY</div>
+                            <div class="text-body-sm font-bold text-[13px]">18%</div>
+                        </div>
+                        <div class="bg-primary/40 rounded-sm p-3 text-on-primary">
+                            <div class="text-label-caps opacity-80 font-bold text-[9px] tracking-wider">NEURO</div>
+                            <div class="text-body-sm font-bold text-[13px]">12%</div>
+                        </div>
+                        <div class="col-span-1 bg-primary/20 rounded-sm p-3">
+                            <div class="text-label-caps text-on-surface-variant font-bold text-[9px] tracking-wider">OTHERS</div>
+                            <div class="text-body-sm font-bold text-[13px] text-slate-700">28%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Geo Map -->
+                <div class="chart-container rounded-lg p-panel-padding overflow-hidden relative text-xs">
+                    <h3 class="text-body-md font-bold text-slate-700 text-sm mb-4">Regional Patient Density</h3>
+                    <div class="h-64 w-full bg-surface-container rounded-sm relative overflow-hidden">
+                        <div class="absolute inset-0 opacity-20 grayscale bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+                        <div class="w-full h-full relative" data-location="New York">
+                            <!-- Simulated density points -->
+                            <div class="absolute top-1/4 left-1/3 w-12 h-12 bg-primary/30 rounded-full animate-pulse blur-md"></div>
+                            <div class="absolute top-1/2 left-2/3 w-20 h-20 bg-primary/20 rounded-full animate-pulse blur-xl"></div>
+                            <div class="absolute bottom-1/4 right-1/4 w-8 h-8 bg-primary/40 rounded-full animate-pulse blur-sm"></div>
+                            <!-- UI elements on map -->
+                            <div class="absolute bottom-4 left-4 bg-white/90 backdrop-blur p-2 rounded shadow-sm border border-outline-variant text-[11px] font-bold">
+                                <div class="text-mono-sm font-bold">East Coast Cluster</div>
+                                <div class="text-[10px] opacity-60">8.4k Active Records</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Section 4: Clinical Data Table -->
+        <section class="pb-12 text-xs font-bold text-slate-500">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <div class="h-6 w-1 bg-primary-container"></div>
+                    <h2 class="text-title-sm font-title-sm uppercase tracking-widest text-on-surface-variant text-[10px] font-bold">Active Patient Registry</h2>
+                </div>
+                <div class="flex gap-4">
+                    <div class="bg-white border border-outline-variant rounded px-3 py-1.5 flex items-center gap-2 text-xs">
+                        <span class="material-symbols-outlined text-outline" data-icon="search">search</span>
+                        <input id="tableSearch" class="bg-transparent border-none focus:ring-0 text-body-sm w-64 p-0 font-semibold text-xs" placeholder="Search registry..." type="text" oninput="filterRegistry(this.value)"/>
+                    </div>
+                    <button class="p-1.5 rounded border border-outline-variant hover:bg-surface-container-low" onclick="alert('Advanced filtering overlay...')"><span class="material-symbols-outlined text-[20px]" data-icon="filter_list">filter_list</span></button>
+                </div>
+            </div>
+            
+            <div class="bg-white border border-outline-variant rounded-lg overflow-hidden shadow-sm text-slate-700">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-surface-container-low border-b border-outline-variant text-[10px] text-slate-500 font-bold uppercase">
+                        <tr>
+                            <th class="px-table-cell-padding py-3 font-semibold">
+                                <div class="flex items-center gap-1 cursor-pointer" onclick="alert('Sorting ID...')">ID <span class="material-symbols-outlined text-[14px]" data-icon="unfold_more">unfold_more</span></div>
+                            </th>
+                            <th class="px-table-cell-padding py-3 font-semibold">
+                                <div class="flex items-center gap-1 cursor-pointer" onclick="alert('Sorting Patient Name...')">PATIENT NAME <span class="material-symbols-outlined text-[14px]" data-icon="expand_more">expand_more</span></div>
+                            </th>
+                            <th class="px-table-cell-padding py-3 font-semibold">RISK SCORE &amp; TREND</th>
+                            <th class="px-table-cell-padding py-3 font-semibold">LAST VISIT</th>
+                            <th class="px-table-cell-padding py-3 font-semibold text-right">ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-outline-variant text-xs font-semibold" id="tableBody">
+                        <!-- Row 1 -->
+                        <tr class="hover:bg-surface-container/30 transition-colors row-item">
+                            <td class="px-table-cell-padding py-4 text-mono-sm text-primary font-mono font-bold">#PAT-8821</td>
+                            <td class="px-table-cell-padding py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold text-body-sm font-sans">EK</div>
+                                    <div>
+                                        <div class="text-body-sm font-bold text-slate-800">Elena Kostic</div>
+                                        <div class="text-[11px] opacity-60 font-semibold text-slate-500">Female, 62y</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-table-cell-padding py-4">
+                                <div class="flex items-center gap-4">
+                                    <span class="px-2 py-0.5 rounded-full bg-error-container text-on-error-container text-[11px] font-bold">HIGH (8.4)</span>
+                                    <div class="flex items-end gap-0.5 h-6">
+                                        <div class="w-1.5 bg-error h-2 sparkline-bar"></div>
+                                        <div class="w-1.5 bg-error h-3 sparkline-bar"></div>
+                                        <div class="w-1.5 bg-error h-5 sparkline-bar"></div>
+                                        <div class="w-1.5 bg-error h-4 sparkline-bar"></div>
+                                        <div class="w-1.5 bg-error h-6 sparkline-bar"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-table-cell-padding py-4 text-mono-sm font-mono text-slate-600">2023-11-14</td>
+                            <td class="px-table-cell-padding py-4 text-right">
+                                <button class="text-primary hover:bg-primary/5 p-1 rounded" onclick="alert('Viewing Elena Kostic profile logs...')"><span class="material-symbols-outlined text-[20px]" data-icon="visibility">visibility</span></button>
+                                <button class="text-outline hover:text-on-surface p-1 rounded ml-1" onclick="alert('Elena actions panel...')"><span class="material-symbols-outlined text-[20px]" data-icon="more_vert">more_vert</span></button>
+                            </td>
+                        </tr>
+                        <!-- Row 2 -->
+                        <tr class="hover:bg-surface-container/30 transition-colors row-item">
+                            <td class="px-table-cell-padding py-4 text-mono-sm text-primary font-mono font-bold">#PAT-8844</td>
+                            <td class="px-table-cell-padding py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-bold text-body-sm font-sans">JD</div>
+                                    <div>
+                                        <div class="text-body-sm font-bold text-slate-800">Jameson Duley</div>
+                                        <div class="text-[11px] opacity-60 font-semibold text-slate-500">Male, 45y</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-table-cell-padding py-4">
+                                <div class="flex items-center gap-4">
+                                    <span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-[11px] font-bold">MOD (4.1)</span>
+                                    <div class="flex items-end gap-0.5 h-6">
+                                        <div class="w-1.5 bg-primary/40 h-4 sparkline-bar"></div>
+                                        <div class="w-1.5 bg-primary/40 h-3 sparkline-bar"></div>
+                                        <div class="w-1.5 bg-primary/40 h-3 sparkline-bar"></div>
+                                        <div class="w-1.5 bg-primary/40 h-2 sparkline-bar"></div>
+                                        <div class="w-1.5 bg-primary/40 h-2 sparkline-bar"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-table-cell-padding py-4 text-mono-sm font-mono text-slate-600">2023-11-10</td>
+                            <td class="px-table-cell-padding py-4 text-right">
+                                <button class="text-primary hover:bg-primary/5 p-1 rounded" onclick="alert('Viewing Jameson Duley profile logs...')"><span class="material-symbols-outlined text-[20px]" data-icon="visibility">visibility</span></button>
+                                <button class="text-outline hover:text-on-surface p-1 rounded ml-1" onclick="alert('Jameson actions panel...')"><span class="material-symbols-outlined text-[20px]" data-icon="more_vert">more_vert</span></button>
+                            </td>
+                        </tr>
+                        <!-- Row 3 -->
+                        <tr class="hover:bg-surface-container/30 transition-colors row-item">
+                            <td class="px-table-cell-padding py-4 text-mono-sm text-primary font-mono font-bold">#PAT-8901</td>
+                            <td class="px-table-cell-padding py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-surface-container-highest text-on-surface flex items-center justify-center font-bold text-body-sm font-sans">MW</div>
+                                    <div>
+                                        <div class="text-body-sm font-bold text-slate-800">Marcus Wong</div>
+                                        <div class="text-[11px] opacity-60 font-semibold text-slate-500">Male, 29y</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-table-cell-padding py-4">
+                                <div class="flex items-center gap-4">
+                                    <span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant text-[11px] font-bold">LOW (1.2)</span>
+                                    <div class="flex items-end gap-0.5 h-6">
+                                        <div class="w-1.5 bg-outline-variant h-1 sparkline-bar"></div>
+                                        <div class="w-1.5 bg-outline-variant h-1 sparkline-bar"></div>
+                                        <div class="w-1.5 bg-outline-variant h-1 sparkline-bar"></div>
+                                        <div class="w-1.5 bg-outline-variant h-1 sparkline-bar"></div>
+                                        <div class="w-1.5 bg-outline-variant h-1 sparkline-bar"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-table-cell-padding py-4 text-mono-sm font-mono text-slate-600">2023-11-15</td>
+                            <td class="px-table-cell-padding py-4 text-right">
+                                <button class="text-primary hover:bg-primary/5 p-1 rounded" onclick="alert('Viewing Marcus Wong profile logs...')"><span class="material-symbols-outlined text-[20px]" data-icon="visibility">visibility</span></button>
+                                <button class="text-outline hover:text-on-surface p-1 rounded ml-1" onclick="alert('Marcus actions panel...')"><span class="material-symbols-outlined text-[20px]" data-icon="more_vert">more_vert</span></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <!-- Pagination -->
+                <div class="px-table-cell-padding py-3 bg-surface-container-low flex justify-between items-center text-body-sm border-t border-outline-variant text-slate-500">
+                    <div>Showing 1 to 3 of 2,450 results</div>
+                    <div class="flex items-center gap-1 font-bold">
+                        <button class="p-1 rounded hover:bg-white disabled:opacity-30" disabled=""><span class="material-symbols-outlined" data-icon="chevron_left">chevron_left</span></button>
+                        <button class="w-8 h-8 rounded bg-primary text-on-primary font-bold">1</button>
+                        <button class="w-8 h-8 rounded hover:bg-white" onclick="alert('Page 2')">2</button>
+                        <button class="w-8 h-8 rounded hover:bg-white" onclick="alert('Page 3')">3</button>
+                        <span class="px-2">...</span>
+                        <button class="w-8 h-8 rounded hover:bg-white" onclick="alert('Page 245')">245</button>
+                        <button class="p-1 rounded hover:bg-white" onclick="alert('Next page')"><span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span></button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Animate sparklines on hover
+        const tableRows = document.querySelectorAll('tbody tr');
+        tableRows.forEach(row => {
+            row.addEventListener('mouseenter', () => {
+                const bars = row.querySelectorAll('.sparkline-bar');
+                bars.forEach(bar => {
+                    bar.style.transform = `scaleY(1.25)`;
+                });
+            });
+            row.addEventListener('mouseleave', () => {
+                const bars = row.querySelectorAll('.sparkline-bar');
+                bars.forEach(bar => {
+                    bar.style.transform = `scaleY(1)`;
+                });
+            });
+        });
+    });
+
+    function filterRegistry(query) {
+        const term = query.toLowerCase().trim();
+        document.querySelectorAll('.row-item').forEach(row => {
+            const text = row.innerText.toLowerCase();
+            if (text.includes(term)) {
+                row.classList.remove('hidden');
+            } else {
+                row.classList.add('hidden');
+            }
+        });
+    }
+</script>
+</body>
+</html>

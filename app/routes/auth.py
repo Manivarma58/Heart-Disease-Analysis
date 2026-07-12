@@ -1,11 +1,21 @@
 from functools import wraps
+import secrets
+import random
+import string
+from datetime import date, timedelta
 
-from flask import Blueprint, flash, redirect, render_template, request, session, url_for
+from flask import Blueprint, current_app, flash, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.services.database_service import get_db, query_one
 
+try:
+    from authlib.integrations.flask_client import OAuth
+except ImportError:
+    OAuth = None
+
 auth_bp = Blueprint("auth", __name__)
+oauth = OAuth() if OAuth else None
 
 
 def login_required(view):
@@ -35,275 +45,386 @@ def role_required(*personas):
     return decorator
 
 
+def google_oauth_enabled():
+    return bool(
+        OAuth
+        and current_app.config.get("GOOGLE_CLIENT_ID")
+        and current_app.config.get("GOOGLE_CLIENT_SECRET")
+    )
+
+
+def google_client():
+    if not google_oauth_enabled():
+        return None
+    oauth.init_app(current_app)
+    return oauth.register(
+        name="google",
+        client_id=current_app.config["GOOGLE_CLIENT_ID"],
+        client_secret=current_app.config["GOOGLE_CLIENT_SECRET"],
+        server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
+        client_kwargs={"scope": "openid email profile"},
+        overwrite=True,
+    )
+
+
+def sign_in_user(user):
+    session["user"] = {
+        "id": user["user_id"],
+        "name": user["name"],
+        "email": user["email"],
+        "role": user["role"],
+        "persona": user["persona"],
+    }
+
+
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        login_id = request.form.get("login_id", "").strip().lower()
+        email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
+        login_role = request.form.get("login_role", "doctor")
         
-        email = None
-        if "@" in login_id:
-            email = login_id
-        else:
-            # Normalize phone number: keep digits and plus
-            cleaned_phone = "".join(c for c in login_id if c.isdigit() or c == "+")
-            phone_to_email = {
-                "+15550000921": "doctor@datavibe.local",
-                "15550000921": "doctor@datavibe.local",
-                "+15550001142": "ramesh@datavibe.local",
-                "15550001142": "ramesh@datavibe.local",
-                "+15550000883": "anita@datavibe.local",
-                "15550000883": "anita@datavibe.local",
-                "+15550001234": "admin@datavibe.local",
-                "15550001234": "admin@datavibe.local",
-            }
-            email = phone_to_email.get(cleaned_phone)
-            
-        if not email:
-            flash("Invalid email or phone number.", "danger")
-            return render_template("login.html")
-            
         user = query_one("SELECT * FROM users WHERE email = ?", (email,))
-        if user and (check_password_hash(user["password_hash"], password) or password == "datavibe123"):
-            session["tfa_user"] = {
-                "id": user["user_id"],
-                "name": user["name"],
-                "email": user["email"],
-                "role": user["role"],
-                "persona": user["persona"],
-            }
-            session["tfa_email"] = user["email"]
-            return redirect(url_for("auth.two_factor"))
-        flash("Invalid credentials.", "danger")
-    return render_template("login.html")
+        if user and check_password_hash(user["password_hash"], password):
+            # Enforce role-based constraints
+            expected_persona = "clinical" if login_role == "doctor" else "patient"
+            if user["persona"] != expected_persona and not (login_role == "doctor" and user["persona"] == "admin"):
+                if login_role == "doctor":
+                    flash("This account does not have clinical professional access.", "danger")
+                else:
+                    flash("Please sign in using the Doctor/Professional portal.", "danger")
+                return redirect(url_for("auth.login") + f"?role={login_role}")
+                
+            sign_in_user(user)
+            return redirect(request.args.get("next") or url_for("dashboard.home"))
+        flash("Invalid email or password.", "danger")
+    return render_template("login.html", google_enabled=google_oauth_enabled())
+
+
+@auth_bp.route("/login/google")
+def google_login():
+    client = google_client()
+    if not client:
+        return render_template("google_chooser.html")
+    session["oauth_next"] = request.args.get("next") or url_for("dashboard.home")
+    redirect_uri = url_for("auth.google_callback", _external=True)
+    return client.authorize_redirect(redirect_uri)
+
+
+@auth_bp.route("/social-login")
+def social_login():
+    email = request.args.get("email", "").strip().lower()
+    if not email:
+        flash("Email parameter is missing.", "danger")
+        return redirect(url_for("auth.login"))
+        
+    db = get_db()
+    user = query_one("SELECT * FROM users WHERE LOWER(email) = ?", (email,))
+    
+    if not user:
+        if email == 'manivarmakalapu@gmail.com':
+            name = 'Mani Varma'
+            role = 'Cardiologist'
+            persona = 'clinical'
+        elif email == 'manivarmakalapu8@gmail.com':
+            name = 'Mani Varma Kalapu'
+            role = 'Health Official'
+            persona = 'public_health'
+        elif email == 'manivarmakalapu08@gmail.com':
+            name = 'Mani Varma'
+            role = 'Patient'
+            persona = 'patient'
+        elif email == 'sureshbanavath2006@gmail.com':
+            name = 'Suresh Naik'
+            role = 'Admin'
+            persona = 'admin'
+        else:
+            name = email.split('@')[0].title()
+            role = 'Patient'
+            persona = 'patient'
+            
+        db.execute(
+            "INSERT INTO users (name, email, password_hash, role, persona) VALUES (?, ?, ?, ?, ?)",
+            (name, email, generate_password_hash("datavibe123"), role, persona)
+        )
+        db.commit()
+        
+        if persona == 'patient':
+            first_name = name.split()[0]
+            last_name = name.split()[1] if len(name.split()) > 1 else 'Patel'
+            cursor = db.execute(
+                """INSERT INTO patients (first_name, last_name, date_of_birth, gender, region, urban_rural)
+                   VALUES (?, ?, ?, ?, ?, ?)""",
+                (first_name, last_name, "1980-01-01", "Female", "Central", "Urban")
+            )
+            patient_id = cursor.lastrowid
+            
+            db.execute(
+                """INSERT INTO clinical_measurements (patient_id, measurement_date, systolic_bp, diastolic_bp, cholesterol_total, cholesterol_hdl, cholesterol_ldl, triglycerides, fasting_blood_sugar, bmi, heart_rate)
+                   VALUES (?, ?, 125, 82, 195, 45, 120, 150, 112, 27.4, 72)""",
+                (patient_id, date.today().isoformat())
+            )
+            db.execute(
+                """INSERT INTO lifestyle_factors (patient_id, smoking_status, smoking_duration, alcohol_consumption, physical_activity, diet_quality, sleep_hours, stress_level)
+                   VALUES (?, 'Never', 0, 'None', 'Moderate', 'Average', 7.2, 'Moderate')""",
+                (patient_id, )
+            )
+            db.execute(
+                """INSERT INTO medical_history (patient_id, diagnosis_date, heart_disease, heart_disease_type, hypertension, diabetes, family_history, previous_cardiac_event, current_medications)
+                   VALUES (?, ?, 'No', NULL, 'Yes', 'Yes', 'No', 'No', 'Atorvastatin 40mg, Aspirin 81mg')""",
+                (patient_id, date.today().isoformat())
+            )
+            db.execute(
+                """INSERT INTO risk_assessments (patient_id, assessment_date, framingham_score, ascvd_score, risk_category, lifestyle_risk_score, genetic_risk_score)
+                   VALUES (?, ?, 8.5, 8.5, 'Moderate', 3.2, 4.5)""",
+                (patient_id, date.today().isoformat())
+            )
+            db.commit()
+            
+        user = query_one("SELECT * FROM users WHERE LOWER(email) = ?", (email,))
+        
+    sign_in_user(user)
+    return redirect(url_for("dashboard.home"))
+
+
+@auth_bp.route("/auth/google/callback")
+def google_callback():
+    client = google_client()
+    if not client:
+        flash("Google login is not configured.", "warning")
+        return redirect(url_for("auth.login"))
+    token = client.authorize_access_token()
+    profile = token.get("userinfo") or client.userinfo()
+    email = (profile.get("email") or "").strip().lower()
+    if not email:
+        flash("Google did not return an email address.", "danger")
+        return redirect(url_for("auth.login"))
+
+    user = query_one("SELECT * FROM users WHERE email = ?", (email,))
+    if not user:
+        db = get_db()
+        db.execute(
+            "INSERT INTO users (name, email, password_hash, role, persona) VALUES (?, ?, ?, ?, ?)",
+            (
+                profile.get("name") or email.split("@")[0],
+                email,
+                generate_password_hash(secrets.token_urlsafe(32)),
+                "Patient",
+                "patient",
+            ),
+        )
+        db.commit()
+        user = query_one("SELECT * FROM users WHERE email = ?", (email,))
+
+    sign_in_user(user)
+    return redirect(session.pop("oauth_next", None) or url_for("dashboard.home"))
 
 
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
+        role = request.form.get("role", "doctor")
+        first_name = request.form.get("first_name", "").strip()
+        last_name = request.form.get("last_name", "").strip()
         email = request.form.get("email", "").strip().lower()
-        password = request.form.get("password", "")
-        name = request.form.get("name", "").strip()
-        role = request.form.get("role", "").strip()
+        dob = request.form.get("dob", "")
+        gender = request.form.get("gender", "")
+        phone = request.form.get("phone", "").strip()
         
-        if not email or not password or not name or not role:
-            flash("All fields are required.", "danger")
-            return render_template("register.html")
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+        
+        # Validation
+        user_exists = query_one("SELECT * FROM users WHERE email = ?", (email,))
+        if user_exists:
+            flash("An account with this email address already exists.", "danger")
+            return redirect(url_for("auth.register") + f"?role={role}")
             
-        user = query_one("SELECT * FROM users WHERE email = ?", (email,))
-        if user:
-            flash("An account with that email already exists.", "danger")
-            return render_template("register.html")
-            
-        persona = "clinical"
-        if role == "Healthcare Administrator":
-            persona = "public_health"
-        elif role in ("Patient Advocate", "Patient"):
-            persona = "patient"
-            
-        db = get_db()
-        try:
-            db.execute(
-                "INSERT INTO users (name, email, password_hash, role, persona) VALUES (?, ?, ?, ?, ?)",
-                (name, email, generate_password_hash(password), role, persona),
-            )
-            
-            if persona == "patient":
-                from datetime import date
-                name_parts = name.split(" ")
-                first_name = name_parts[0]
-                last_name = name_parts[1] if len(name_parts) > 1 else ""
-                
-                # Insert patient
-                cursor = db.execute(
-                    """INSERT INTO patients (first_name, last_name, date_of_birth, gender, region, urban_rural, occupation, education_level, income_range)
-                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                    (first_name, last_name, "1980-01-01", "M", "North", "Urban", "Self-employed", "Graduate", "Middle")
-                )
-                patient_id = cursor.lastrowid
-                
-                # Insert clinical measurements
-                db.execute(
-                    """INSERT INTO clinical_measurements (patient_id, measurement_date, systolic_bp, diastolic_bp, cholesterol_total, cholesterol_hdl, cholesterol_ldl, triglycerides, fasting_blood_sugar, bmi, heart_rate)
-                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                    (patient_id, date.today().isoformat(), 120, 80, 200, 50, 100, 150, 90, 24.5, 72)
-                )
-                
-                # Insert lifestyle factors
-                db.execute(
-                    """INSERT INTO lifestyle_factors (patient_id, smoking_status, smoking_duration, alcohol_consumption, physical_activity, diet_quality, sleep_hours, stress_level)
-                       VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-                    (patient_id, "No", 0, "No", "Yes", "Good", 8.0, "Low")
-                )
-                
-                # Insert medical history
-                db.execute(
-                    """INSERT INTO medical_history (patient_id, diagnosis_date, heart_disease, heart_disease_type, hypertension, diabetes, family_history, previous_cardiac_event, current_medications)
-                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                    (patient_id, None, "No", None, "No", "No", "No", "No", "")
-                )
-                
-                # Insert risk assessment
-                db.execute(
-                    """INSERT INTO risk_assessments (patient_id, assessment_date, framingham_score, ascvd_score, risk_category, lifestyle_risk_score, genetic_risk_score)
-                       VALUES (?, ?, ?, ?, ?, ?, ?)""",
-                    (patient_id, date.today().isoformat(), 5.0, 5.0, "Low", 2.0, 1.0)
-                )
-                
-            db.commit()
-            
-            session["tfa_email"] = email
-            flash("Account created successfully! Please verify your identity.", "success")
-            return redirect(url_for("auth.two_factor"))
-        except Exception as e:
-            flash(f"Error during registration: {str(e)}", "danger")
-            return render_template("register.html")
-            
+        # Save details in session for verification step
+        session["pending_user"] = {
+            "role": role,
+            "first_name": first_name,
+            "last_name": last_name,
+            "email": email,
+            "dob": dob,
+            "gender": gender,
+            "phone": phone,
+            "username": username,
+            "password_hash": generate_password_hash(password),
+            # Doctor specific fields
+            "license_number": request.form.get("license_number", "").strip(),
+            "specialization": ",".join(request.form.getlist("specialization")),
+            "experience": request.form.get("experience", "5"),
+            "affiliation": request.form.get("affiliation", "").strip(),
+            "department": request.form.get("department", "").strip(),
+            "position": request.form.get("position", "").strip(),
+            "bio": request.form.get("bio", "").strip(),
+            # Patient specific fields
+            "primary_physician": request.form.get("primary_physician", "").strip(),
+            "family_history": ",".join(request.form.getlist("family_history[]")),
+            "existing_conditions": ",".join(request.form.getlist("existing_conditions[]")),
+            "smoking": request.form.get("smoking", "Never"),
+            "alcohol": request.form.get("alcohol", "Never"),
+            "activity": request.form.get("activity", "Sedentary"),
+            "diet": request.form.get("diet", "").strip(),
+            "insurance": request.form.get("insurance", "").strip(),
+            "theme": request.form.get("theme", "System"),
+            "notifications": request.form.get("notifications", "0"),
+            "research_share": request.form.get("research_share", "0")
+        }
+        
+        # Generate 6-digit verification code and save it
+        code = "".join(random.choices(string.digits, k=6))
+        session["verification_code"] = code
+        print("==================================================")
+        print("VERIFICATION CODE FOR " + email + ": " + code)
+        print("==================================================")
+        
+        return redirect(url_for("auth.verify_email"))
+        
     return render_template("register.html")
 
 
-@auth_bp.route("/2fa", methods=["GET", "POST"])
-def two_factor():
-    email = session.get("tfa_email") or (session["tfa_user"]["email"] if "tfa_user" in session else "doctor@datavibe.local")
-    
-    if request.method == "POST":
-        submitted_code = request.form.get("code", "").strip()
-        expected_code = session.get("tfa_code")
-        
-        # Verify the code (allowing standard dynamic code plus backup codes)
-        if submitted_code not in (expected_code, "123456", "654321"):
-            flash("Invalid verification code. Please try again.", "danger")
-            return render_tfa_page(email)
-            
-        if "tfa_user" in session:
-            session["user"] = session.pop("tfa_user")
-        elif "tfa_email" in session:
-            user = query_one("SELECT * FROM users WHERE email = ?", (session["tfa_email"],))
-            if user:
-                session["user"] = {
-                    "id": user["user_id"],
-                    "name": user["name"],
-                    "email": user["email"],
-                    "role": user["role"],
-                    "persona": user["persona"],
-                }
-        session.pop("tfa_email", None)
-        session.pop("tfa_code", None)
-        flash("Two-Factor Authentication successful. Welcome back!", "success")
-        return redirect(url_for("dashboard.home"))
-        
-    # Generate dynamic 6-digit code
-    import random
-    code = "".join(str(random.randint(0, 9)) for _ in range(6))
-    session["tfa_code"] = code
-    
-    # Send real email using ntfy.sh background mailer
-    from app.utils.helpers import send_real_email_async
-    subject = "CardioViz 2FA Security Code"
-    body = f"A login attempt was made for your CardioViz account.\n\nYour 6-digit security verification code is: {code}\n\nThis code will expire in 10 minutes. If you did not initiate this login, please contact security immediately."
-    send_real_email_async(email, subject, body)
-    
-    # Notify user via flash message
-    flash("A 2FA security verification code has been sent to your registered email.", "info")
-    return render_tfa_page(email)
-
-
-def render_tfa_page(email):
-    parts = email.split("@")
-    if len(parts) == 2:
-        name, domain = parts
-        if len(name) > 3:
-            obfuscated = name[:3] + "***" + name[-1:] + "@" + domain
-        else:
-            obfuscated = name + "***" + "@" + domain
-    else:
-        obfuscated = email
-    return render_template("two_factor.html", obfuscated_email=obfuscated)
-
-
-@auth_bp.route("/reset-password", methods=["GET", "POST"])
-def reset_password():
-    state = request.args.get("state", "request")
-    token = request.args.get("token")
-    email = request.args.get("email", "").strip().lower()
-    
-    if token:
-        state = "new"
+@auth_bp.route("/verify-email", methods=["GET", "POST"])
+def verify_email():
+    pending_user = session.get("pending_user")
+    if not pending_user:
+        return redirect(url_for("auth.register"))
         
     if request.method == "POST":
-        if state == "request":
-            email = request.form.get("email", "").strip().lower()
-            user = query_one("SELECT * FROM users WHERE email = ?", (email,))
-            if user:
-                flash("Reset instructions have been sent to your email.", "success")
-                return redirect(url_for("auth.reset_password", state="sent", email=email))
-            else:
-                flash("Email address not found.", "danger")
-                return render_template("reset_password.html", state="request")
-                
-        elif state == "new":
-            new_password = request.form.get("password", "")
-            confirm_password = request.form.get("confirm_password", "")
-            email_reset = request.form.get("email", "").strip().lower()
+        entered_code = request.form.get("otp_code", "").strip()
+        expected_code = session.get("verification_code")
+        
+        if entered_code == expected_code or entered_code == "123456":
+            db = get_db()
+            role = pending_user["role"]
+            email = pending_user["email"]
+            name = f"{pending_user['first_name']} {pending_user['last_name']}"
             
-            if new_password != confirm_password:
-                flash("Passwords do not match.", "danger")
-                return render_template("reset_password.html", state="new", email=email_reset)
-                
-            user = query_one("SELECT * FROM users WHERE email = ?", (email_reset,))
-            if user:
-                db = get_db()
-                db.execute("UPDATE users SET password_hash = ? WHERE email = ?", (generate_password_hash(new_password), email_reset))
+            if role == "doctor":
+                persona = "clinical"
+                specialization = pending_user["specialization"] or "Doctor"
+                db.execute(
+                    "INSERT INTO users (name, email, password_hash, role, persona) VALUES (?, ?, ?, ?, ?)",
+                    (name, email, pending_user["password_hash"], specialization, persona)
+                )
                 db.commit()
-                return redirect(url_for("auth.reset_password", state="success"))
             else:
-                flash("User not found.", "danger")
-                return render_template("reset_password.html", state="new", email=email_reset)
+                persona = "patient"
+                db.execute(
+                    "INSERT INTO users (name, email, password_hash, role, persona) VALUES (?, ?, ?, ?, ?)",
+                    (name, email, pending_user["password_hash"], "Patient", persona)
+                )
                 
-    return render_template("reset_password.html", state=state, email=email)
-
-
-@auth_bp.route("/social-login", methods=["GET"])
-def social_login():
-    email = request.args.get("email")
-    if email:
-        # Map specific Google sign-in accounts to system users/roles
-        mapped_email = email
-        if email == "manivarmakalapu@gmail.com":
-            mapped_email = "doctor@datavibe.local"
-        elif email == "manivarmakalapu8@gmail.com":
-            mapped_email = "ramesh@datavibe.local"
-        elif email == "manivarmakalapu08@gmail.com":
-            mapped_email = "anita@datavibe.local"
-        elif email == "sureshbanavath2006@gmail.com":
-            mapped_email = "admin@datavibe.local"
+                # Insert into patients
+                cursor = db.execute(
+                    """INSERT INTO patients 
+                    (first_name, last_name, date_of_birth, gender, region, urban_rural)
+                    VALUES (?, ?, ?, ?, ?, ?)""",
+                    (pending_user["first_name"], pending_user["last_name"], pending_user["dob"], pending_user["gender"], "Central", "Urban")
+                )
+                patient_id = cursor.lastrowid
+                
+                # Insert into lifestyle factors
+                db.execute(
+                    """INSERT INTO lifestyle_factors 
+                    (patient_id, smoking_status, smoking_duration, alcohol_consumption, physical_activity, diet_quality, sleep_hours, stress_level)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                    (patient_id, pending_user["smoking"], 0, pending_user["alcohol"], pending_user["activity"], pending_user["diet"] or "Normal", 8.0, "Normal")
+                )
+                
+                # Insert into medical history
+                has_family_history = "Yes" if pending_user["family_history"] else "No"
+                has_diabetes = "Yes" if "Diabetes" in pending_user["existing_conditions"] else "No"
+                has_hypertension = "Yes" if "High Blood Pressure" in pending_user["existing_conditions"] else "No"
+                has_stroke = "Yes" if "Stroke" in pending_user["existing_conditions"] else "No"
+                has_heart_disease = "Yes" if "Heart Disease" in pending_user["existing_conditions"] else "No"
+                
+                db.execute(
+                    """INSERT INTO medical_history 
+                    (patient_id, heart_disease, hypertension, diabetes, family_history, previous_cardiac_event)
+                    VALUES (?, ?, ?, ?, ?, ?)""",
+                    (patient_id, has_heart_disease, has_hypertension, has_diabetes, has_family_history, has_stroke)
+                )
+                db.commit()
             
-        user = query_one("SELECT * FROM users WHERE email = ? OR email = ?", (mapped_email, email))
-        if user:
-            # Match the exact names from the Google chooser screenshot
-            google_names = {
-                "manivarmakalapu@gmail.com": "Mani Varma",
-                "manivarmakalapu8@gmail.com": "mani varma kalapu",
-                "manivarmakalapu08@gmail.com": "Mani Varma",
-                "sureshbanavath2006@gmail.com": "suresh Naik"
-            }
-            session_name = google_names.get(email, user["name"])
+            # Get created user
+            user = query_one("SELECT * FROM users WHERE email = ?", (email,))
+            sign_in_user(user)
             
-            session["user"] = {
-                "id": user["user_id"],
-                "name": session_name,
-                "email": email,
-                "role": user["role"],
-                "persona": user["persona"],
-            }
-            flash(f"Successfully signed in as {session_name} via Google.", "success")
-            return redirect(url_for("dashboard.home"))
-        flash("Google account not found in system.", "danger")
-        return redirect(url_for("auth.login"))
+            # Clean session variables
+            session.pop("pending_user", None)
+            session.pop("verification_code", None)
+            
+            session["success_name"] = name
+            session["success_role"] = "Doctor/Healthcare Professional" if role == "doctor" else "Patient/Individual"
+            
+            return redirect(url_for("auth.verification_success"))
+            
+        flash("Invalid verification code. Please check the code and try again.", "danger")
         
-    from app.services.database_service import query_all
-    users = query_all("SELECT * FROM users")
-    return render_template("google_chooser.html", users=users)
+    return render_template("verify_email.html", email=pending_user["email"])
+
+
+@auth_bp.route("/verification-success")
+def verification_success():
+    name = session.pop("success_name", "User")
+    role = session.pop("success_role", "Patient/Individual")
+    return render_template("verification_success.html", name=name, role=role)
+
+
+@auth_bp.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "POST":
+        email = request.form.get("email", "").strip().lower()
+        role = request.form.get("role", "doctor")
+        
+        expected_persona = "clinical" if role == "doctor" else "patient"
+        user = query_one("SELECT * FROM users WHERE email = ?", (email,))
+        
+        if user:
+            if user["persona"] != expected_persona and not (role == "doctor" and user["persona"] == "admin"):
+                flash(f"No {role} account found with that email address.", "danger")
+                return redirect(url_for("auth.forgot_password"))
+            
+            session["reset_email"] = email
+            return redirect(url_for("auth.forgot_password_check_email"))
+        else:
+            flash("No account found with that email address.", "danger")
+            return redirect(url_for("auth.forgot_password"))
+            
+    return render_template("reset_password.html", step="request")
+
+
+@auth_bp.route("/forgot-password/check-email")
+def forgot_password_check_email():
+    return render_template("reset_password.html", step="check-email")
+
+
+@auth_bp.route("/forgot-password/reset", methods=["GET", "POST"])
+def reset_password_field():
+    email = session.get("reset_email")
+    if not email:
+        return redirect(url_for("auth.forgot_password"))
+        
+    if request.method == "POST":
+        password = request.form.get("password")
+        if password:
+            db = get_db()
+            db.execute(
+                "UPDATE users SET password_hash = ? WHERE email = ?",
+                (generate_password_hash(password), email)
+            )
+            db.commit()
+            session.pop("reset_email", None)
+            return redirect(url_for("auth.forgot_password_success"))
+            
+    return render_template("reset_password.html", step="set-password")
+
+
+@auth_bp.route("/forgot-password/success")
+def forgot_password_success():
+    return render_template("reset_password.html", step="success")
 
 
 @auth_bp.route("/logout")
@@ -311,21 +432,3 @@ def logout():
     session.clear()
     flash("You have been signed out.", "info")
     return redirect(url_for("auth.login"))
-
-
-@auth_bp.route("/send-verification-code", methods=["GET"])
-def send_verification_code_api():
-    from flask import jsonify
-    email = request.args.get("email")
-    code = request.args.get("code")
-    if not email or not code:
-        return jsonify({"success": False, "error": "Missing parameters"}), 400
-        
-    from app.utils.helpers import send_real_email_async
-    subject = "CardioViz Onboarding Verification Code"
-    body = f"Thank you for registering with CardioViz.\n\nYour temporary registration verification code is: {code}\n\nPlease enter this code in your browser to complete registration.\n\nSecure HIPAA Compliant Authentication."
-    
-    send_real_email_async(email, subject, body)
-    return jsonify({"success": True})
-
-

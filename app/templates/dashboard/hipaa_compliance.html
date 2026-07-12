@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>HIPAA Compliance | CardioViz</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "on-secondary-container": "#610001",
+                "surface": "#faf8ff",
+                "on-surface": "#171b2b",
+                "primary-container": "#1a2a6c",
+                "secondary-container": "#fe5c4a",
+                "outline": "#767681",
+                "outline-variant": "#c6c5d2",
+                "primary": "#001255",
+                "on-primary": "#ffffff",
+                "surface-container-low": "#f3f2ff",
+                "surface-container-high": "#e4e7fe",
+                "surface-container-highest": "#dfe1f8",
+                "on-surface-variant": "#454650",
+                "status-stable": "#1a2a6c",
+                "status-critical": "#E74C3C"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "base": "4px",
+                "sm": "16px",
+                "margin-desktop": "40px",
+                "xl": "48px",
+                "lg": "32px",
+                "md": "24px",
+                "margin-mobile": "16px",
+                "gutter": "24px",
+                "xs": "8px"
+            },
+            "fontFamily": {
+                "title-lg": ["Inter"],
+                "label-sm": ["Inter"],
+                "headline-lg": ["Inter"],
+                "label-md": ["Inter"],
+                "headline-md": ["Inter"]
+            },
+            "fontSize": {
+                "title-lg": ["20px", {"lineHeight": "28px", "fontWeight": "500"}],
+                "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}]
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body-md text-on-surface">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center px-margin-desktop w-full h-16 sticky top-0 z-50 bg-surface dark:bg-inverse-surface border-b border-outline-variant shadow-sm">
+    <div class="flex items-center gap-md">
+        <a href="/" class="flex items-center gap-2">
+            <span class="font-headline-md text-headline-md font-bold text-primary">CardioViz</span>
+        </a>
+        <nav class="hidden md:flex items-center gap-lg ml-lg">
+            <a class="text-on-surface-variant hover:bg-surface-container-low transition-colors px-2 py-1 rounded" href="{{ url_for('dashboard.home') }}">Dashboard</a>
+            <a class="text-on-surface-variant hover:bg-surface-container-low transition-colors px-2 py-1 rounded" href="{{ url_for('dashboard.support_hub_page') }}">Support</a>
+            <a class="text-primary font-bold border-b-2 border-primary px-2 py-1" href="{{ url_for('dashboard.hipaa_compliance_page') }}">Compliance</a>
+        </nav>
+    </div>
+    <div class="flex items-center gap-md">
+        <img class="w-10 h-10 rounded-full border-2 border-primary-container object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmw1FPEGcfC25hzLcSkBzhjdKbOXybRz1Y-y_LRD6dEFezccT3q38MO-X8wztFtD8iU5sltu9jucaj1SOldKq_IWNruyETi7awZFHVLdesfyGSYApDh-3ItzBkJ1Ebrc0VBE_i_2gjLJNXEsajrNnHSBhUtH4aRZNqkVGBvWaKUXLOGpYyLnR68KyUSEbnpQse2i21d9K5Rx_uwYWZljPACoIRw2peCAeF-9iif3xTzSN5-PhuQYpr5LIlVixo6BjxEx7lt02b4k0Q"/>
+    </div>
+</header>
+
+<main class="max-w-[1440px] mx-auto px-margin-desktop py-xl">
+    <div class="flex flex-col lg:flex-row gap-gutter">
+        <!-- Sidebar Navigation -->
+        <aside class="w-full lg:w-80 shrink-0 h-fit lg:sticky lg:top-24">
+            <div class="bg-surface-container-low rounded-xl p-md border border-outline-variant shadow-sm mb-lg">
+                <h4 class="font-label-md text-label-md text-primary mb-md uppercase tracking-wider">Compliance Sections</h4>
+                <nav class="space-y-xs">
+                    <a class="flex items-center gap-2 px-md py-sm rounded-lg bg-secondary-container text-on-secondary-container font-bold" href="#">
+                        <span class="material-symbols-outlined text-lg">shield_with_heart</span>
+                        <span>HIPAA Compliance</span>
+                    </a>
+                    <a class="flex items-center gap-2 px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high" href="{{ url_for('dashboard.privacy_policy_page') }}">
+                        <span class="material-symbols-outlined text-lg">policy</span>
+                        <span>Privacy Policy</span>
+                    </a>
+                    <a class="flex items-center gap-2 px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high" href="{{ url_for('dashboard.terms_of_service_page') }}">
+                        <span class="material-symbols-outlined text-lg">gavel</span>
+                        <span>Terms of Service</span>
+                    </a>
+                    <a class="flex items-center gap-2 px-md py-sm rounded-lg text-on-surface-variant hover:bg-surface-container-high" href="{{ url_for('dashboard.accessibility_governance_page') }}">
+                        <span class="material-symbols-outlined text-lg">accessibility</span>
+                        <span>Accessibility Statement</span>
+                    </a>
+                </nav>
+            </div>
+            
+            <div class="p-md bg-primary rounded-xl text-white">
+                <h5 class="font-title-lg text-title-lg mb-xs">In Trust We Heal</h5>
+                <p class="font-label-sm text-label-sm opacity-80 mb-md">Our architecture is built around HIPAA, GDPR, and medical device standards.</p>
+                <button onclick="window.print()" class="w-full bg-white text-primary font-label-md text-label-md py-sm rounded-lg hover:bg-primary-fixed transition-colors">Print Certification</button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 space-y-lg">
+            <!-- Header Block -->
+            <div class="bg-surface-container-lowest rounded-2xl p-lg md:p-xl border border-outline-variant shadow-sm">
+                <div class="flex flex-wrap justify-between items-start gap-md mb-md">
+                    <div>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-primary text-white mb-2 uppercase tracking-wide">FDA Cleared Class II Software</span>
+                        <h1 class="font-display-lg text-3xl font-extrabold text-primary mb-2">HIPAA Compliance</h1>
+                        <p class="text-on-surface-variant text-sm max-w-2xl"> CardioViz Analytics maintains rigorous adherence to the Health Insurance Portability and Accountability Act (HIPAA) to ensure the absolute security and privacy of Protected Health Information (PHI).</p>
+                    </div>
+                    <div class="flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-sm font-bold">
+                        <span class="material-symbols-outlined text-emerald-600">check_circle</span>
+                        <span>Fully Compliant</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Safeguards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+                <div class="bg-white rounded-2xl p-lg border border-outline-variant shadow-sm space-y-md">
+                    <span class="material-symbols-outlined text-4xl text-primary">admin_panel_settings</span>
+                    <h3 class="font-bold text-lg text-primary">Administrative Safeguards</h3>
+                    <p class="text-sm text-on-surface-variant leading-relaxed">Regular risk assessments, employee privacy training, and appointed compliance officers governing data processing workflows.</p>
+                </div>
+                <div class="bg-white rounded-2xl p-lg border border-outline-variant shadow-sm space-y-md">
+                    <span class="material-symbols-outlined text-4xl text-primary">meeting_room</span>
+                    <h3 class="font-bold text-lg text-primary">Physical Safeguards</h3>
+                    <p class="text-sm text-on-surface-variant leading-relaxed">Secure host servers situated in restricted AWS GovCloud facilities with multiple biometric entry controls.</p>
+                </div>
+                <div class="bg-white rounded-2xl p-lg border border-outline-variant shadow-sm space-y-md">
+                    <span class="material-symbols-outlined text-4xl text-primary">vpn_key</span>
+                    <h3 class="font-bold text-lg text-primary">Technical Safeguards</h3>
+                    <p class="text-sm text-on-surface-variant leading-relaxed">Military-grade AES-256 encryption at rest, secure TLS 1.3 protocol logs in transit, and multi-factor authentication locks.</p>
+                </div>
+            </div>
+
+            <!-- Patient Rights and Governance -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+                <!-- Patient Rights -->
+                <div class="bg-white rounded-2xl p-lg border border-outline-variant shadow-sm space-y-md">
+                    <h3 class="font-bold text-lg text-primary flex items-center gap-2">
+                        <span class="material-symbols-outlined text-secondary">assignment_ind</span> Patient Rights (PHI)
+                    </h3>
+                    <p class="text-sm text-on-surface-variant mb-4">We empower patients with full control over their clinical records:</p>
+                    <ul class="space-y-sm text-sm text-on-surface-variant">
+                        <li class="flex items-start gap-2">
+                            <span class="material-symbols-outlined text-primary text-lg">check</span>
+                            <span><strong>Access to Data:</strong> Patients can view and download their diagnostic records.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="material-symbols-outlined text-primary text-lg">check</span>
+                            <span><strong>Accounting of Disclosures:</strong> Complete audit trails of everyone who accessed records.</span>
+                        </li>
+                    </ul>
+                </div>
+                <!-- Governance -->
+                <div class="bg-white rounded-2xl p-lg border border-outline-variant shadow-sm space-y-md">
+                    <h3 class="font-bold text-lg text-primary flex items-center gap-2">
+                        <span class="material-symbols-outlined text-secondary">gavel</span> Governance &amp; Response
+                    </h3>
+                    <p class="text-sm text-on-surface-variant mb-4">Our compliance framework guarantees instant action:</p>
+                    <ul class="space-y-sm text-sm text-on-surface-variant">
+                        <li class="flex items-start gap-2">
+                            <span class="material-symbols-outlined text-primary text-lg">check</span>
+                            <span><strong>Workforce Auditing:</strong> Annual mandatory training logs for all administrative staff.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="material-symbols-outlined text-primary text-lg">check</span>
+                            <span><strong>Incident Response:</strong> Dedicated security team monitoring alerts 24/7.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Trust / Interactive Network Graphic Mockup -->
+            <div class="bg-primary text-white rounded-2xl p-lg md:p-xl border border-outline-variant relative overflow-hidden shadow-lg">
+                <div class="relative z-10 max-w-lg space-y-sm">
+                    <h3 class="text-2xl font-bold">In Trust We Heal</h3>
+                    <p class="text-sm text-slate-200">Our telemetry clusters utilize advanced node security. Data remains secure from the patient's mobile unit to the clinic command dashboards.</p>
+                </div>
+                <!-- Decorative network grid -->
+                <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(#ffffff 2px, transparent 2px); background-size: 24px 24px;"></div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer class="w-full py-lg px-margin-desktop grid grid-cols-1 md:grid-cols-2 items-center bg-surface-container-highest dark:bg-inverse-surface border-t border-outline-variant mt-20">
+    <div class="flex flex-col gap-2">
+        <span class="font-title-lg text-title-lg font-bold text-on-surface">CardioViz Analytics</span>
+        <p class="font-label-sm text-label-sm text-on-surface-variant">© 2026 CardioViz Analytics. FDA Cleared Class II Software.</p>
+    </div>
+    <div class="flex flex-wrap md:justify-end gap-lg mt-md md:mt-0">
+        <a class="text-on-surface-variant hover:text-primary transition-colors font-label-sm" href="{{ url_for('dashboard.privacy_policy_page') }}">Privacy Policy</a>
+        <a class="text-on-surface-variant hover:text-primary transition-colors font-label-sm" href="{{ url_for('dashboard.terms_of_service_page') }}">Terms of Service</a>
+        <a class="text-on-surface-variant hover:text-primary transition-colors font-label-sm" href="{{ url_for('dashboard.hipaa_compliance_page') }}">Compliance</a>
+        <a class="text-on-surface-variant hover:text-primary transition-colors font-label-sm" href="{{ url_for('dashboard.support_hub_page') }}">Contact Support</a>
+    </div>
+</footer>
+</body>
+</html>

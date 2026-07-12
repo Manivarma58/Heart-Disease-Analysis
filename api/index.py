@@ -1,7 +1,10 @@
-import os
 import sys
+from pathlib import Path
 
-# Add root directory to sys.path so Vercel can find run.py and the app/ package
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
-from run import app
+from app import create_app
+
+app = create_app()

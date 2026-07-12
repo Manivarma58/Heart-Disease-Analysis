@@ -3,8 +3,8 @@
 - Flask application completed.
 - Dataset copied into `data/Heart_new2.csv`.
 - Dataset imported into SQLite dashboard tables.
-- 4,500 raw records loaded into `raw_heart_dataset`.
-- 4,500 normalized patient records loaded.
+- 4,494 cleaned real records loaded into `raw_heart_dataset`.
+- 4,494 normalized patient records loaded.
 - Clinical dashboard completed.
 - Public health dashboard completed.
 - Patient dashboard completed.
@@ -22,11 +22,9 @@
 - Tableau publishing and web integration document completed.
 - Flask public landing page completed.
 - Published dashboard/story embed routes completed.
+- Google OAuth login UI and setup document completed.
 - Final project report completed.
 - Demo script completed.
-- Performance testing report completed.
-- Data filters report completed.
-- Project development step-by-step documentation completed.
 - README completed with run instructions.
 - Dockerfile and Docker Compose included.
 

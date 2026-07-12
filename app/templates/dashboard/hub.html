@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>CardioViz | Clinical Command Center</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary": "#0061a4",
+                    "error": "#ba1a1a",
+                    "secondary-fixed-dim": "#9fcaff",
+                    "on-primary-container": "#7a839f",
+                    "on-primary-fixed-variant": "#3d465f",
+                    "on-error-container": "#93000a",
+                    "background": "#fbf8fb",
+                    "on-background": "#1b1b1d",
+                    "surface-container-highest": "#e4e2e4",
+                    "on-secondary-container": "#00477b",
+                    "inverse-on-surface": "#f3f0f2",
+                    "primary": "#001255",
+                    "on-primary-container": "#8594dc",
+                    "gradient-vital": "linear-gradient(135deg, #1a2a6c 0%, #c0392b 100%)",
+                    "error-container": "#ffdad6",
+                    "on-secondary-fixed": "#001d36",
+                    "secondary-fixed": "#d1e4ff",
+                    "surface-bright": "#fbf8fb",
+                    "surface-light": "#F8FAFC",
+                    "on-error-container": "#93000a",
+                    "secondary-container": "#77b7ff",
+                    "surface-variant": "#e4e2e4",
+                    "on-tertiary-fixed-variant": "#00497d",
+                    "on-surface-variant": "#45464d",
+                    "background": "#fbf8fb",
+                    "primary-container": "#121b31",
+                    "inverse-surface": "#303032",
+                    "on-surface": "#1b1b1d",
+                    "on-primary-fixed-variant": "#334284",
+                    "tertiary": "#000000",
+                    "on-secondary": "#ffffff",
+                    "on-secondary-container": "#00477b",
+                    "primary-fixed-dim": "#bdc6e4",
+                    "outline": "#76777e",
+                    "status-stable": "#1a2a6c",
+                    "surface-tint": "#555e78",
+                    "surface-dim": "#dcd9db",
+                    "surface-muted": "#F1F5F9",
+                    "secondary": "#b4271d",
+                    "tertiary-fixed-dim": "#9ecaff",
+                    "on-primary-fixed": "#121b31",
+                    "on-tertiary-fixed": "#001d36",
+                    "inverse-on-surface": "#f3f0f2",
+                    "error": "#ba1a1a",
+                    "surface": "#fbf8fb",
+                    "tertiary-container": "#001d36",
+                    "on-primary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "primary-fixed": "#dae2ff",
+                    "secondary-fixed-dim": "#9fcaff",
+                    "status-critical": "#E74C3C",
+                    "efficiency-purple": "#7C4DFF",
+                    "cardiac-teal": "#00BCD4",
+                    "workflow-blue": "#536DFE",
+                    "critical-red": "#ba1a1a",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-low": "#f6f3f5",
+                    "surface-container-high": "#eae7ea"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xs": "8px",
+                    "margin-mobile": "16px",
+                    "sm": "16px",
+                    "md": "24px",
+                    "base": "4px",
+                    "margin-desktop": "40px",
+                    "gutter": "24px",
+                    "xl": "48px",
+                    "lg": "32px",
+                    "sidebar-width": "240px",
+                    "header-height": "64px",
+                    "card-padding": "24px",
+                    "card-gap": "20px",
+                    "container-padding": "32px"
+            },
+            "fontFamily": {
+                    "data-mono": ["Inter"],
+                    "headline-lg": ["Plus Jakarta Sans", "Inter"],
+                    "headline-md": ["Plus Jakarta Sans", "Inter"],
+                    "title-sm": ["Plus Jakarta Sans", "Inter"],
+                    "title-lg": ["Plus Jakarta Sans", "Inter"],
+                    "label-sm": ["Inter"],
+                    "body-md": ["Plus Jakarta Sans", "Inter"],
+                    "body-lg": ["Plus Jakarta Sans", "Inter"],
+                    "display-lg": ["Plus Jakarta Sans", "Inter"],
+                    "label-md": ["Inter"],
+                    "label-caps": ["Plus Jakarta Sans", "Inter"],
+                    "data-metric": ["Plus Jakarta Sans", "Inter"]
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+        background-color: #fbf8fb;
+        overflow-x: hidden;
+      }
+      .card-shadow {
+        box-shadow: 0px 2px 4px rgba(26, 42, 108, 0.05);
+      }
+      .card-shadow-hover:hover {
+        box-shadow: 0px 10px 20px rgba(26, 42, 108, 0.1);
+      }
+      .glass-card {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+      .vital-gradient {
+        background: linear-gradient(135deg, #1a2a6c 0%, #c0392b 100%);
+      }
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #e4e2e4;
+        border-radius: 10px;
+      }
+      .sidebar-item-active {
+        background: rgba(0, 97, 164, 0.08);
+        color: #0061a4;
+        font-weight: 700;
+        border-radius: 0.5rem;
+      }
+    </style>
+</head>
+<body class="text-on-surface antialiased">
+
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 w-full h-header-height z-50 flex justify-between items-center px-container-padding bg-surface/70 backdrop-blur-md shadow-sm border-b border-outline-variant/30">
+    <div class="flex items-center gap-8">
+        <button id="sidebarToggle" class="md:hidden p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors mr-2">
+            <span class="material-symbols-outlined">menu</span>
+        </button>
+        {% if persona == 'clinical' or persona == 'admin' %}
+        <div class="flex items-center gap-xs">
+            <span class="material-symbols-outlined text-status-critical text-headline-md" style="font-variation-settings: 'FILL' 1;">ecg_heart</span>
+            <h1 class="font-display-lg text-[24px] font-bold text-primary tracking-tight">CardioViz</h1>
+        </div>
+        {% else %}
+        <h1 class="font-display-lg text-workflow-blue font-extrabold text-[24px] tracking-tight">DataVibe</h1>
+        {% endif %}
+        
+        <!-- Search bar with suggestions -->
+        <div class="relative group hidden md:block">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+            <input id="searchInput" class="pl-10 pr-4 py-1.5 bg-surface-container rounded-full border-none focus:ring-2 focus:ring-workflow-blue w-64 transition-all text-body-md" placeholder="Search data records..." type="text" autocomplete="off"/>
+            
+            <!-- Autocomplete Suggestions -->
+            <div id="autocompleteDropdown" class="hidden absolute left-0 right-0 mt-2 bg-white border border-outline-variant rounded-xl shadow-lg z-50 overflow-hidden text-xs">
+                <div class="p-xs bg-slate-50 text-[10px] uppercase font-bold text-outline tracking-wider border-b">Suggested Searches</div>
+                <div class="divide-y divide-outline-variant/30">
+                    <a href="#" class="flex items-center gap-sm p-sm hover:bg-surface-container-low transition-colors" onclick="fillSearch('Elena Rodriguez')">
+                        <span class="material-symbols-outlined text-slate-400">person</span>
+                        <div>
+                            <p class="font-bold text-on-surface">Elena Rodriguez</p>
+                            <p class="text-[10px] text-on-surface-variant">Patient Profile</p>
+                        </div>
+                    </a>
+                    <a href="#" class="flex items-center gap-sm p-sm hover:bg-surface-container-low transition-colors" onclick="fillSearch('Population Morbidity trends')">
+                        <span class="material-symbols-outlined text-slate-400">monitoring</span>
+                        <div>
+                            <p class="font-bold text-on-surface">Population Trends</p>
+                            <p class="text-[10px] text-on-surface-variant">Health Analytics</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="flex items-center gap-6">
+        <!-- Role Display Badge -->
+        <div class="flex items-center gap-3 bg-secondary/10 px-3 py-1 rounded-full">
+            <span class="font-label-caps text-label-caps text-secondary">
+                {% if persona == 'clinical' or persona == 'admin' %}
+                Clinical Command Center
+                {% elif persona == 'public_health' %}
+                Public Health
+                {% else %}
+                Patient Hub
+                {% endif %}
+            </span>
+        </div>
+        
+        <div class="flex items-center gap-4 text-on-surface-variant">
+            <a href="{{ url_for('dashboard.notifications_components_page') }}" class="material-symbols-outlined p-2 rounded-full hover:bg-surface-variant/50 transition-colors">notifications</a>
+            <a href="{{ url_for('dashboard.settings_page') }}" class="material-symbols-outlined p-2 rounded-full hover:bg-surface-variant/50 transition-colors">settings</a>
+        </div>
+        
+        <div class="flex items-center gap-3 pl-4 border-l border-outline-variant cursor-pointer" id="profileDropdownBtn">
+            <div class="text-right hidden sm:block">
+                <p class="font-title-sm text-sm font-bold text-primary">{{ name }}</p>
+                <p class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">{{ role }}</p>
+            </div>
+            
+            <div class="w-10 h-10 rounded-full border-2 border-workflow-blue overflow-hidden">
+                {% if persona == 'clinical' or persona == 'admin' %}
+                <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJ0HX2ndchYn7PoSqlRG40R4LNRsVt1iQm-58DDSRx_mE6jPeP9qLUh6f01wmFRHkUium1A7AN9i7dmp6DqlTegPqlwvqELEIeZKeSgfYAPrFhjfEK2erMFBvkCJZuf3bxO_lVAt7V_MxYs0N7ty7cZ6VdYkXTTiR7Vnl8YuNDA_rxaeTd1cvoPV-hrqKkexLUjRfnxIZPAuhKHFypbZOvfBIR3DwkODX4c9Uabrc7duor0fYR-72p9kMB01vmsyYiodOAogvNEpxK" alt="Dr Sharma Headshot"/>
+                {% elif persona == 'public_health' %}
+                <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgn9yopAdFVM78SjjvXb2SXReqQrlzRcMC2ndintz2b2bxT0RL5P-bq4GFfs1HQkpHtyds4m5L_-o8NIiLgHuaFLogCxZp7GJS8q5xbE6A_l4kKAgqDDqXAkeKiHoWeLRRCArYSPMk4U79rbLPuRGnV1c1_887FktMvVkf8AN2AJQ4YXe_7yg8pY361z2O4gSS2labWMCl0KyxD2FTRRQo9WgkH3pvp2PWFBPp-y_dnvoXQR5GgTEH3hER24tV_s4oNxVmcbaRV0AX" alt="Ramesh Headshot"/>
+                {% else %}
+                <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnJTqu-wWxLgPFto7zjaQC9AGp4FCdJXtuVkm_yL8b39g5k30PqVqsrLgzbsQK9YGo2jUf5RXpDHBcmb1NhI3wtd36A4JHNXgkRDEiPlJsrm-c8X_I0Eqz33Bmu0VfpyUSCJxFEdzyh5TLheTckhISKBjLVYnEvenjn1YX0VyScn_SfrRL_wr15Rqzxy-6pY7hWTx1xBKgfx97L2rUZJqbUuXsSunKbr48RTIg2JyVhZWWQGSaQTtvjNi88Eoa2CAYESMtaJCJN6F-" alt="Anita Headshot"/>
+                {% endif %}
+            </div>
+            
+            <!-- User Dropdown Menu -->
+            <div id="profileMenu" class="hidden absolute right-4 top-14 w-48 bg-white border border-outline-variant rounded-xl shadow-lg z-50 overflow-hidden text-xs">
+                <div class="p-sm border-b border-outline-variant/30 bg-slate-50 text-[10px] text-outline font-bold uppercase tracking-wider">Account Options</div>
+                <a href="{{ url_for('dashboard.settings_page') }}" class="flex items-center gap-xs px-md py-sm text-xs hover:bg-surface-container-low transition-colors">
+                    <span class="material-symbols-outlined text-sm">person</span> Profile Details
+                </a>
+                <a href="{{ url_for('dashboard.settings_page') }}" class="flex items-center gap-xs px-md py-sm text-xs hover:bg-surface-container-low transition-colors">
+                    <span class="material-symbols-outlined text-sm">settings</span> Settings
+                </a>
+                <a href="{{ url_for('auth.logout') }}" class="flex items-center gap-xs px-md py-sm text-xs hover:bg-red-50 text-status-critical transition-colors border-t border-outline-variant/30">
+                    <span class="material-symbols-outlined text-sm">logout</span> Logout
+                </a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Sidebar Navigation -->
+<aside id="sidebarMenu" class="fixed left-0 top-0 h-screen w-sidebar-width z-40 bg-surface-container-low pt-20 px-4 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300">
+    <div class="mb-6 px-4 pt-4">
+        <p class="font-label-caps text-label-caps text-on-surface-variant mb-1">Clinical Portal</p>
+        <p class="font-title-sm text-sm text-secondary font-bold">Health Intelligence</p>
+    </div>
+    
+    <nav class="flex-grow space-y-1">
+        <!-- CARDIOLOGIST SIDEBAR -->
+        {% if persona == 'clinical' or persona == 'admin' %}
+        <a class="sidebar-item-active flex items-center gap-3 px-4 py-3" href="{{ url_for('dashboard.home') }}">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="font-label-caps text-label-caps">Dashboard Overview</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-secondary hover:bg-secondary/5 rounded-lg transition-colors group" href="{{ url_for('clinical.clinical_dashboard') }}">
+            <span class="material-symbols-outlined">group</span>
+            <span class="font-label-caps text-label-caps">Patient Management</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-secondary hover:bg-secondary/5 rounded-lg transition-colors group" href="{{ url_for('dashboard.clinical_analytics_page') }}">
+            <span class="material-symbols-outlined">monitoring</span>
+            <span class="font-label-caps text-label-caps">Clinical Analytics</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-secondary hover:bg-secondary/5 rounded-lg transition-colors group" href="#" onclick="alert('Opening Risk Assessment Wizard...')">
+            <span class="material-symbols-outlined">warning</span>
+            <span class="font-label-caps text-label-caps">Risk Assessments</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-secondary hover:bg-secondary/5 rounded-lg transition-colors group" href="#" onclick="alert('Opening Treatment Protocols...')">
+            <span class="material-symbols-outlined">prescriptions</span>
+            <span class="font-label-caps text-label-caps">Treatment Plans</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-secondary hover:bg-secondary/5 rounded-lg transition-colors group" href="#" onclick="alert('Appointments scheduler loaded...')">
+            <span class="material-symbols-outlined">calendar_today</span>
+            <span class="font-label-caps text-label-caps">Appointments</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-secondary hover:bg-secondary/5 rounded-lg transition-colors group" href="{{ url_for('dashboard.heart_disease_story') }}">
+            <span class="material-symbols-outlined">assessment</span>
+            <span class="font-label-caps text-label-caps">Reports</span>
+        </a>
+        
+        <!-- PUBLIC HEALTH SIDEBAR -->
+        {% elif persona == 'public_health' %}
+        <a class="sidebar-item-active flex items-center gap-3 px-4 py-3" href="{{ url_for('dashboard.home') }}">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="font-label-caps text-label-caps">Overview</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-secondary hover:bg-secondary/5 rounded-lg transition-colors group" href="{{ url_for('public_health.public_health_dashboard') }}">
+            <span class="material-symbols-outlined">map</span>
+            <span class="font-label-caps text-label-caps">Regional Health Map</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-secondary hover:bg-secondary/5 rounded-lg transition-colors group" href="{{ url_for('public_health.public_health_dashboard') }}#visualizations">
+            <span class="material-symbols-outlined">trending_up</span>
+            <span class="font-label-caps text-label-caps">Population Trends</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-secondary hover:bg-secondary/5 rounded-lg transition-colors group" href="#" onclick="alert('Opening Policy Impact Assessments...')">
+            <span class="material-symbols-outlined">policy</span>
+            <span class="font-label-caps text-label-caps">Policy Analysis</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-secondary hover:bg-secondary/5 rounded-lg transition-colors group" href="#" onclick="alert('Opening Resource Planning models...')">
+            <span class="material-symbols-outlined">inventory_2</span>
+            <span class="font-label-caps text-label-caps">Resource Planning</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-secondary hover:bg-secondary/5 rounded-lg transition-colors group" href="{{ url_for('dashboard.heart_disease_story') }}">
+            <span class="material-symbols-outlined">analytics</span>
+            <span class="font-label-caps text-label-caps">Reports</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-secondary hover:bg-secondary/5 rounded-lg transition-colors group" href="#" onclick="alert('Connecting to stakeholder dashboard...')">
+            <span class="material-symbols-outlined">groups</span>
+            <span class="font-label-caps text-label-caps">Stakeholder Dashboard</span>
+        </a>
+        
+        <!-- PATIENT SIDEBAR -->
+        {% else %}
+        <a class="sidebar-item-active flex items-center gap-3 px-4 py-3" href="{{ url_for('dashboard.home') }}">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="text-body-md">My Health Dashboard</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-secondary/5 rounded-lg transition-colors group" href="#" onclick="alert('Launching Patient Risk Calculator...')">
+            <span class="material-symbols-outlined">warning</span>
+            <span class="text-body-md">Risk Assessment</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-secondary/5 rounded-lg transition-colors group" href="#" onclick="alert('Opening Progress Graphs...')">
+            <span class="material-symbols-outlined">analytics</span>
+            <span class="text-body-md">Progress Tracking</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-secondary/5 rounded-lg transition-colors group" href="#" onclick="alert('Appointments calendar loaded...')">
+            <span class="material-symbols-outlined">calendar_month</span>
+            <span class="text-body-md">Appointments</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-secondary/5 rounded-lg transition-colors group" href="#" onclick="alert('Loading prescription log...')">
+            <span class="material-symbols-outlined">medication</span>
+            <span class="text-body-md">Medications</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-secondary/5 rounded-lg transition-colors group" href="#" onclick="alert('Opening Daily Vitals Journal...')">
+            <span class="material-symbols-outlined">history_edu</span>
+            <span class="text-body-md">Health Journal</span>
+        </a>
+        <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-secondary/5 rounded-lg transition-colors group" href="{{ url_for('dashboard.knowledge_center_page') }}">
+            <span class="material-symbols-outlined">school</span>
+            <span class="text-body-md">Health Education</span>
+        </a>
+        {% endif %}
+    </nav>
+    
+    <!-- Sidebar Bottom Controls -->
+    <div class="mt-auto mb-8">
+        {% if persona == 'patient' %}
+        <div class="bg-surface-lowest rounded-xl p-4 shadow-sm border border-outline-variant/30">
+            <p class="text-[12px] font-bold text-workflow-blue mb-1">SUPPORT</p>
+            <p class="text-body-sm text-on-surface-variant mb-3">Need help with your data?</p>
+            <button class="w-full py-2 border-2 border-secondary text-secondary rounded-lg font-bold text-body-sm hover:bg-secondary hover:text-white transition-all shadow-sm" onclick="alert('Contacting Care Team support desk...')">Contact Care Team</button>
+        </div>
+        {% else %}
+        <button class="w-full bg-white border-2 border-workflow-blue text-workflow-blue font-bold py-2 px-4 rounded-lg hover:bg-workflow-blue hover:text-white transition-all flex items-center justify-center gap-2 shadow-sm" onclick="alert('Launching diagnostic analysis workflow...')">
+            <span class="material-symbols-outlined text-sm">add</span>
+            <span class="font-label-caps text-label-caps">New Analysis</span>
+        </button>
+        {% endif %}
+        
+        <div class="border-t border-outline-variant pt-4 mt-4 space-y-1">
+            <a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:text-secondary transition-all" href="#" onclick="alert('Loading help documents...')">
+                <span class="material-symbols-outlined text-sm">help</span>
+                <span class="font-label-caps text-label-caps">Help Center</span>
+            </a>
+            <a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:text-secondary transition-all" href="{{ url_for('auth.logout') }}">
+                <span class="material-symbols-outlined text-sm">logout</span>
+                <span class="font-label-caps text-label-caps">Logout</span>
+            </a>
+        </div>
+    </div>
+</aside>
+
+<!-- Main Content Canvas -->
+<main class="md:ml-sidebar-width pt-20 min-h-screen p-container-padding bg-surface">
+    <div class="max-w-[1400px] mx-auto">
+        
+        <!-- ==================== CARDIOLOGIST OVERVIEW ==================== -->
+        {% if persona == 'clinical' or persona == 'admin' %}
+        <!-- Welcome Widget -->
+        <section class="mb-8 relative overflow-hidden rounded-xl p-8 glass-card bg-gradient-to-r from-workflow-blue/10 to-transparent border-l-4 border-workflow-blue">
+            <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div>
+                    <h2 class="font-headline-md text-headline-md text-primary mb-1">Welcome back, Dr. Sharma</h2>
+                    <p class="text-on-surface-variant max-w-xl">"Precision in data, compassion in care." — Daily Insight</p>
+                </div>
+                <div class="flex items-center gap-4 bg-white/80 p-4 rounded-lg shadow-sm border border-outline-variant/30">
+                    <div class="w-10 h-10 rounded-full bg-critical-red/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-critical-red">warning</span>
+                    </div>
+                    <div>
+                        <p class="font-label-caps text-label-caps text-critical-red uppercase">Urgent Insight</p>
+                        <p class="font-body-sm text-body-sm text-on-surface font-semibold">System: 12 high-risk alerts flagged</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- KPI Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-card-gap mb-8">
+            <div class="bg-surface-lowest p-card-padding rounded-xl shadow-sm border-l-4 border-workflow-blue hover:shadow-md transition-shadow">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="material-symbols-outlined text-workflow-blue">groups</span>
+                    <span class="bg-workflow-blue/10 text-workflow-blue px-2 py-0.5 rounded text-[10px] font-bold">TOTAL DATABASE</span>
+                </div>
+                <h3 class="font-data-metric text-data-metric text-primary mb-1">{{ stats.total_patients }}</h3>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Active Monitored Patients</p>
+            </div>
+            
+            <div class="bg-surface-lowest p-card-padding rounded-xl shadow-sm border-l-4 border-efficiency-purple hover:shadow-md transition-shadow">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="material-symbols-outlined text-efficiency-purple">speed</span>
+                    <span class="bg-efficiency-purple/10 text-efficiency-purple px-2 py-0.5 rounded text-[10px] font-bold">MONITOR STATUS</span>
+                </div>
+                <h3 class="font-data-metric text-data-metric text-primary mb-1">Hypertension</h3>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Most Common Diagnosis</p>
+            </div>
+            
+            <div class="bg-surface-lowest p-card-padding rounded-xl shadow-sm border-l-4 border-cardiac-teal hover:shadow-md transition-shadow">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="material-symbols-outlined text-cardiac-teal">emergency_home</span>
+                    <span class="bg-cardiac-teal/10 text-cardiac-teal px-2 py-0.5 rounded text-[10px] font-bold">URGENT flags</span>
+                </div>
+                <h3 class="font-data-metric text-data-metric text-primary mb-1">{{ stats.high_risk_patients }}</h3>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">High Risk Patient Alerts</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-card-gap mb-8">
+            <!-- Left Grid: Pulse of the Lab Graph -->
+            <div class="lg:col-span-8 bg-surface-lowest rounded-xl shadow-sm p-6 overflow-hidden flex flex-col justify-between min-h-[450px]">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h4 class="font-headline-md text-xl text-primary">Pulse of the Lab</h4>
+                        <p class="font-body-sm text-on-surface-variant">Real-time aggregate data throughput and analysis accuracy</p>
+                    </div>
+                </div>
+                
+                <div class="h-64 flex items-end gap-2 px-2 border-b pb-md relative">
+                    <div class="absolute inset-0 opacity-10 pointer-events-none">
+                        <svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 400 100">
+                            <path d="M0,50 L20,50 L30,20 L40,80 L50,50 L80,50 L90,10 L100,90" fill="none" stroke="#001255" stroke-width="1.5"></path>
+                        </svg>
+                    </div>
+                    <div class="flex-1 bg-surface-container rounded-t-sm h-[60%] hover:bg-workflow-blue/40 transition-all cursor-pointer relative group">
+                        <div class="absolute bottom-0 w-full h-[60%] bg-workflow-blue opacity-80 group-hover:opacity-100"></div>
+                    </div>
+                    <div class="flex-1 bg-surface-container rounded-t-sm h-[80%] hover:bg-workflow-blue/40 transition-all cursor-pointer relative group">
+                        <div class="absolute bottom-0 w-full h-[80%] bg-workflow-blue opacity-80 group-hover:opacity-100"></div>
+                    </div>
+                    <div class="flex-1 bg-surface-container rounded-t-sm h-[75%] hover:bg-workflow-blue/40 transition-all cursor-pointer relative group">
+                        <div class="absolute bottom-0 w-full h-[75%] bg-workflow-blue opacity-80 group-hover:opacity-100"></div>
+                    </div>
+                    <div class="flex-1 bg-surface-container rounded-t-sm h-[95%] hover:bg-workflow-blue/40 transition-all cursor-pointer relative group">
+                        <div class="absolute bottom-0 w-full h-[95%] bg-status-critical opacity-80 group-hover:opacity-100"></div>
+                    </div>
+                    <div class="flex-1 bg-surface-container rounded-t-sm h-[65%] hover:bg-workflow-blue/40 transition-all cursor-pointer relative group">
+                        <div class="absolute bottom-0 w-full h-[65%] bg-workflow-blue opacity-80 group-hover:opacity-100"></div>
+                    </div>
+                    <div class="flex-1 bg-surface-container rounded-t-sm h-[85%] hover:bg-workflow-blue/40 transition-all cursor-pointer relative group">
+                        <div class="absolute bottom-0 w-full h-[85%] bg-workflow-blue opacity-80 group-hover:opacity-100"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Grid: Quick actions -->
+            <div class="lg:col-span-4 flex flex-col gap-6">
+                <div class="bg-surface-lowest rounded-xl shadow-sm p-6 flex-1">
+                    <h4 class="font-headline-md text-lg text-primary mb-6">Quick Actions</h4>
+                    <div class="space-y-3">
+                        <button class="w-full flex items-center justify-between p-4 rounded-lg bg-surface-container hover:bg-workflow-blue/5 transition-all group" onclick="alert('Launching Add Patient Wizard...')">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-workflow-blue">person_add</span>
+                                <span class="font-body-md font-semibold">Add New Patient</span>
+                            </div>
+                        </button>
+                        <a href="{{ url_for('dashboard.heart_disease_story') }}" class="w-full flex items-center justify-between p-4 rounded-lg bg-surface-container hover:bg-efficiency-purple/5 transition-all group">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-efficiency-purple">description</span>
+                                <span class="font-body-md font-semibold">Generate Clinical Report</span>
+                            </div>
+                        </a>
+                        <button class="w-full flex items-center justify-between p-4 rounded-lg bg-surface-container hover:bg-cardiac-teal/5 transition-all group" onclick="alert('Exporting clinical data logs...')">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-cardiac-teal">cloud_download</span>
+                                <span class="font-body-md font-semibold">Export Vitals Data</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ==================== PUBLIC HEALTH OVERVIEW ==================== -->
+        {% elif persona == 'public_health' %}
+        <!-- Welcome Widget -->
+        <section class="mb-8 relative overflow-hidden rounded-xl p-8 glass-card bg-gradient-to-r from-workflow-blue/10 to-transparent border-l-4 border-workflow-blue">
+            <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div>
+                    <h2 class="font-headline-md text-headline-md text-primary mb-1">Welcome back, Ramesh</h2>
+                    <p class="text-on-surface-variant max-w-xl">"Public health is the foundation of a thriving society." — Daily Insight</p>
+                </div>
+                <div class="flex items-center gap-4 bg-white/80 p-4 rounded-lg shadow-sm border border-outline-variant/30">
+                    <div class="w-10 h-10 rounded-full bg-critical-red/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-critical-red">warning</span>
+                    </div>
+                    <div>
+                        <p class="font-label-caps text-label-caps text-critical-red uppercase">Urgent Insight</p>
+                        <p class="font-body-sm text-body-sm text-on-surface font-semibold">Southern region: 15% increase in hypertension reports</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- KPI Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-card-gap mb-8">
+            <div class="bg-surface-lowest p-card-padding rounded-xl shadow-sm border-l-4 border-workflow-blue hover:shadow-md transition-shadow">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="material-symbols-outlined text-workflow-blue">groups</span>
+                    <span class="bg-workflow-blue/10 text-workflow-blue px-2 py-0.5 rounded text-[10px] font-bold">TOTAL COVERAGE</span>
+                </div>
+                <h3 class="font-data-metric text-data-metric text-primary mb-1">1.2M</h3>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Total Population Analyzed</p>
+            </div>
+            
+            <div class="bg-surface-lowest p-card-padding rounded-xl shadow-sm border-l-4 border-efficiency-purple hover:shadow-md transition-shadow">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="material-symbols-outlined text-efficiency-purple">speed</span>
+                    <span class="bg-efficiency-purple/10 text-efficiency-purple px-2 py-0.5 rounded text-[10px] font-bold">CURRENT STATUS</span>
+                </div>
+                <h3 class="font-data-metric text-data-metric text-primary mb-1">Moderate</h3>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Regional Risk Index</p>
+            </div>
+            
+            <div class="bg-surface-lowest p-card-padding rounded-xl shadow-sm border-l-4 border-cardiac-teal hover:shadow-md transition-shadow">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="material-symbols-outlined text-cardiac-teal">emergency_home</span>
+                    <span class="bg-cardiac-teal/10 text-cardiac-teal px-2 py-0.5 rounded text-[10px] font-bold">PRIORITY FOCUS</span>
+                </div>
+                <h3 class="font-title-sm text-title-sm text-primary mb-1 truncate">Resource Disparity</h3>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Top Administrative Concern</p>
+            </div>
+        </div>
+
+        <div class="bento-grid">
+            <!-- Map Widget -->
+            <div class="col-span-12 lg:col-span-8 bg-surface-lowest rounded-xl shadow-sm p-6 overflow-hidden min-h-[450px] flex flex-col">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h4 class="font-headline-md text-xl text-primary">Interactive Regional Risk Map</h4>
+                        <p class="font-body-sm text-on-surface-variant">Real-time geospatial health metrics across all districts</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="px-3 py-1 bg-surface-container rounded-md text-xs font-bold text-on-surface-variant hover:bg-surface-variant transition-colors" onclick="alert('Switching to Heatmap view...')">Heatmap</button>
+                        <button class="px-3 py-1 bg-secondary text-white rounded-md text-xs font-bold">Risk Levels</button>
+                    </div>
+                </div>
+                
+                <div class="flex-1 relative rounded-lg bg-surface-container overflow-hidden group">
+                    <div class="absolute inset-0 z-0 bg-cover bg-center grayscale group-hover:grayscale-0 transition-all duration-700" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC5CDRpUIi16jMzKPhKpixD2AsJjjlj33Mz_XR6QmsIO4HNlwMHcYylrx4JmaYmUZyVC3GPCnjGY8BltKZJDhQmhwPqRDVRQ5bELxjGaYELFmMVgRJqqSxBljQ8IGq-F9fpynyq7C0cnbNx-DsaWPx9GASrBa4vAsOt0bOE4ScL_vKITqREXl6jMhbniJRB6uNJBa4NXLDLDEvQ6epfW4SZxg_TF-QnXrpbruFGKb7wJSOARpc5bSx1Ai_z2Cs4EJxdv9RBWOq-WBg2')"></div>
+                    <!-- Legend Overlay -->
+                    <div class="absolute bottom-4 left-4 p-4 glass-card rounded-lg flex flex-col gap-2">
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full bg-critical-red"></div>
+                            <span class="text-[10px] font-bold uppercase">High Risk</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full bg-amber-400"></div>
+                            <span class="text-[10px] font-bold uppercase">Moderate</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full bg-cardiac-teal"></div>
+                            <span class="text-[10px] font-bold uppercase">Low Risk</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="col-span-12 lg:col-span-4 flex flex-col gap-6">
+                <div class="bg-surface-lowest rounded-xl shadow-sm p-6 flex-1">
+                    <h4 class="font-headline-md text-lg text-primary mb-6">Quick Actions</h4>
+                    <div class="space-y-3">
+                        <button class="w-full flex items-center justify-between p-4 rounded-lg border-2 border-transparent bg-surface-container hover:border-workflow-blue hover:bg-workflow-blue/5 transition-all group" onclick="alert('Opening Policy Simulation Wizard...')">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-workflow-blue">vitals</span>
+                                <span class="font-body-md font-semibold">Simulate Policy Impact</span>
+                            </div>
+                            <span class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
+                        </button>
+                        <a href="{{ url_for('dashboard.heart_disease_story') }}" class="w-full flex items-center justify-between p-4 rounded-lg border-2 border-transparent bg-surface-container hover:border-efficiency-purple hover:bg-efficiency-purple/5 transition-all group">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-efficiency-purple">description</span>
+                                <span class="font-body-md font-semibold">Generate National Report</span>
+                            </div>
+                            <span class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
+                        </a>
+                        <button class="w-full flex items-center justify-between p-4 rounded-lg border-2 border-transparent bg-surface-container hover:border-cardiac-teal hover:bg-cardiac-teal/5 transition-all group" onclick="alert('Downloading dataset...')">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-cardiac-teal">cloud_download</span>
+                                <span class="font-body-md font-semibold">Export Regional Data</span>
+                            </div>
+                            <span class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
+                        </button>
+                        <button class="w-full flex items-center justify-between p-4 rounded-lg border-2 border-transparent bg-surface-container hover:border-primary hover:bg-primary/5 transition-all group" onclick="alert('Creating stakeholder event...')">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-primary">calendar_today</span>
+                                <span class="font-body-md font-semibold">Schedule Stakeholder Meeting</span>
+                            </div>
+                            <span class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Stakeholder summary -->
+                <div class="bg-gradient-to-br from-secondary to-blue-800 rounded-xl shadow-lg p-6 text-white relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <span class="material-symbols-outlined text-8xl">partner_exchange</span>
+                    </div>
+                    <h4 class="font-title-sm text-lg mb-2 relative z-10">Network Integrity</h4>
+                    <p class="text-sm opacity-90 mb-4 relative z-10">4 key stakeholders pending review for Q3 resource allocation alignment.</p>
+                    <button class="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-lg text-xs font-bold uppercase tracking-wider transition-all relative z-10" onclick="alert('Opening reviews console...')">Review Now</button>
+                </div>
+            </div>
+
+            <!-- Trends trajectories -->
+            <div class="col-span-12 bg-surface-lowest rounded-xl shadow-sm p-6">
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <h4 class="font-headline-md text-xl text-primary">Population Health Trajectories</h4>
+                        <p class="font-body-sm text-on-surface-variant">Historical vs. Projected morbidity trends per 100k capita</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-workflow-blue"></div>
+                            <span class="text-[10px] font-bold text-on-surface-variant uppercase">Hypertension</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-efficiency-purple"></div>
+                            <span class="text-[10px] font-bold text-on-surface-variant uppercase">Diabetes</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="h-64 flex items-end gap-2 px-2">
+                    <div class="flex-1 bg-surface-container rounded-t-sm h-[30%] hover:bg-workflow-blue/40 transition-all cursor-pointer relative group">
+                        <div class="absolute bottom-0 w-full h-1/2 bg-workflow-blue opacity-80 group-hover:opacity-100"></div>
+                    </div>
+                    <div class="flex-1 bg-surface-container rounded-t-sm h-[45%] hover:bg-workflow-blue/40 transition-all cursor-pointer relative group">
+                        <div class="absolute bottom-0 w-full h-2/3 bg-workflow-blue opacity-80 group-hover:opacity-100"></div>
+                    </div>
+                    <div class="flex-1 bg-surface-container rounded-t-sm h-[40%] hover:bg-workflow-blue/40 transition-all cursor-pointer relative group">
+                        <div class="absolute bottom-0 w-full h-1/3 bg-workflow-blue opacity-80 group-hover:opacity-100"></div>
+                    </div>
+                    <div class="flex-1 bg-surface-container rounded-t-sm h-[60%] hover:bg-workflow-blue/40 transition-all cursor-pointer relative group">
+                        <div class="absolute bottom-0 w-full h-1/2 bg-workflow-blue opacity-80 group-hover:opacity-100"></div>
+                    </div>
+                    <div class="flex-1 bg-surface-container rounded-t-sm h-[85%] hover:bg-workflow-blue/40 transition-all cursor-pointer relative group">
+                        <div class="absolute bottom-0 w-full h-[70%] bg-workflow-blue opacity-80 group-hover:opacity-100"></div>
+                    </div>
+                    <div class="flex-1 bg-surface-container rounded-t-sm h-[55%] hover:bg-efficiency-purple/40 transition-all cursor-pointer relative group">
+                        <div class="absolute bottom-0 w-full h-2/3 bg-efficiency-purple opacity-80 group-hover:opacity-100"></div>
+                    </div>
+                    <div class="flex-1 bg-surface-container rounded-t-sm h-[70%] hover:bg-efficiency-purple/40 transition-all cursor-pointer relative group">
+                        <div class="absolute bottom-0 w-full h-1/2 bg-efficiency-purple opacity-80 group-hover:opacity-100"></div>
+                    </div>
+                    <div class="flex-1 bg-surface-container rounded-t-sm h-[90%] hover:bg-efficiency-purple/40 transition-all cursor-pointer relative group">
+                        <div class="absolute bottom-0 w-full h-[80%] bg-efficiency-purple opacity-80 group-hover:opacity-100"></div>
+                    </div>
+                    <div class="flex-1 bg-surface-container rounded-t-sm h-[65%] hover:bg-efficiency-purple/40 transition-all cursor-pointer relative group">
+                        <div class="absolute bottom-0 w-full h-1/3 bg-efficiency-purple opacity-80 group-hover:opacity-100"></div>
+                    </div>
+                </div>
+                <div class="flex justify-between mt-4 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest border-t border-outline-variant/30 pt-4 px-2">
+                    <span>Jan</span>
+                    <span>Feb</span>
+                    <span>Mar</span>
+                    <span>Apr</span>
+                    <span>May</span>
+                    <span>Jun</span>
+                    <span>Jul</span>
+                    <span>Aug</span>
+                    <span>Sep</span>
+                    <span>Oct</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ==================== PATIENT OVERVIEW ==================== -->
+        {% else %}
+        <!-- Welcome Bento Row -->
+        <div class="bento-grid mb-8">
+            <div class="col-span-12 lg:col-span-8 bg-gradient-to-br from-workflow-blue to-efficiency-purple rounded-3xl p-8 text-white relative overflow-hidden shadow-lg">
+                <div class="relative z-10 flex flex-col justify-between h-full">
+                    <div>
+                        <h2 class="text-[32px] font-bold mb-2">Welcome back, {{ name }}! 👋</h2>
+                        <p class="text-white/80 text-body-md max-w-md">Great work this week. You're consistently hitting your activity targets and keeping your records updated.</p>
+                    </div>
+                    <div class="mt-8 flex gap-6">
+                        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 flex-1 border border-white/10">
+                            <span class="material-symbols-outlined text-cardiac-teal mb-2">auto_awesome</span>
+                            <p class="text-[14px] font-bold">Today's Tip</p>
+                            <p class="text-[13px] text-white/70">You've hit your step goal 3 days in a row!</p>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 flex-1 border border-white/10">
+                            <span class="material-symbols-outlined text-secondary-fixed-dim mb-2">format_quote</span>
+                            <p class="text-[14px] font-bold">Daily Quote</p>
+                            <p class="text-[13px] text-white/70 italic">"Small steps lead to big changes."</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Live Vitals Progress -->
+            <div class="col-span-12 lg:col-span-4 glass-card rounded-3xl p-6 border-l-4 border-l-efficiency-purple flex flex-col">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-title-sm text-on-surface">Live Vitals</h3>
+                    <span class="text-[12px] font-bold text-efficiency-purple flex items-center gap-1">
+                        <span class="w-2 h-2 rounded-full bg-efficiency-purple animate-pulse"></span> SYNCED
+                    </span>
+                </div>
+                <div class="space-y-4 flex-grow text-xs">
+                    <div class="flex justify-between items-end border-b border-outline-variant/30 pb-3">
+                        <div>
+                            <p class="text-body-sm text-on-surface-variant uppercase tracking-wider font-bold">Heart Rate</p>
+                            <p class="text-data-metric text-secondary text-lg font-bold">72 <span class="text-body-sm font-normal text-on-surface-variant">BPM</span></p>
+                        </div>
+                        <div class="h-8 w-24 bg-secondary/10 rounded overflow-hidden">
+                            <div class="h-full w-full bg-secondary/20 flex items-center justify-around px-1">
+                                <div class="w-1 h-3 bg-secondary rounded-full"></div>
+                                <div class="w-1 h-5 bg-secondary rounded-full"></div>
+                                <div class="w-1 h-4 bg-secondary rounded-full"></div>
+                                <div class="w-1 h-6 bg-secondary rounded-full"></div>
+                                <div class="w-1 h-4 bg-secondary rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-end">
+                        <div>
+                            <p class="text-body-sm text-on-surface-variant uppercase tracking-wider font-bold">Sleep Quality</p>
+                            <p class="text-data-metric text-efficiency-purple text-lg font-bold">8.2 <span class="text-body-sm font-normal text-on-surface-variant">HRS</span></p>
+                        </div>
+                        <span class="material-symbols-outlined text-efficiency-purple">bedtime</span>
+                    </div>
+                </div>
+                <button class="mt-6 text-body-md font-bold text-secondary flex items-center justify-center gap-2 hover:underline" onclick="alert('Opening detailed progress charts...')">
+                    Detailed Progress <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- KPI Row -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-surface-lowest rounded-2xl p-6 shadow-sm border border-outline-variant/20 hover:shadow-md transition-all group">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-12 h-12 rounded-full bg-cardiac-teal/10 flex items-center justify-center text-cardiac-teal">
+                        <span class="material-symbols-outlined">favorite</span>
+                    </div>
+                    <div>
+                        <p class="text-body-sm font-bold text-on-surface-variant uppercase tracking-widest text-[10px]">Health Score</p>
+                        <h4 class="text-2xl font-bold text-on-surface">{{ stats.health_score }}<span class="text-body-md text-on-surface-variant font-medium">/100</span></h4>
+                    </div>
+                </div>
+                <div class="w-full bg-surface-container rounded-full h-2 overflow-hidden">
+                    <div class="bg-cardiac-teal h-full w-[78%] rounded-full group-hover:w-[82%] transition-all duration-1000"></div>
+                </div>
+                <p class="mt-3 text-body-sm text-on-surface-variant text-[11px]">Top 15% in your age group.</p>
+            </div>
+            
+            <div class="bg-surface-lowest rounded-2xl p-6 shadow-sm border border-outline-variant/20 hover:shadow-md transition-all group">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-12 h-12 rounded-full bg-error-container/50 flex items-center justify-center text-error">
+                        <span class="material-symbols-outlined">warning</span>
+                    </div>
+                    <div>
+                        <p class="text-body-sm font-bold text-on-surface-variant uppercase tracking-widest text-[10px]">Active Risk</p>
+                        <h4 class="text-2xl font-bold text-on-surface">{{ stats.risk_level }}</h4>
+                    </div>
+                </div>
+                <div class="flex gap-1 h-2">
+                    <div class="flex-1 bg-green-500 rounded-full"></div>
+                    <div class="flex-1 bg-yellow-400 rounded-full"></div>
+                    <div class="flex-1 bg-surface-container rounded-full"></div>
+                </div>
+                <p class="mt-3 text-body-sm text-on-surface-variant text-[11px]">Manageable with lifestyle changes.</p>
+            </div>
+            
+            <div class="bg-surface-lowest rounded-2xl p-6 shadow-sm border border-outline-variant/20 hover:shadow-md transition-all group">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-12 h-12 rounded-full bg-workflow-blue/10 flex items-center justify-center text-workflow-blue">
+                        <span class="material-symbols-outlined">flag</span>
+                    </div>
+                    <div>
+                        <p class="text-body-sm font-bold text-on-surface-variant uppercase tracking-widest text-[10px]">Next Milestone</p>
+                        <h4 class="text-2xl font-bold text-on-surface">5% <span class="text-body-md text-on-surface-variant font-medium">Goal</span></h4>
+                    </div>
+                </div>
+                <p class="text-body-md text-on-surface font-semibold mb-2 text-xs">Cholesterol Improvement</p>
+                <div class="flex items-center justify-between text-[11px]">
+                    <p class="text-body-sm text-on-surface-variant">Deadline: Sep 12</p>
+                    <span class="text-[10px] font-bold bg-workflow-blue/10 text-workflow-blue px-2 py-0.5 rounded uppercase">On Track</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-12 gap-8">
+            <!-- Left Side Charts & Logs -->
+            <div class="col-span-12 lg:col-span-8 space-y-8">
+                <div class="bg-surface-lowest rounded-3xl p-8 border border-outline-variant/20 shadow-sm overflow-hidden relative min-h-[400px]">
+                    <div class="flex justify-between items-center mb-8 relative z-10">
+                        <div>
+                            <h3 class="font-headline-md text-on-surface text-lg font-bold">Activity Trends</h3>
+                            <p class="text-body-sm text-on-surface-variant">Step count vs Heart rate recovery</p>
+                        </div>
+                    </div>
+                    <div class="flex items-end justify-between h-[220px] px-4 relative z-10">
+                        <div class="w-12 bg-gradient-to-t from-cardiac-teal to-cardiac-teal/40 rounded-t-xl h-[40%] hover:scale-105 transition-transform cursor-pointer"></div>
+                        <div class="w-12 bg-gradient-to-t from-cardiac-teal to-cardiac-teal/40 rounded-t-xl h-[65%] hover:scale-105 transition-transform cursor-pointer"></div>
+                        <div class="w-12 bg-gradient-to-t from-cardiac-teal to-cardiac-teal/40 rounded-t-xl h-[55%] hover:scale-105 transition-transform cursor-pointer"></div>
+                        <div class="w-12 bg-gradient-to-t from-cardiac-teal to-cardiac-teal/40 rounded-t-xl h-[85%] hover:scale-105 transition-transform cursor-pointer"></div>
+                        <div class="w-12 bg-gradient-to-t from-cardiac-teal to-cardiac-teal/40 rounded-t-xl h-[90%] hover:scale-105 transition-transform cursor-pointer"></div>
+                        <div class="w-12 bg-gradient-to-t from-cardiac-teal to-cardiac-teal/40 rounded-t-xl h-[70%] hover:scale-105 transition-transform cursor-pointer"></div>
+                        <div class="w-12 bg-gradient-to-t from-cardiac-teal to-cardiac-teal/40 rounded-t-xl h-[30%] hover:scale-105 transition-transform cursor-pointer"></div>
+                    </div>
+                    <div class="flex justify-between px-4 mt-4 text-[11px] font-bold text-on-surface-variant tracking-widest relative z-10">
+                        <span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span>
+                    </div>
+                </div>
+
+                <!-- Quick actions -->
+                <div>
+                    <h3 class="font-headline-md text-on-surface mb-4 text-base font-bold">Quick Actions</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <button class="flex flex-col items-center gap-3 p-6 bg-surface-lowest rounded-2xl border border-outline-variant/20 hover:border-secondary transition-all group" onclick="alert('Opening Daily Vitals log entry...')">
+                            <div class="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary group-hover:scale-110 transition-transform">
+                                <span class="material-symbols-outlined">edit_note</span>
+                            </div>
+                            <span class="text-body-sm font-bold text-[11px]">Log Vitals Entry</span>
+                        </button>
+                        <button class="flex flex-col items-center gap-3 p-6 bg-surface-lowest rounded-2xl border border-outline-variant/20 hover:border-secondary transition-all group" onclick="alert('Viewing comprehensive test results records...')">
+                            <div class="w-12 h-12 rounded-xl bg-cardiac-teal/10 flex items-center justify-center text-cardiac-teal group-hover:scale-110 transition-transform">
+                                <span class="material-symbols-outlined">lab_research</span>
+                            </div>
+                            <span class="text-body-sm font-bold text-[11px]">View Test Results</span>
+                        </button>
+                        <button class="flex flex-col items-center gap-3 p-6 bg-surface-lowest rounded-2xl border border-outline-variant/20 hover:border-secondary transition-all group" onclick="alert('Scheduling appointments flow...')">
+                            <div class="w-12 h-12 rounded-xl bg-efficiency-purple/10 flex items-center justify-center text-efficiency-purple group-hover:scale-110 transition-transform">
+                                <span class="material-symbols-outlined">calendar_add_on</span>
+                            </div>
+                            <span class="text-body-sm font-bold text-[11px]">Schedule Appt.</span>
+                        </button>
+                        <a href="{{ url_for('dashboard.knowledge_center_page') }}" class="flex flex-col items-center gap-3 p-6 bg-surface-lowest rounded-2xl border border-outline-variant/20 hover:border-secondary transition-all group">
+                            <div class="w-12 h-12 rounded-xl bg-on-tertiary-container/10 flex items-center justify-center text-on-tertiary-container group-hover:scale-110 transition-transform">
+                                <span class="material-symbols-outlined">lightbulb</span>
+                            </div>
+                            <span class="text-body-sm font-bold text-[11px]">Read Health Tip</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side Appointments & Articles -->
+            <div class="col-span-12 lg:col-span-4 space-y-8">
+                <div class="bg-surface-lowest rounded-3xl p-6 border border-outline-variant/20 shadow-sm">
+                    <h3 class="font-title-sm text-on-surface mb-6 flex items-center gap-2 text-sm font-bold">
+                        <span class="material-symbols-outlined text-secondary">upcoming</span>
+                        Upcoming Care &amp; Appointments
+                    </h3>
+                    <div class="space-y-4 text-xs">
+                        <div class="p-4 rounded-2xl bg-surface-container-low border border-transparent hover:border-secondary/30 cursor-pointer transition-all">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="text-[10px] font-extrabold px-2 py-0.5 rounded bg-secondary/10 text-secondary uppercase tracking-widest">In-Person</span>
+                                <p class="text-body-sm font-bold text-on-surface-variant">TOMORROW</p>
+                            </div>
+                            <h4 class="text-body-md font-bold mb-1">Cardiology Follow-up</h4>
+                            <p class="text-body-sm text-on-surface-variant">Dr. Alan Marcus • 10:30 AM</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-surface-container-high to-surface-bright rounded-3xl p-6 border border-outline-variant/30 relative overflow-hidden">
+                    <div class="relative z-10">
+                        <h3 class="text-body-sm font-bold text-on-tertiary-container uppercase tracking-widest mb-4 text-[10px]">Recommended Read</h3>
+                        <div class="w-full aspect-video rounded-xl bg-surface mb-4 overflow-hidden">
+                            <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmEwOkYrXbfxHc0orrZe-TfaPcQ9ubSplvxwE-c4fnVu87jhjqnze3SX2lVlSLHv6JaieozBn1TFpC9InipVx-SDOSleOR3GOy3JMXOsnAK_G_yxnOklokdfR-cKButxVKOM9WAvmHfBGvv_dM3mhDA0omYXHf36DkzkNt6gk-Ah_KSQkU7ulxnv3nkN6AxgnoBXwcqc0p4mbDV_u1HvF0VlCuVmGTDMMtCFdErwwPWU948W8SLOnabv0XRq23rvdulGRiX6_AtAzO" alt="forest trail walk"/>
+                        </div>
+                        <h4 class="font-title-sm mb-2 text-xs font-bold">Benefits of Low-Impact Cardio for Heart Health</h4>
+                        <p class="text-body-sm text-on-surface-variant mb-4 text-[11px]">Learn why walking 30 minutes a day is more effective than short bursts of high-intensity training...</p>
+                        <a class="inline-block text-secondary font-bold text-body-sm hover:underline text-xs" href="{{ url_for('dashboard.knowledge_center_page') }}">Read Article →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</main>
+
+<!-- Mobile Navigation FAB Trigger -->
+<div class="fixed bottom-8 right-8 z-50 md:hidden">
+    <button class="w-14 h-14 rounded-full bg-secondary text-white shadow-xl flex items-center justify-center hover:scale-110 transition-transform" onclick="alert('Launching entry workflow...')">
+        <span class="material-symbols-outlined text-[28px]">add</span>
+    </button>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Toggle Sidebar on mobile
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebarMenu = document.getElementById('sidebarMenu');
+        
+        if (sidebarToggle && sidebarMenu) {
+            sidebarToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                sidebarMenu.classList.toggle('-translate-x-full');
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (!sidebarMenu.contains(e.target) && e.target !== sidebarToggle) {
+                    sidebarMenu.classList.add('-translate-x-full');
+                }
+            });
+        }
+        
+        // Toggle User Profile Dropdown Menu
+        const dropdownBtn = document.getElementById('profileDropdownBtn');
+        const profileMenu = document.getElementById('profileMenu');
+        
+        if (dropdownBtn && profileMenu) {
+            dropdownBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                profileMenu.classList.toggle('hidden');
+            });
+            
+            document.addEventListener('click', () => {
+                profileMenu.classList.add('hidden');
+            });
+        }
+        
+        // Autocomplete search suggestion list logic
+        const searchInput = document.getElementById('searchInput');
+        const autocomplete = document.getElementById('autocompleteDropdown');
+        
+        if (searchInput && autocomplete) {
+            searchInput.addEventListener('input', (e) => {
+                if (e.target.value.length > 1) {
+                    autocomplete.classList.remove('hidden');
+                } else {
+                    autocomplete.classList.add('hidden');
+                }
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (!searchInput.contains(e.target) && !autocomplete.contains(e.target)) {
+                    autocomplete.classList.add('hidden');
+                }
+            });
+        }
+    });
+
+    function fillSearch(val) {
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.value = val;
+        }
+        document.getElementById('autocompleteDropdown').classList.add('hidden');
+    }
+</script>
+</body>
+</html>

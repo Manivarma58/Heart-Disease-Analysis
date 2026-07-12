@@ -6,7 +6,7 @@ DataVibe is a heart disease analytics platform that combines a Flask web app, a 
 
 ## 2. Dataset
 
-Show `data/Heart_new2.csv`. Mention that it contains 4,500 patient-style records with heart disease status, BMI, smoking, alcohol, stroke, age category, race, diabetic status, physical activity, general health, sleep time, kidney disease, and related health indicators.
+Show `data/Heart_new2_clean.csv`. Mention that it contains 4,494 cleaned real dataset records with heart disease status, BMI, smoking, alcohol, stroke, age category, race, diabetic status, physical activity, general health, sleep time, kidney disease, and related health indicators.
 
 ## 3. Run the Application
 

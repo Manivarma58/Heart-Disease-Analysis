@@ -1,1 +1,1 @@
-"""Utility helpers for CardioViz."""
+"""Utility helpers for DataVibe."""
