@@ -1,10 +1,21 @@
-from flask import Blueprint, jsonify, redirect, render_template, session, url_for
+from flask import Blueprint, jsonify, redirect, render_template, session, url_for, send_from_directory, current_app
+import os
 
 from app.routes.auth import login_required
 from app.services.database_service import get_db, query_all, query_one
 from app.services.tableau_service import tableau_status
 
 dashboard_bp = Blueprint("dashboard", __name__)
+
+
+@dashboard_bp.route("/favicon.ico")
+@dashboard_bp.route("/favicon.png")
+def favicon():
+    return send_from_directory(
+        os.path.join(current_app.root_path, "static", "images"),
+        "cardioviz_logo.png",
+        mimetype="image/png"
+    )
 
 
 @dashboard_bp.route("/")

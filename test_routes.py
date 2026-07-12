@@ -45,7 +45,9 @@ for persona, email in personas:
         '/privacy',
         '/compliance/hipaa',
         '/terms',
-        '/compliance/accessibility'
+        '/compliance/accessibility',
+        '/favicon.ico',
+        '/favicon.png'
     ]:
         try:
             res = client.get(route)
