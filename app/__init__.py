@@ -24,7 +24,4 @@ def create_app(config_class=Config):
 
     app.teardown_appcontext(close_db)
 
-    with app.app_context():
-        init_database()
-
     return app

@@ -133,8 +133,21 @@ CREATE INDEX IF NOT EXISTS idx_measurements_patient_date ON clinical_measurement
 
 def get_db():
     if "db" not in g:
-        g.db = sqlite3.connect(current_app.config["DATABASE_PATH"])
+        db_path = current_app.config["DATABASE_PATH"]
+        db_exists = Path(db_path).exists()
+        g.db = sqlite3.connect(db_path)
         g.db.row_factory = sqlite3.Row
+        if not db_exists:
+            g.db.executescript(SCHEMA)
+            user_count = g.db.execute("SELECT COUNT(*) FROM users").fetchone()[0]
+            if user_count == 0:
+                seed_demo_users(g.db)
+            patient_count = g.db.execute("SELECT COUNT(*) FROM patients").fetchone()[0]
+            if patient_count == 0:
+                csv_path = real_dataset_path()
+                if csv_path.exists():
+                    import_heart_csv(g.db, csv_path)
+            g.db.commit()
     return g.db
 
 
@@ -145,17 +158,7 @@ def close_db(_=None):
 
 
 def init_database():
-    db = get_db()
-    db.executescript(SCHEMA)
-    user_count = db.execute("SELECT COUNT(*) FROM users").fetchone()[0]
-    if user_count == 0:
-        seed_demo_users(db)
-    patient_count = db.execute("SELECT COUNT(*) FROM patients").fetchone()[0]
-    if patient_count == 0:
-        csv_path = real_dataset_path()
-        if csv_path.exists():
-            import_heart_csv(db, csv_path)
-    db.commit()
+    pass
 
 
 def real_dataset_path():
