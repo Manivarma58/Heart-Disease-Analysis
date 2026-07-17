@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 {% block title %}Settings &amp; Profile | CardioSync Pro{% endblock %}
 {% block content %}
 <!-- Load Tailwind CSS CDN in settings view to enable modern style extensions -->
@@ -263,7 +263,7 @@
                         </div>
                         <div class="flex gap-2">
                             <button onclick="triggerPhotoUpload()" class="text-[10px] text-primary font-bold hover:underline">Crop</button>
-                            <span class="text-[10px] text-on-surface-variant">•</span>
+                            <span class="text-[10px] text-on-surface-variant">â€¢</span>
                             <button onclick="deleteAvatarPhoto()" class="text-[10px] text-secondary font-bold hover:underline">Delete</button>
                         </div>
                         <p class="text-[9px] text-on-surface-variant font-medium">JPG, PNG up to 5MB</p>
@@ -294,7 +294,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-on-surface-variant mb-1">Phone Number</label>
-                            <input type="text" id="prof-phone" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs focus:ring-primary focus:border-primary transition-all font-semibold" value="{% if patient %}+1 (555) 019-8800{% else %}+1 (555) 902-3412{% endif %}"/>
+                            <input type="text" id="prof-phone" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs focus:ring-primary focus:border-primary transition-all font-semibold" value="{% if patient %}+91 98765 01988{% else %}+91 98765 90234{% endif %}"/>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-on-surface-variant mb-1">Date of Birth</label>
@@ -413,7 +413,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-on-surface-variant mb-1">Recovery Phone</label>
-                            <input type="text" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs" value="+1 (555) 019-{{ user.user_id or user.id or 8900 }}" />
+                            <input type="text" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs" value="+91 98765 0{{ user.user_id or user.id or 8900 }}" />
                         </div>
                     </div>
                     <button onclick="alert('Generated Recovery Codes: CARDIO-VANCE-890A')" class="text-xs text-primary font-bold hover:underline">Get Backup Recovery Code</button>
@@ -461,14 +461,14 @@
                             <div class="p-3 bg-surface-light rounded-lg border border-outline-variant/50 flex justify-between items-center text-xs">
                                 <div>
                                     <p class="font-bold text-primary">MacBook Pro - Boston, US</p>
-                                    <p class="text-[10px] text-on-surface-variant">IP: 192.168.1.42 • Active Now</p>
+                                    <p class="text-[10px] text-on-surface-variant">IP: 192.168.1.42 â€¢ Active Now</p>
                                 </div>
                                 <span class="text-[9px] font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">Current</span>
                             </div>
                             <div class="p-3 bg-surface-light rounded-lg border border-outline-variant/50 flex justify-between items-center text-xs" id="session-ipad">
                                 <div>
                                     <p class="font-bold text-primary">iPad Pro - New York, US</p>
-                                    <p class="text-[10px] text-on-surface-variant">IP: 102.33.21.9 • Last used 2h ago</p>
+                                    <p class="text-[10px] text-on-surface-variant">IP: 102.33.21.9 â€¢ Last used 2h ago</p>
                                 </div>
                                 <button onclick="terminateSession('session-ipad')" class="text-[10px] text-secondary font-bold hover:underline">Revoke</button>
                             </div>
@@ -745,7 +745,7 @@
                         </div>
                         <div>
                             <label class="block font-bold mb-1">Default Currency</label>
-                            <select class="w-full rounded border-outline-variant py-1 focus:ring-primary"><option selected>USD ($)</option><option>EUR (€)</option><option>GBP (£)</option></select>
+                            <select class="w-full rounded border-outline-variant py-1 focus:ring-primary"><option selected>USD ($)</option><option>EUR (â‚¬)</option><option>GBP (Â£)</option></select>
                         </div>
                         <div>
                             <label class="block font-bold mb-1">System Time Zone</label>
@@ -976,7 +976,7 @@
                                 <h4 class="font-bold text-primary text-sm">Apple Health</h4>
                                 <span class="bg-green-100 text-green-700 text-[8px] px-2 py-0.5 rounded-full font-bold">CONNECTED</span>
                             </div>
-                            <p class="text-[11px] text-on-surface-variant mt-1 leading-snug">Import patient activity and wearable ECG data automatically.</p>
+                            <p class="text-[11px] text-on-surface-variant mt-1 leading-snug">Import patient activity and wearable heart disease data automatically.</p>
                             <button onclick="disconnectIntegration('int-apple', 'Apple Health')" class="text-[10px] text-secondary font-bold hover:underline mt-2">Disconnect</button>
                         </div>
                     </div>
@@ -1120,7 +1120,7 @@
                                 <button onclick="toggleApiKeyVisibility()" class="hover:text-primary-fixed-dim" title="Toggle Visibility"><span class="material-symbols-outlined text-[18px]" id="key-vis-icon">visibility</span></button>
                                 <button onclick="copyApiKey()" class="hover:text-primary-fixed-dim" title="Copy Key"><span class="material-symbols-outlined text-[18px]">content_copy</span></button>
                             </div>
-                            <p class="text-[9px] text-surface-container-high">Created: Jan 15, 2025 • Last Used: 2 mins ago • Status: Active</p>
+                            <p class="text-[9px] text-surface-container-high">Created: Jan 15, 2025 â€¢ Last Used: 2 mins ago â€¢ Status: Active</p>
                         </div>
                         <div class="flex gap-2 w-full md:w-auto">
                             <button onclick="regenerateApiKey()" class="flex-1 px-3 py-1.5 border border-surface-container-high text-white hover:bg-white/10 rounded text-xs font-bold transition-all">Regenerate</button>
@@ -1137,7 +1137,7 @@
                                 <button onclick="toggleSandboxApiKeyVisibility()" class="hover:text-primary-fixed-dim" title="Toggle Visibility"><span class="material-symbols-outlined text-[18px]" id="key-sandbox-vis-icon">visibility</span></button>
                                 <button onclick="copySandboxApiKey()" class="hover:text-primary-fixed-dim" title="Copy Key"><span class="material-symbols-outlined text-[18px]">content_copy</span></button>
                             </div>
-                            <p class="text-[9px] text-surface-container-high">Created: Feb 10, 2025 • Last Used: Never • Status: Active</p>
+                            <p class="text-[9px] text-surface-container-high">Created: Feb 10, 2025 â€¢ Last Used: Never â€¢ Status: Active</p>
                         </div>
                         <div class="flex gap-2 w-full md:w-auto">
                             <button onclick="alert('Sandbox API Key regenerated.')" class="flex-1 px-3 py-1.5 border border-surface-container-high text-white hover:bg-white/10 rounded text-xs font-bold transition-all">Regenerate</button>
@@ -1284,30 +1284,30 @@
                             <tbody class="divide-y divide-outline-variant/20 font-semibold text-on-surface-variant text-[11px]">
                                 <tr>
                                     <td class="px-4 py-2 text-left text-primary font-bold">Admin / Chief</td>
-                                    <td class="px-4 py-2 text-green-600">✓</td>
-                                    <td class="px-4 py-2 text-green-600">✓</td>
-                                    <td class="px-4 py-2 text-green-600">✓</td>
-                                    <td class="px-4 py-2 text-green-600">✓</td>
-                                    <td class="px-4 py-2 text-green-600">✓</td>
-                                    <td class="px-4 py-2 text-green-600">✓</td>
+                                    <td class="px-4 py-2 text-green-600">âœ“</td>
+                                    <td class="px-4 py-2 text-green-600">âœ“</td>
+                                    <td class="px-4 py-2 text-green-600">âœ“</td>
+                                    <td class="px-4 py-2 text-green-600">âœ“</td>
+                                    <td class="px-4 py-2 text-green-600">âœ“</td>
+                                    <td class="px-4 py-2 text-green-600">âœ“</td>
                                 </tr>
                                 <tr>
                                     <td class="px-4 py-2 text-left text-primary font-bold">Clinical Doctor</td>
-                                    <td class="px-4 py-2 text-green-600">✓</td>
-                                    <td class="px-4 py-2 text-red-500">✗</td>
-                                    <td class="px-4 py-2 text-green-600">✓</td>
-                                    <td class="px-4 py-2 text-green-600">✓</td>
-                                    <td class="px-4 py-2 text-green-600">✓</td>
-                                    <td class="px-4 py-2 text-red-500">✗</td>
+                                    <td class="px-4 py-2 text-green-600">âœ“</td>
+                                    <td class="px-4 py-2 text-red-500">âœ—</td>
+                                    <td class="px-4 py-2 text-green-600">âœ“</td>
+                                    <td class="px-4 py-2 text-green-600">âœ“</td>
+                                    <td class="px-4 py-2 text-green-600">âœ“</td>
+                                    <td class="px-4 py-2 text-red-500">âœ—</td>
                                 </tr>
                                 <tr>
                                     <td class="px-4 py-2 text-left text-primary font-bold">Nurse / Assistant</td>
-                                    <td class="px-4 py-2 text-green-600">✓</td>
-                                    <td class="px-4 py-2 text-red-500">✗</td>
-                                    <td class="px-4 py-2 text-green-600">✓</td>
-                                    <td class="px-4 py-2 text-red-500">✗</td>
-                                    <td class="px-4 py-2 text-green-600">✓</td>
-                                    <td class="px-4 py-2 text-red-500">✗</td>
+                                    <td class="px-4 py-2 text-green-600">âœ“</td>
+                                    <td class="px-4 py-2 text-red-500">âœ—</td>
+                                    <td class="px-4 py-2 text-green-600">âœ“</td>
+                                    <td class="px-4 py-2 text-red-500">âœ—</td>
+                                    <td class="px-4 py-2 text-green-600">âœ“</td>
+                                    <td class="px-4 py-2 text-red-500">âœ—</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -1324,7 +1324,7 @@
                     <div>
                         <span class="bg-white/20 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest">Active Plan</span>
                         <h2 class="text-[32px] font-black mt-4 leading-none">Professional Tier</h2>
-                        <p class="text-on-primary-container mt-2 text-xs font-semibold">Billed annually ($79/month) • Next renewal: Oct 2026</p>
+                        <p class="text-on-primary-container mt-2 text-xs font-semibold">Billed annually ($79/month) â€¢ Next renewal: Oct 2026</p>
                         <div class="flex gap-4 mt-6">
                             <button onclick="alert('Opening plan comparison list...')" class="px-4 py-2 bg-white text-primary rounded-lg text-xs font-bold hover:bg-surface-light transition-all shadow-md active:scale-95">Change Plan</button>
                             <button onclick="alert('Downloading invoice history...')" class="px-4 py-2 bg-white/10 text-white border border-white/30 rounded-lg text-xs font-bold hover:bg-white/20 transition-all active:scale-95">View History</button>
@@ -1431,7 +1431,7 @@
                             <div class="p-3 bg-white rounded-lg border border-outline-variant/40 flex justify-between items-center">
                                 <div>
                                     <p class="font-bold text-primary">Ticket #1234 - Epic EHR sync failure</p>
-                                    <p class="text-[9px] text-on-surface-variant">Category: Tech Support • Created: 2026-07-05</p>
+                                    <p class="text-[9px] text-on-surface-variant">Category: Tech Support â€¢ Created: 2026-07-05</p>
                                 </div>
                                 <span class="text-[9px] font-bold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">RESOLVED</span>
                             </div>
@@ -1943,7 +1943,7 @@
                 <div class="p-3 bg-white rounded-lg border border-outline-variant/40 flex justify-between items-center">
                     <div>
                         <p class="font-bold text-primary">Ticket #${nextIdNum} - ${details.substring(0,35)}...</p>
-                        <p class="text-[9px] text-on-surface-variant">Category: ${cat || 'General'} • Created: ${dateStr}</p>
+                        <p class="text-[9px] text-on-surface-variant">Category: ${cat || 'General'} â€¢ Created: ${dateStr}</p>
                     </div>
                     <span class="text-[9px] font-bold text-yellow-700 bg-yellow-100 px-2 py-0.5 rounded-full">OPEN</span>
                 </div>

@@ -1,8 +1,8 @@
-{% extends "base.html" %}
-{% block title %}Power BI Analytics - CardioViz{% endblock %}
+﻿{% extends "base.html" %}
+{% block title %}Tableau Analytics - CardioViz{% endblock %}
 {% block content %}
 <style>
-  /* Power BI Color Palette & Theme Override */
+  /* Tableau Color Palette & Theme Override */
   :root {
     --pbi-yellow: #f2c811;
     --pbi-yellow-hover: #d9b30f;
@@ -62,7 +62,7 @@
   }
 
   .sidebar-menu-item.active {
-    background: #fef08a; /* Soft Power BI yellow highlight */
+    background: #fef08a; /* Soft Tableau yellow highlight */
     color: #854d0e;
     border-left-color: var(--pbi-yellow);
   }
@@ -75,7 +75,7 @@
     gap: 1.25rem;
   }
 
-  /* Power BI Action Bar */
+  /* Tableau Action Bar */
   .pbi-action-bar {
     background: white;
     border-bottom: 1px solid #e2e8f0;
@@ -136,7 +136,7 @@
     border-radius: 50%;
   }
 
-  /* Power BI Live Frame Container */
+  /* Tableau Live Frame Container */
   .pbi-embed-shell {
     flex: 1;
     background: white;
@@ -154,7 +154,7 @@
     border: 0;
   }
 
-  /* Power BI Simulated Canvas */
+  /* Tableau Simulated Canvas */
   .pbi-simulated-canvas {
     display: grid;
     grid-template-columns: 1fr 14.5rem;
@@ -462,7 +462,7 @@
   <aside class="sidebar">
     <div>
       <div class="sidebar-brand-section" style="padding-left: 1rem; margin-bottom: 1.5rem; margin-top: 0.5rem;">
-        <span style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.5px;">Power BI Suite</span>
+        <span style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.5px;">Tableau Suite</span>
         <span style="font-size: 1.25rem; font-weight: 800; color: #3b82f6; display: block; font-family: Poppins, sans-serif; margin-top: 0.15rem; letter-spacing: -0.5px;">ANALYTICS HUB</span>
       </div>
 
@@ -489,7 +489,7 @@
         {% endif %}
         <a href="{{ url_for('dashboard.powerbi_style_dashboard') }}" class="sidebar-menu-item active">
           <i data-lucide="pie-chart"></i>
-          <span class="menu-text">Power BI Report</span>
+          <span class="menu-text">Tableau Report</span>
         </a>
         <a href="{{ url_for('dashboard.tableau_style_dashboard') }}" class="sidebar-menu-item">
           <i data-lucide="line-chart"></i>
@@ -521,16 +521,16 @@
       </div>
       <div class="pbi-brand-indicator">
         <div class="pbi-yellow-dot"></div>
-        <span>POWER BI EMBEDDED</span>
+        <span>TABLEAU-READY REPORT</span>
       </div>
     </div>
 
-    <!-- Power BI Embed Shell -->
+    <!-- Tableau Embed Shell -->
     <div class="pbi-embed-shell">
       {% if powerbi.configured %}
-        <iframe class="pbi-iframe" src="{{ powerbi.url }}" title="Live Power BI Heart Disease Report" allowFullScreen="true"></iframe>
+        <iframe class="pbi-iframe" src="{{ powerbi.url }}" title="Live Tableau Heart Disease Report" allowFullScreen="true"></iframe>
       {% else %}
-        <!-- Realistic Simulated Power BI Canvas -->
+        <!-- Realistic Simulated Tableau Canvas -->
         <div class="pbi-simulated-canvas">
           <!-- Main Canvas Area -->
           <div class="pbi-report-page">
@@ -545,12 +545,12 @@
               <div class="pbi-kpi-card">
                 <span class="pbi-kpi-title">Heart Disease Cases</span>
                 <span class="pbi-kpi-value" id="kpi-cases">{{ totals.heart_cases }}</span>
-                <span class="pbi-kpi-subtext">Clinical positives detected</span>
+                <span class="pbi-kpi-subtext">Heart disease positive records</span>
               </div>
               <div class="pbi-kpi-card">
                 <span class="pbi-kpi-title">Heart Disease Rate</span>
                 <span class="pbi-kpi-value" id="kpi-rate">{{ totals.disease_rate }}%</span>
-                <span class="pbi-kpi-subtext">Weighted disease prevalence</span>
+                <span class="pbi-kpi-subtext">Dataset prevalence</span>
               </div>
               <div class="pbi-kpi-card">
                 <span class="pbi-kpi-title">Average Patient BMI</span>
@@ -868,7 +868,7 @@
 
   function exportData() {
     // Generate simple alert mock for export
-    alert("Power BI Data Export: CSV data package for " + document.getElementById('kpi-records').textContent + " filtered cohort generated successfully.");
+    alert("Tableau Data Export: CSV data package for " + document.getElementById('kpi-records').textContent + " filtered cohort generated successfully.");
   }
 </script>
 {% endblock %}

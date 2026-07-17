@@ -1,8 +1,8 @@
-# DataVibe Final Project Report
+﻿# CardioViz Final Project Report
 
 ## Objective
 
-DataVibe analyzes heart disease indicators and presents role-specific insights for a cardiologist, public health officer, and patient.
+CardioViz analyzes heart disease indicators and presents role-specific insights for a cardiologist, public health officer, and patient.
 
 ## Dataset
 
@@ -16,7 +16,7 @@ The CSV is stored inside the project at `data/Heart_new2.csv`. It is imported in
 - Local database: SQLite
 - BI database target: MySQL
 - Visualization: Tableau-ready views and embedded dashboard URLs
-- UI: Responsive DataVibe healthcare dashboard
+- UI: Responsive CardioViz healthcare dashboard
 
 ## Dashboards
 

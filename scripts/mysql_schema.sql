@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS datavibe_heart;
-USE datavibe_heart;
+﻿CREATE DATABASE IF NOT EXISTS cardioviz_heart;
+USE cardioviz_heart;
 
 CREATE TABLE IF NOT EXISTS heart_raw (
   raw_id INT AUTO_INCREMENT PRIMARY KEY,

@@ -1,4 +1,4 @@
-# Dataset, Database, and Tableau Readiness
+﻿# Dataset, Database, and Tableau Readiness
 
 ## 1. Acquire Finalized Dataset
 
@@ -98,7 +98,7 @@ Important MySQL views:
 1. Open Tableau Desktop.
 2. Select `MySQL` connector.
 3. Enter host, port, username, and password.
-4. Select database `datavibe_heart`.
+4. Select database `cardioviz_heart`.
 5. Use these views:
    - `tableau_population_overview_clean`
    - `tableau_lifestyle_risk_clean`

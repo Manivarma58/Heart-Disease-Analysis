@@ -18,14 +18,50 @@ def favicon():
     )
 
 
+def _dataset_summary():
+    totals = query_one(
+        """SELECT COUNT(*) AS records,
+                  SUM(CASE WHEN heart_disease='Yes' THEN 1 ELSE 0 END) AS heart_cases,
+                  ROUND(100.0 * SUM(CASE WHEN heart_disease='Yes' THEN 1 ELSE 0 END) / COUNT(*), 1) AS disease_rate,
+                  ROUND(AVG(bmi), 1) AS avg_bmi
+           FROM raw_heart_dataset"""
+    )
+    age_groups = query_one("SELECT COUNT(DISTINCT age_category) AS total FROM raw_heart_dataset")
+    race_groups = query_one("SELECT COUNT(DISTINCT race) AS total FROM raw_heart_dataset")
+    if not totals or not totals["records"]:
+        return {
+            "records": 0,
+            "heart_cases": 0,
+            "disease_rate": 0,
+            "avg_bmi": 0,
+            "age_groups": 0,
+            "race_groups": 0,
+        }
+    summary = dict(totals)
+    summary["age_groups"] = age_groups["total"] if age_groups else 0
+    summary["race_groups"] = race_groups["total"] if race_groups else 0
+    return summary
+
+
 @dashboard_bp.route("/")
 def index():
     if "user" in session:
         return redirect(url_for("dashboard.home"))
     return render_template(
         "index.html",
+        dataset=_dataset_summary(),
         dashboard_embed=tableau_status("dashboard"),
         story_embed=tableau_status("story"),
+    )
+
+
+@dashboard_bp.route("/data/heart-dataset.csv")
+def download_heart_dataset():
+    return send_from_directory(
+        os.path.join(current_app.root_path, "..", "data"),
+        "Heart_new2.csv",
+        as_attachment=True,
+        download_name="CardioViz_Heart_Disease_Dataset.csv",
     )
 
 
@@ -155,6 +191,7 @@ def home():
         persona=persona,
         stats=stats,
         patient=patient_details,
+        dataset=_dataset_summary(),
         recent_activity=recent_activity
     )
 
@@ -336,6 +373,8 @@ def settings_page():
     db_user = query_one("SELECT * FROM users WHERE user_id = ?", (user_id,))
     if not db_user:
         db_user = user
+    elif not isinstance(db_user, dict):
+        db_user = dict(db_user)
         
     name = db_user.get("name", "User")
     names = name.split()
@@ -430,9 +469,31 @@ def forms_page():
 
 
 @dashboard_bp.route("/dashboard/powerbi-style")
+@dashboard_bp.route("/dashboard/tableau-report")
 @login_required
 def powerbi_style_dashboard():
-    return render_template("dashboard/powerbi_style.html")
+    totals = query_one(
+        """SELECT COUNT(*) AS records,
+                  SUM(CASE WHEN heart_disease='Yes' THEN 1 ELSE 0 END) AS heart_cases,
+                  ROUND(100.0 * SUM(CASE WHEN heart_disease='Yes' THEN 1 ELSE 0 END) / COUNT(*), 1) AS disease_rate,
+                  ROUND(AVG(bmi), 1) AS avg_bmi
+           FROM raw_heart_dataset"""
+    )
+    gen_health = query_all(
+        """SELECT gen_health,
+                  ROUND(100.0 * SUM(CASE WHEN heart_disease='Yes' THEN 1 ELSE 0 END) / COUNT(*), 1) AS disease_rate
+           FROM raw_heart_dataset
+           GROUP BY gen_health
+           ORDER BY CASE gen_health
+                    WHEN 'Poor' THEN 1 WHEN 'Fair' THEN 2 WHEN 'Good' THEN 3
+                    WHEN 'Very good' THEN 4 ELSE 5 END"""
+    )
+    return render_template(
+        "dashboard/powerbi_style.html",
+        totals=totals,
+        gen_health=gen_health,
+        powerbi=tableau_status("dashboard"),
+    )
 
 
 @dashboard_bp.route("/dashboard/sql-console")

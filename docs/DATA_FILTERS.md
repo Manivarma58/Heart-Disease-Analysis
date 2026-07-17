@@ -1,4 +1,4 @@
-# Utilization of Data Filters Report
+﻿# Utilization of Data Filters Report
 
 ## Description
 Utilization of data filters refers to the effective implementation and management of filtering mechanisms within the Project to refine and focus the dataset. Proper use of filters enhances performance by limiting the volume of data processed and displayed, thereby improving responsiveness. It also enables users to interactively explore specific segments of data, leading to more targeted and meaningful insights.
@@ -33,7 +33,7 @@ Based on the interactive Tableau workbooks, the platform implements specific, hi
 
 ## 2. Backend Server-Side Filter Implementation
 
-In the DataVibe Flask codebase, filters are utilized at the database query level to optimize network payload and backend speed. For example, in the patient search and dashboard routes, filters are applied dynamically in SQL:
+In the CardioViz Flask codebase, filters are utilized at the database query level to optimize network payload and backend speed. For example, in the patient search and dashboard routes, filters are applied dynamically in SQL:
 
 ```python
 # In app/routes/dashboard.py (or patient search routes)

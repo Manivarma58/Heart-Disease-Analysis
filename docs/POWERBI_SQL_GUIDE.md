@@ -1,12 +1,12 @@
-# Power BI & SQL Database Integration Guide
+﻿# Tableau & SQL Database Integration Guide
 
-This guide details how to integrate Power BI with CardioViz's SQLite/PostgreSQL database structures, configure live dashboards, and leverage the built-in SQL Console.
+This guide details how to integrate Tableau with CardioViz's SQLite/PostgreSQL database structures, configure live dashboards, and leverage the built-in SQL Console.
 
 ---
 
-## 1. Connecting Power BI to the SQLite Database
+## 1. Connecting Tableau to the SQLite Database
 
-To connect Power BI Desktop to the local SQLite database (`datavibe.db`), follow these steps:
+To connect Tableau Desktop to the local SQLite database (`cardioviz.db`), follow these steps:
 
 ### Step 1: Install the SQLite ODBC Driver
 1. Download the SQLite ODBC Driver from [Ch. Werner's SQLite ODBC Driver site](http://www.ch-werner.de/sqliteodbc/).
@@ -18,15 +18,15 @@ To connect Power BI Desktop to the local SQLite database (`datavibe.db`), follow
 2. Go to the **System DSN** tab and click **Add...**
 3. Select **SQLite3 ODBC Driver** and click **Finish**.
 4. Configure the following fields:
-   * **Data Source Name (DSN)**: `datavibe_sqlite`
-   * **Database Name**: Click *Browse* and navigate to the absolute path of `datavibe.db` inside your repository directory (e.g. `D:\projects\skillwallet\Heart-Disease-Analysis\datavibe.db`).
+   * **Data Source Name (DSN)**: `cardioviz_sqlite`
+   * **Database Name**: Click *Browse* and navigate to the absolute path of `cardioviz.db` inside your repository directory (e.g. `D:\projects\skillwallet\Heart-Disease-Analysis\cardioviz.db`).
 5. Click **OK** to save the source.
 
-### Step 3: Connect from Power BI Desktop
-1. Open Power BI Desktop.
+### Step 3: Connect from Tableau Desktop
+1. Open Tableau Desktop.
 2. Click **Get Data** -> **More...** -> search for **ODBC**.
 3. Choose **ODBC** and click **Connect**.
-4. In the Data Source Name dropdown, select `datavibe_sqlite` and click **OK**.
+4. In the Data Source Name dropdown, select `cardioviz_sqlite` and click **OK**.
 5. When prompted for credentials, select **Windows** or **Default / Anonymous** (SQLite has no username/password by default) and click **Connect**.
 6. The Navigator window will display the tables: `patients`, `clinical_measurements`, `lifestyle_factors`, `medical_history`, and `risk_assessments`. Select the tables and click **Load**.
 
@@ -34,16 +34,16 @@ To connect Power BI Desktop to the local SQLite database (`datavibe.db`), follow
 
 ## 2. Environment Configurations
 
-To embed live Power BI reports/dashboards in CardioViz, publish your workbook to the Power BI Service, grab the embed URL (e.g., File -> Embed report -> Website or portal), and add it to your local environment file (`.env`):
+To embed live Tableau reports/dashboards in CardioViz, publish your workbook to the Tableau Service, grab the embed URL (e.g., File -> Embed report -> Website or portal), and add it to your local environment file (`.env`):
 
 ```bash
-POWERBI_CLINICAL_URL="https://app.powerbi.com/reportEmbed?reportId=your-report-id&groupId=your-group-id"
-POWERBI_PUBLIC_HEALTH_URL="https://app.powerbi.com/reportEmbed?reportId=your-report-id&groupId=your-group-id"
-POWERBI_PATIENT_URL="https://app.powerbi.com/reportEmbed?reportId=your-report-id&groupId=your-group-id"
-POWERBI_DASHBOARD_URL="https://app.powerbi.com/reportEmbed?reportId=your-report-id&groupId=your-group-id"
+TABLEAU_CLINICAL_URL="https://public.tableau.com/views/your-clinical-dashboard"
+TABLEAU_PUBLIC_HEALTH_URL="https://public.tableau.com/views/your-public-health-dashboard"
+TABLEAU_PATIENT_URL="https://public.tableau.com/views/your-patient-dashboard"
+TABLEAU_DASHBOARD_URL="https://public.tableau.com/views/your-heart-disease-dashboard"
 ```
 
-*Note: If no URL is provided, the platform automatically renders a responsive mock Power BI report with interactive tabs, filtering capabilities, and data exports.*
+*Note: If no URL is provided, the platform automatically renders a responsive mock Tableau report with interactive tabs, filtering capabilities, and data exports.*
 
 ---
 

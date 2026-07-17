@@ -1,8 +1,8 @@
-# Dashboard
+﻿# Dashboard
 
 ## Description
 
-The DataVibe dashboard is a graphical user interface that organizes heart disease data into clear, easy-to-read visual sections. It supports healthcare analysis by showing key metrics, charts, risk patterns, and population-level comparisons in one place.
+The CardioViz dashboard is a graphical user interface that organizes heart disease data into clear, easy-to-read visual sections. It supports healthcare analysis by showing key metrics, charts, risk patterns, and population-level comparisons in one place.
 
 The dashboard is designed for heart disease analysis and includes:
 

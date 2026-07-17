@@ -1,4 +1,4 @@
-USE datavibe_heart;
+﻿USE cardioviz_heart;
 
 TRUNCATE TABLE heart_raw;
 TRUNCATE TABLE heart_clean;

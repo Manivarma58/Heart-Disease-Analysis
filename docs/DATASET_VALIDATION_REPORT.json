@@ -1,6 +1,6 @@
 {
-  "source_file": "C:\\Users\\MANI VARMA\\Documents\\Codex\\2026-07-06\\datavibe-heart-disease-analytics-platform-complete-2\\data\\Heart_new2.csv",
-  "clean_file": "C:\\Users\\MANI VARMA\\Documents\\Codex\\2026-07-06\\datavibe-heart-disease-analytics-platform-complete-2\\data\\Heart_new2_clean.csv",
+  "source_file": "D:\\projects\\skillwallet\\Heart-Disease-Analysis\\data\\Heart_new2.csv",
+  "clean_file": "D:\\projects\\skillwallet\\Heart-Disease-Analysis\\data\\Heart_new2_clean.csv",
   "expected_columns_present": true,
   "source_rows": 4500,
   "clean_rows": 4494,

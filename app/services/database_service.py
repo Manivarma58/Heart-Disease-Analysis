@@ -1,4 +1,4 @@
-import csv
+﻿import csv
 import random
 import sqlite3
 from datetime import date, timedelta
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS lifestyle_factors (
 CREATE TABLE IF NOT EXISTS medical_history (
   history_id INTEGER PRIMARY KEY AUTOINCREMENT,
   patient_id INTEGER NOT NULL,
-  diagnosis_date TEXT,
+  condition_date TEXT,
   heart_disease TEXT NOT NULL,
   heart_disease_type TEXT,
   hypertension TEXT NOT NULL,
@@ -171,15 +171,15 @@ def real_dataset_path():
 
 def seed_demo_users(db):
     users = [
-        ("Dr. Sharma", "doctor@datavibe.local", "Cardiologist", "clinical"),
-        ("Ramesh Iyer", "ramesh@datavibe.local", "Health Official", "public_health"),
-        ("Anita Rao", "anita@datavibe.local", "Patient", "patient"),
-        ("Admin User", "admin@datavibe.local", "Admin", "admin"),
+        ("Dr. Sharma", "doctor@cardioviz.local", "Cardiologist", "clinical"),
+        ("Ramesh Iyer", "ramesh@cardioviz.local", "Health Official", "public_health"),
+        ("Anita Rao", "anita@cardioviz.local", "Patient", "patient"),
+        ("Admin User", "admin@cardioviz.local", "Admin", "admin"),
     ]
     for name, email, role, persona in users:
         db.execute(
             "INSERT INTO users (name, email, password_hash, role, persona) VALUES (?, ?, ?, ?, ?)",
-            (name, email, generate_password_hash("datavibe123"), role, persona),
+            (name, email, generate_password_hash("cardioviz123"), role, persona),
         )
 
 
@@ -269,7 +269,7 @@ def seed_demo_data(db, rows=240):
         has_hd = category == "High" or (category == "Moderate" and random.random() < 0.28)
         db.execute(
             """INSERT INTO medical_history
-            (patient_id, diagnosis_date, heart_disease, heart_disease_type, hypertension, diabetes,
+            (patient_id, condition_date, heart_disease, heart_disease_type, hypertension, diabetes,
              family_history, previous_cardiac_event, current_medications)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
@@ -436,7 +436,7 @@ def insert_csv_history(db, patient_id, row):
     heart_disease = row["HeartDisease"]
     db.execute(
         """INSERT INTO medical_history
-        (patient_id, diagnosis_date, heart_disease, heart_disease_type, hypertension, diabetes,
+        (patient_id, condition_date, heart_disease, heart_disease_type, hypertension, diabetes,
          family_history, previous_cardiac_event, current_medications)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (

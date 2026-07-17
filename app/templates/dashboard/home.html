@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 {% block title %}Dashboard - CardioViz{% endblock %}
 {% block content %}
 <style>
@@ -804,7 +804,7 @@
         </a>
         <a href="{{ url_for('dashboard.powerbi_style_dashboard') }}" class="sidebar-menu-item">
           <i data-lucide="pie-chart"></i>
-          <span class="menu-text">Power BI Report</span>
+          <span class="menu-text">Tableau Report</span>
         </a>
         <a href="{{ url_for('dashboard.tableau_style_dashboard') }}" class="sidebar-menu-item">
           <i data-lucide="line-chart"></i>
@@ -836,7 +836,7 @@
         </a>
         <a href="{{ url_for('dashboard.powerbi_style_dashboard') }}" class="sidebar-menu-item">
           <i data-lucide="pie-chart"></i>
-          <span class="menu-text">Power BI Report</span>
+          <span class="menu-text">Tableau Report</span>
         </a>
         <a href="{{ url_for('public_health.visualizations_dashboard') }}" class="sidebar-menu-item">
           <i data-lucide="trending-up"></i>
@@ -940,7 +940,7 @@
               12 high-risk patients require immediate review
             </div>
             <p style="margin: 0; font-size: 0.82rem; color: #64748b; font-style: italic; font-weight: 500;">
-              "The heartbeat is the rhythm of life." — Daily Diagnostic Focus
+              "The heartbeat is the rhythm of life." â€” Daily Diagnostic Focus
             </p>
           </div>
           <!-- Heartbeat SVG wave visual -->
@@ -1039,7 +1039,7 @@
                   <span style="font-size: 0.68rem; font-weight: 700; color: #94a3b8;">2 MINS AGO</span>
                 </div>
                 <p style="margin: 0.25rem 0 0.75rem; font-size: 0.8rem; color: #64748b; line-height: 1.4;">
-                  Abnormal ECG variation detected (ST-segment elevation), immediate telehealth follow-up recommended.
+                  Abnormal heart disease variation detected (ST-segment elevation), immediate telehealth follow-up recommended.
                 </p>
                 <div style="display: flex; gap: 0.5rem;">
                   <button class="btn-solid-dark" style="background: #ef4444; padding: 0.35rem 0.75rem; font-size: 0.75rem;" onclick="alert('Opening telemetry charts for Jenkins...')">Review Data</button>
@@ -1155,7 +1155,7 @@
           <span style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Public Health Administrator</span>
           <h2 style="font-size: 1.8rem; font-weight: 800; color: #1e293b; margin: 0.25rem 0 0.5rem;">Welcome back, {{ session.user.name }}</h2>
           <p style="margin: 0; font-size: 0.85rem; color: #64748b; font-style: italic;">
-            "Public health is the foundation of a thriving society." — Daily Insight
+            "Public health is the foundation of a thriving society." â€” Daily Insight
           </p>
         </div>
         
@@ -1288,7 +1288,7 @@
             <div>
               <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; color: #1e293b; margin-bottom: 0.4rem;">
                 <span>Screening Budget</span>
-                <span style="color: #3b82f6;" id="budget-val">₹1.2Cr (+15%)</span>
+                <span style="color: #3b82f6;" id="budget-val">â‚¹1.2Cr (+15%)</span>
               </div>
               <input type="range" min="0.5" max="3.0" step="0.1" value="1.2" id="sim-budget" style="width: 100%; cursor: pointer;">
             </div>
@@ -1332,7 +1332,7 @@
           
           <!-- Left: Welcome Anita card -->
           <div class="welcome-banner-card">
-            <h2 style="font-size: 1.8rem; font-weight: 800; color: #1e293b; margin: 0 0 0.5rem;">Welcome back, {{ session.user.name }}! 👋</h2>
+            <h2 style="font-size: 1.8rem; font-weight: 800; color: #1e293b; margin: 0 0 0.5rem;">Welcome back, {{ session.user.name }}! ðŸ‘‹</h2>
             <p style="margin: 0 0 1rem; font-size: 0.88rem; color: #475569; line-height: 1.4; max-width: 80%;">
               Great work this week. You're consistently hitting your activity targets and keeping your records updated.
             </p>
@@ -1350,7 +1350,7 @@
           <!-- Right: Live Vitals -->
           <div class="dash-card" style="margin-bottom: 0; padding: 1.25rem;">
             <h3 style="margin: 0; font-size: 0.95rem; font-weight: 800; display: flex; justify-content: space-between; align-items: center;">
-              <span>❤️ Live Vitals</span>
+              <span>â¤ï¸ Live Vitals</span>
               <a href="#" class="sidebar-tab" data-tab="progress-tracking" style="font-size: 0.72rem; color: #3b82f6; text-decoration: none; font-weight: 700;" onclick="document.querySelector('.sidebar-tab[data-tab=\'progress-tracking\']').click(); return false;">Detailed Progress &rarr;</a>
             </h3>
             <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
@@ -1425,14 +1425,14 @@
                 <div style="background: #f8fafc; border-left: 3px solid #3b82f6; padding: 0.6rem 0.75rem; border-radius: 0 8px 8px 0; display: flex; justify-content: space-between; align-items: center;">
                   <div>
                     <h5 style="margin: 0; font-size: 0.8rem; font-weight: 700; color: #1e293b;">Cardiology Follow-up</h5>
-                    <small style="font-size: 0.72rem; color: #64748b;">In-person • Dr. Sharma • Tomorrow</small>
+                    <small style="font-size: 0.72rem; color: #64748b;">In-person â€¢ Dr. Sharma â€¢ Tomorrow</small>
                   </div>
                   <i data-lucide="chevron-right" style="width:1rem; height:1rem; color:#64748b;"></i>
                 </div>
                 <div style="background: #f8fafc; border-left: 3px solid #a855f7; padding: 0.6rem 0.75rem; border-radius: 0 8px 8px 0; display: flex; justify-content: space-between; align-items: center;">
                   <div>
                     <h5 style="margin: 0; font-size: 0.8rem; font-weight: 700; color: #1e293b;">Nutrition Review</h5>
-                    <small style="font-size: 0.72rem; color: #64748b;">Virtual • Oct 14 • Dietitian</small>
+                    <small style="font-size: 0.72rem; color: #64748b;">Virtual â€¢ Oct 14 â€¢ Dietitian</small>
                   </div>
                   <i data-lucide="chevron-right" style="width:1rem; height:1rem; color:#64748b;"></i>
                 </div>
@@ -1476,7 +1476,7 @@
         <!-- welcome header -->
         <div class="welcome-header">
           <div>
-            <h2>Personal Health Hub 👋</h2>
+            <h2>Personal Health Hub ðŸ‘‹</h2>
             <div class="welcome-meta">
               <span><i data-lucide="clock" style="width: 0.9rem; height: 0.9rem; display:inline-block; vertical-align:middle;"></i> Last login: Today, 9:30 AM</span>
               <span>|</span>
@@ -1545,7 +1545,7 @@
             <span class="kpi-main-val">27.4</span>
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <span class="kpi-status-badge watch">Watch</span>
-              <span style="color:#cbd5e1; font-weight:800;">—</span>
+              <span style="color:#cbd5e1; font-weight:800;">â€”</span>
             </div>
           </div>
 
@@ -1729,14 +1729,14 @@
             <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #10b981;">
               <div>
                 <h4 style="margin: 0; font-size: 0.9rem; font-weight: 700; color: #1e293b;">Metoprolol Succinate</h4>
-                <p style="margin: 0.15rem 0 0; font-size: 0.75rem; color: #64748b;">50mg Daily • Morning • Take with food</p>
+                <p style="margin: 0.15rem 0 0; font-size: 0.75rem; color: #64748b;">50mg Daily â€¢ Morning â€¢ Take with food</p>
               </div>
               <button onclick="alert('Refill requested for Metoprolol.')" style="background: #ecfdf5; color: #10b981; border: 1px solid #10b981; padding: 0.35rem 0.75rem; font-size: 0.75rem; border-radius: 6px; font-weight: 700; cursor: pointer;">Request Refill</button>
             </div>
             <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #10b981;">
               <div>
                 <h4 style="margin: 0; font-size: 0.9rem; font-weight: 700; color: #1e293b;">Atorvastatin</h4>
-                <p style="margin: 0.15rem 0 0; font-size: 0.75rem; color: #64748b;">20mg Daily • Bedtime • For cholesterol</p>
+                <p style="margin: 0.15rem 0 0; font-size: 0.75rem; color: #64748b;">20mg Daily â€¢ Bedtime â€¢ For cholesterol</p>
               </div>
               <button onclick="alert('Refill requested for Atorvastatin.')" style="background: #ecfdf5; color: #10b981; border: 1px solid #10b981; padding: 0.35rem 0.75rem; font-size: 0.75rem; border-radius: 6px; font-weight: 700; cursor: pointer;">Request Refill</button>
             </div>
@@ -1884,7 +1884,7 @@
         budgetInput.addEventListener("input", (e) => {
           const val = parseFloat(e.target.value);
           const changePct = Math.round((val - 1.2) / 1.2 * 100);
-          budgetVal.textContent = `₹${val.toFixed(1)}Cr (${changePct >= 0 ? '+' : ''}${changePct}%)`;
+          budgetVal.textContent = `â‚¹${val.toFixed(1)}Cr (${changePct >= 0 ? '+' : ''}${changePct}%)`;
 
           const factor = (val / 1.2);
           impactChart.data.datasets[0].data = [

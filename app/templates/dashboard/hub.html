@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html class="light" lang="en">
 <head>
     <meta charset="utf-8"/>
@@ -147,6 +147,27 @@
         color: #0061a4;
         font-weight: 700;
         border-radius: 0.5rem;
+      }
+      .project-stat-card {
+        background: #ffffff;
+        border: 1px solid rgba(118, 119, 126, 0.22);
+        border-radius: 0.75rem;
+        padding: 1rem;
+      }
+      .project-stat-card span {
+        display: block;
+        color: #45464d;
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .project-stat-card strong {
+        display: block;
+        margin-top: 0.25rem;
+        color: #001255;
+        font-size: 1.55rem;
+        line-height: 1;
       }
     </style>
 </head>
@@ -355,7 +376,7 @@
             <button class="w-full py-2 border-2 border-secondary text-secondary rounded-lg font-bold text-body-sm hover:bg-secondary hover:text-white transition-all shadow-sm" onclick="alert('Contacting Care Team support desk...')">Contact Care Team</button>
         </div>
         {% else %}
-        <button class="w-full bg-white border-2 border-workflow-blue text-workflow-blue font-bold py-2 px-4 rounded-lg hover:bg-workflow-blue hover:text-white transition-all flex items-center justify-center gap-2 shadow-sm" onclick="alert('Launching diagnostic analysis workflow...')">
+        <button class="w-full bg-white border-2 border-workflow-blue text-workflow-blue font-bold py-2 px-4 rounded-lg hover:bg-workflow-blue hover:text-white transition-all flex items-center justify-center gap-2 shadow-sm" onclick="alert('Launching analysis analysis workflow...')">
             <span class="material-symbols-outlined text-sm">add</span>
             <span class="font-label-caps text-label-caps">New Analysis</span>
         </button>
@@ -377,6 +398,78 @@
 <!-- Main Content Canvas -->
 <main class="md:ml-sidebar-width pt-20 min-h-screen p-container-padding bg-surface">
     <div class="max-w-[1400px] mx-auto">
+        <section class="mb-8 rounded-xl bg-surface-lowest border border-outline-variant/20 shadow-sm overflow-hidden">
+            <div class="grid grid-cols-1 xl:grid-cols-[1.15fr_0.85fr]">
+                <div class="p-8 bg-gradient-to-br from-workflow-blue/10 via-white to-status-critical/5">
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="px-3 py-1 rounded-full bg-workflow-blue/10 text-workflow-blue text-[11px] font-extrabold uppercase tracking-widest">CardioViz</span>
+                        <span class="px-3 py-1 rounded-full bg-cardiac-teal/10 text-cardiac-teal text-[11px] font-extrabold uppercase tracking-widest">Heart Disease Analysis</span>
+                        <span class="px-3 py-1 rounded-full bg-status-critical/10 text-status-critical text-[11px] font-extrabold uppercase tracking-widest">Tableau + MySQL</span>
+                    </div>
+                    <h2 class="font-headline-md text-primary text-[28px] font-black mb-3">CardioViz project workspace</h2>
+                    <p class="text-on-surface-variant max-w-3xl leading-relaxed">
+                        This signed-in dashboard now follows the full Heart Disease Analysis project flow: dataset collection,
+                        database storage, SQL operations, Tableau-ready preparation, unique visualizations, and responsive dashboard delivery.
+                    </p>
+                    <div class="flex flex-wrap gap-3 mt-6">
+                        <a class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white font-bold text-sm hover:opacity-90 transition-opacity" href="{{ url_for('dashboard.tableau_style_dashboard') }}">
+                            <span class="material-symbols-outlined text-[18px]">monitoring</span>
+                            Open analytics dashboard
+                        </a>
+                        <a class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-outline-variant bg-white text-primary font-bold text-sm hover:bg-surface-container-low transition-colors" href="{{ url_for('dashboard.download_heart_dataset') }}">
+                            <span class="material-symbols-outlined text-[18px]">download</span>
+                            Download dataset
+                        </a>
+                        <a class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-outline-variant bg-white text-primary font-bold text-sm hover:bg-surface-container-low transition-colors" href="{{ url_for('dashboard.heart_disease_story') }}">
+                            <span class="material-symbols-outlined text-[18px]">auto_stories</span>
+                            View data story
+                        </a>
+                    </div>
+                </div>
+                <div class="p-8 bg-white border-t xl:border-t-0 xl:border-l border-outline-variant/20">
+                    <div class="flex items-center justify-between gap-4 mb-4">
+                        <div>
+                            <p class="text-[11px] font-extrabold uppercase tracking-widest text-on-surface-variant">Live dataset snapshot</p>
+                            <h3 class="text-primary font-black text-lg">Heart_new2.csv</h3>
+                        </div>
+                        <span class="material-symbols-outlined text-status-critical text-[32px]" style="font-variation-settings: 'FILL' 1;">ecg_heart</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="project-stat-card"><span>Total records</span><strong>{{ "{:,}".format(dataset.records) }}</strong></div>
+                        <div class="project-stat-card"><span>Heart cases</span><strong>{{ "{:,}".format(dataset.heart_cases) }}</strong></div>
+                        <div class="project-stat-card"><span>Disease rate</span><strong>{{ dataset.disease_rate }}%</strong></div>
+                        <div class="project-stat-card"><span>Average BMI</span><strong>{{ dataset.avg_bmi }}</strong></div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 border-t border-outline-variant/20">
+                <div class="p-5 border-b md:border-b-0 md:border-r border-outline-variant/20">
+                    <p class="text-[11px] font-extrabold uppercase tracking-widest text-workflow-blue mb-2">Scenario 1</p>
+                    <h3 class="font-bold text-primary mb-1">Dr. Sharma</h3>
+                    <p class="text-sm text-on-surface-variant">Finds high-risk patient groups using age, gender, BMI, cholesterol, smoking, and alcohol indicators.</p>
+                </div>
+                <div class="p-5 border-b md:border-b-0 md:border-r border-outline-variant/20">
+                    <p class="text-[11px] font-extrabold uppercase tracking-widest text-cardiac-teal mb-2">Scenario 2</p>
+                    <h3 class="font-bold text-primary mb-1">Ramesh</h3>
+                    <p class="text-sm text-on-surface-variant">Studies population-level patterns to support preventive health policy and public awareness planning.</p>
+                </div>
+                <div class="p-5">
+                    <p class="text-[11px] font-extrabold uppercase tracking-widest text-status-critical mb-2">Scenario 3</p>
+                    <h3 class="font-bold text-primary mb-1">Anita</h3>
+                    <p class="text-sm text-on-surface-variant">Tracks personal risk indicators and lifestyle actions through a simplified patient dashboard.</p>
+                </div>
+            </div>
+            <div class="px-8 py-5 bg-surface-container-low border-t border-outline-variant/20">
+                <div class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-3 text-sm">
+                    <div class="font-bold text-primary">1. Data collection</div>
+                    <div class="font-bold text-primary">2. SQL storage</div>
+                    <div class="font-bold text-primary">3. Tableau connection</div>
+                    <div class="font-bold text-primary">4. Data preparation</div>
+                    <div class="font-bold text-primary">5. 10 visualizations</div>
+                    <div class="font-bold text-primary">6. Responsive dashboard</div>
+                </div>
+            </div>
+        </section>
         
         <!-- ==================== CARDIOLOGIST OVERVIEW ==================== -->
         {% if persona == 'clinical' or persona == 'admin' %}
@@ -385,7 +478,7 @@
             <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
                     <h2 class="font-headline-md text-headline-md text-primary mb-1">Welcome back, {{ name }}</h2>
-                    <p class="text-on-surface-variant max-w-xl">"Precision in data, compassion in care." — Daily Insight</p>
+                    <p class="text-on-surface-variant max-w-xl">"Precision in data, compassion in care." â€” Daily Insight</p>
                 </div>
                 <div class="flex items-center gap-4 bg-white/80 p-4 rounded-lg shadow-sm border border-outline-variant/30">
                     <div class="w-10 h-10 rounded-full bg-critical-red/10 flex items-center justify-center">
@@ -501,7 +594,7 @@
             <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
                     <h2 class="font-headline-md text-headline-md text-primary mb-1">Welcome back, {{ name }}</h2>
-                    <p class="text-on-surface-variant max-w-xl">"Public health is the foundation of a thriving society." — Daily Insight</p>
+                    <p class="text-on-surface-variant max-w-xl">"Public health is the foundation of a thriving society." â€” Daily Insight</p>
                 </div>
                 <div class="flex items-center gap-4 bg-white/80 p-4 rounded-lg shadow-sm border border-outline-variant/30">
                     <div class="w-10 h-10 rounded-full bg-critical-red/10 flex items-center justify-center">
@@ -696,7 +789,7 @@
             <div class="col-span-12 lg:col-span-8 bg-gradient-to-br from-workflow-blue to-efficiency-purple rounded-3xl p-8 text-white relative overflow-hidden shadow-lg">
                 <div class="relative z-10 flex flex-col justify-between h-full">
                     <div>
-                        <h2 class="text-[32px] font-bold mb-2">Welcome back, {{ name }}! 👋</h2>
+                        <h2 class="text-[32px] font-bold mb-2">Welcome back, {{ name }}! ðŸ‘‹</h2>
                         <p class="text-white/80 text-body-md max-w-md">Great work this week. You're consistently hitting your activity targets and keeping your records updated.</p>
                     </div>
                     <div class="mt-8 flex gap-6">
@@ -876,7 +969,7 @@
                                 <p class="text-body-sm font-bold text-on-surface-variant">TOMORROW</p>
                             </div>
                             <h4 class="text-body-md font-bold mb-1">Cardiology Follow-up</h4>
-                            <p class="text-body-sm text-on-surface-variant">Dr. Alan Marcus • 10:30 AM</p>
+                            <p class="text-body-sm text-on-surface-variant">Dr. Alan Marcus â€¢ 10:30 AM</p>
                         </div>
                     </div>
                 </div>
@@ -889,7 +982,7 @@
                         </div>
                         <h4 class="font-title-sm mb-2 text-xs font-bold">Benefits of Low-Impact Cardio for Heart Health</h4>
                         <p class="text-body-sm text-on-surface-variant mb-4 text-[11px]">Learn why walking 30 minutes a day is more effective than short bursts of high-intensity training...</p>
-                        <a class="inline-block text-secondary font-bold text-body-sm hover:underline text-xs" href="{{ url_for('dashboard.knowledge_center_page') }}">Read Article →</a>
+                        <a class="inline-block text-secondary font-bold text-body-sm hover:underline text-xs" href="{{ url_for('dashboard.knowledge_center_page') }}">Read Article â†’</a>
                     </div>
                 </div>
             </div>
