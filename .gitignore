@@ -4,4 +4,5 @@ __pycache__/
 *.pyo
 *.log
 datavibe.db
+cardioviz.db
 .env

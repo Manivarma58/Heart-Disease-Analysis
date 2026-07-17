@@ -1,4 +1,4 @@
-# Performance Testing Report
+﻿# Performance Testing Report
 
 ## Description
 Performance testing involves assessing the volume of data rendered from the database, the impact of data filters on system responsiveness, and the complexity introduced by the number of visualizations. Optimizing these factors ensures the dashboard operates efficiently, providing timely and reliable insights.
@@ -49,7 +49,7 @@ Data filtering on fields such as `AgeCategory`, `Sex`, `Smoking`, and `AlcoholDr
 ## 3. Complexity Introduced by the Number of Visualizations
 
 ### Analysis
-The DataVibe dashboard renders multiple key charts in a single view:
+The CardioViz dashboard renders multiple key charts in a single view:
 1. KPI metrics (Total records, cases, rate, BMI).
 2. Gender vs Heart Disease stacked columns.
 3. Diabetic vs Stroke bubble grid.

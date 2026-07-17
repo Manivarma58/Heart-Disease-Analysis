@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 {% block title %}Form System - CardioViz{% endblock %}
 {% block content %}
 <style>
@@ -459,7 +459,7 @@
         </a>
         <a href="{{ url_for('dashboard.powerbi_style_dashboard') }}" class="sidebar-menu-item">
           <i data-lucide="pie-chart"></i>
-          <span class="menu-text">Power BI Report</span>
+          <span class="menu-text">Tableau Report</span>
         </a>
         <a href="{{ url_for('dashboard.tableau_style_dashboard') }}" class="sidebar-menu-item">
           <i data-lucide="line-chart"></i>
@@ -554,7 +554,7 @@
       <div class="form-card" style="padding: 0;">
         <div class="upload-dropzone" onclick="alert('Open local file dialogue upload payload...')">
           <i data-lucide="upload-cloud"></i>
-          <h4>Drag & drop DICOM or PDF files</h4>
+          <h4>Drag & drop CSV or PDF files</h4>
           <p>Maximum file size: 500MB</p>
           <button class="btn-export" style="border:1.5px solid #cbd5e1; background:white; color:#334155;">Select Files</button>
         </div>
@@ -829,7 +829,7 @@
     const container = document.getElementById("selected-symptoms-tags");
     
     // Check if tag already exists
-    const textNodes = Array.from(container.getElementsByClassName("symptom-tag-box")).map(node => node.textContent.replace('×', '').trim());
+    const textNodes = Array.from(container.getElementsByClassName("symptom-tag-box")).map(node => node.textContent.replace('Ã—', '').trim());
     if (textNodes.includes(name)) return;
 
     const newTag = document.createElement("div");

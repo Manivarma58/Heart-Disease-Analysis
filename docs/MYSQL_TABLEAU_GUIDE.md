@@ -1,4 +1,4 @@
-# MySQL and Tableau Guide
+﻿# MySQL and Tableau Guide
 
 ## Files Used
 
@@ -24,7 +24,7 @@
 
 1. Open Tableau Desktop.
 2. Choose `MySQL` as the connector.
-3. Connect to the `datavibe_heart` database.
+3. Connect to the `cardioviz_heart` database.
 4. Use these views as Tableau sources:
    - `tableau_visualization_ready`
    - `tableau_population_overview_clean`

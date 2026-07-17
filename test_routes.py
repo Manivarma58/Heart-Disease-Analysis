@@ -5,10 +5,10 @@ app = create_app()
 client = app.test_client()
 
 personas = [
-    ("clinical", "doctor@datavibe.local"),
-    ("public_health", "ramesh@datavibe.local"),
-    ("patient", "anita@datavibe.local"),
-    ("admin", "admin@datavibe.local"),
+    ("clinical", "doctor@cardioviz.local"),
+    ("public_health", "ramesh@cardioviz.local"),
+    ("patient", "anita@cardioviz.local"),
+    ("admin", "admin@cardioviz.local"),
 ]
 
 for persona, email in personas:

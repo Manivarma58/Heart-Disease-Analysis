@@ -1,8 +1,8 @@
-# DataVibe Project Documentation
+﻿# CardioVizject Documentation
 
 ## Architecture
 
-DataVibe uses a Flask web layer, a service layer for analytics and reporting, and a relational schema that can run locally in SQLite or be migrated to PostgreSQL. Tableau dashboards are embedded through configurable workbook URLs.
+CardioViz uses a Flask web layer, a service layer for analytics and reporting, and a relational schema that can run locally in SQLite or be migrated to PostgreSQL. Tableau dashboards are embedded through configurable workbook URLs.
 
 ```mermaid
 flowchart LR

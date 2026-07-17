@@ -1,17 +1,17 @@
-# DataVibe - Heart Disease Analytics Platform
+# CardioViz - Heart Disease Analysis
 
-DataVibe is a Flask-based healthcare analytics application for cardiovascular risk analysis. It includes the cleaned real heart disease dataset, role-based dashboards, Tableau embed hooks, risk scoring, and SQL assets for a database-backed implementation.
+CardioViz is a Flask-based Heart Disease Analysis project for cardiovascular risk exploration. It includes the real heart disease dataset, database import scripts, SQL/MySQL assets, Tableau-ready exports, role-based dashboards, and a public project overview website.
 
-The project now includes the real dataset file at `data/Heart_new2.csv` and an importer that maps it into the application schema.
+The project supports the full workflow shown in the assignment: data collection, dataset validation, database storage, SQL operations, Tableau connection, data preparation, unique visualizations, and a responsive dashboard.
 
 ## Demo Accounts
 
-All accounts use `datavibe123`.
+All accounts use `cardioviz123`.
 
-- `doctor@datavibe.local` - Dr. Sharma clinical dashboard
-- `ramesh@datavibe.local` - public health dashboard
-- `anita@datavibe.local` - patient portal
-- `admin@datavibe.local` - admin tools
+- `doctor@cardioviz.local` - Dr. Sharma clinical dashboard
+- `ramesh@cardioviz.local` - public health dashboard
+- `anita@cardioviz.local` - patient portal
+- `admin@cardioviz.local` - admin tools
 
 ## Run Locally
 
@@ -24,7 +24,7 @@ python run.py
 
 Open `http://127.0.0.1:5000`.
 
-## Load the Provided Dataset
+## Load or Refresh the Dataset
 
 ```powershell
 .\.venv\Scripts\python scripts\validate_and_prepare_dataset.py
@@ -32,7 +32,17 @@ Open `http://127.0.0.1:5000`.
 .\.venv\Scripts\python scripts\import_heart_csv.py
 ```
 
-This validates `data/Heart_new2.csv`, creates `data/Heart_new2_clean.csv`, imports the dataset into normalized dashboard tables, and keeps a raw copy in `raw_heart_dataset`.
+This validates `data/Heart_new2.csv`, creates `data/Heart_new2_clean.csv`, imports the data into normalized dashboard tables, and keeps a raw copy in `raw_heart_dataset`.
+
+## Key Pages
+
+- `/` - CardioViz project overview website
+- `/dashboard` - role-based dashboard hub after login
+- `/dashboard/tableau-style` - native Tableau-style analytics dashboard
+- `/story/heart-disease` - heart disease data story
+- `/web-integration/dashboard` - published Tableau dashboard embed area
+- `/web-integration/story` - published Tableau story embed area
+- `/data/heart-dataset.csv` - dataset download
 
 ## Tableau Integration
 
@@ -44,27 +54,16 @@ Set these environment variables to embed live Tableau dashboards:
 - `TABLEAU_DASHBOARD_URL`
 - `TABLEAU_STORY_URL`
 
-When the variables are empty, each dashboard shows a native demo visualization instead.
-
-For MySQL and Tableau setup, see `docs/MYSQL_TABLEAU_GUIDE.md`.
-
-## Google Login
-
-Set these environment variables to enable Google OAuth sign-in:
-
-- `GOOGLE_CLIENT_ID`
-- `GOOGLE_CLIENT_SECRET`
-
-Setup details are in `docs/GOOGLE_LOGIN_SETUP.md`.
+When the variables are empty, each dashboard shows a native demo visualization. For MySQL and Tableau setup, see `docs/MYSQL_TABLEAU_GUIDE.md`.
 
 ## Included Architecture
 
 - Flask app factory and blueprints
 - Role-based session authentication
-- SQLite demo schema mirroring the requested heart disease dataset
-- Real imported patient-style clinical, lifestyle, history, and risk assessment data
+- SQLite demo schema with MySQL migration scripts
+- Real imported clinical, lifestyle, history, and risk assessment data
 - Risk calculator service
-- REST endpoints for overview and patient search
+- REST endpoints for overview and visualization data
 - Dockerfile and Docker Compose
 - SQL views and indexes for analytical reporting
 
@@ -78,6 +77,5 @@ Setup details are in `docs/GOOGLE_LOGIN_SETUP.md`.
 - `docs/DATA_STORY.md`
 - `docs/CALCULATED_FIELDS_AND_VISUALIZATIONS.md`
 - `docs/PUBLISHING_AND_WEB_INTEGRATION.md`
-- `docs/GOOGLE_LOGIN_SETUP.md`
 - `docs/DEMO_SCRIPT.md`
 - `docs/SUBMISSION_CHECKLIST.md`

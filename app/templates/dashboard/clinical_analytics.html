@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html class="light" lang="en">
 <head>
     <meta charset="utf-8"/>
@@ -153,7 +153,7 @@
 <!-- TopNavBar -->
 <header class="bg-surface docked full-width top-0 border-b border-outline-variant shadow-sm flex justify-between items-center w-full px-margin-desktop py-base z-50 sticky">
     <div class="flex items-center gap-md">
-        <a href="{{ url_for('dashboard.home') }}" class="text-title-lg font-title-lg font-bold text-primary tracking-tight">CardioViz Analytics</a>
+        <a href="{{ url_for('dashboard.home') }}" class="text-title-lg font-title-lg font-bold text-primary tracking-tight">CardioViz</a>
         <nav class="hidden md:flex items-center gap-gutter ml-lg">
             <a class="text-primary font-bold border-b-2 border-primary pb-1 text-label-md font-label-md" href="{{ url_for('dashboard.clinical_analytics_page') }}">Dashboard</a>
             <a class="text-on-surface-variant hover:bg-surface-container-low transition-colors px-xs py-base rounded text-label-md font-label-md" href="{{ url_for('clinical.clinical_dashboard') }}">Patients</a>
@@ -487,7 +487,7 @@
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-md gap-sm">
                     <div>
                         <h3 class="text-headline-md font-bold text-primary text-base">Patient Profile Deep Dive</h3>
-                        <p class="text-xs text-on-surface-variant">Select patient from database for diagnostic metrics and history.</p>
+                        <p class="text-xs text-on-surface-variant">Select patient from database for analysis metrics and history.</p>
                     </div>
                     
                     <!-- Patient Dropdown Selector -->
@@ -512,7 +512,7 @@
                                 <h4 class="text-title-lg font-bold text-primary" id="patientName">Vikram Patel, 64</h4>
                                 <span class="bg-error-container text-on-error-container px-xs py-[2px] rounded text-label-sm font-bold" id="patientRisk">CRITICAL RISK</span>
                             </div>
-                            <p class="text-label-sm text-on-surface-variant mt-1" id="patientSubText">ID: #CPA-4492 • BMI: 29.4 • Smoker: No</p>
+                            <p class="text-label-sm text-on-surface-variant mt-1" id="patientSubText">ID: #CPA-4492 â€¢ BMI: 29.4 â€¢ Smoker: No</p>
                             <div class="mt-xs flex gap-xs" id="patientBadges">
                                 <span class="bg-surface-container-high text-primary px-xs py-[1px] rounded text-[10px] font-bold">Hypertension</span>
                                 <span class="bg-surface-container-high text-primary px-xs py-[1px] rounded text-[10px] font-bold">T2 Diabetes</span>
@@ -532,7 +532,7 @@
                             <div class="relative">
                                 <div class="absolute -left-[21px] top-1 w-3 h-3 bg-outline-variant rounded-full"></div>
                                 <p class="font-bold text-on-surface" id="timelineDate2">Sep 12, 2024</p>
-                                <p class="text-on-surface-variant" id="timelineDesc2">Baseline ECG: ST Segment elevation noted.</p>
+                                <p class="text-on-surface-variant" id="timelineDesc2">Baseline heart disease: ST Segment elevation noted.</p>
                             </div>
                         </div>
                     </div>
@@ -611,7 +611,7 @@
 <footer class="bg-surface-dim full-width py-md border-t border-outline-variant flex flex-col md:flex-row justify-between items-center w-full px-margin-desktop gap-md mt-auto text-xs">
     <div class="flex items-center gap-md">
         <span class="text-label-md font-label-md font-bold text-on-surface">CardioViz Health Systems</span>
-        <span class="text-label-sm font-label-sm text-on-surface-variant">© 2024 Clinical Decision Support.</span>
+        <span class="text-label-sm font-label-sm text-on-surface-variant">Â© 2024 Clinical Decision Support.</span>
     </div>
     <div class="flex gap-md flex-wrap justify-center font-semibold text-slate-500">
         <a class="text-on-surface-variant hover:text-primary transition-colors text-label-sm font-label-sm" href="#">Medical Compliance</a>
@@ -997,7 +997,7 @@
         const namePart = text.split(' (#')[0];
         
         document.getElementById('patientName').innerText = namePart + ", " + (patientId % 2 === 0 ? "62" : "58");
-        document.getElementById('patientSubText').innerText = `ID: #CPA-${patientId} • BMI: ${(24 + (patientId % 6)).toFixed(1)} • Smoker: ${patientId % 3 === 0 ? 'Yes' : 'No'}`;
+        document.getElementById('patientSubText').innerText = `ID: #CPA-${patientId} â€¢ BMI: ${(24 + (patientId % 6)).toFixed(1)} â€¢ Smoker: ${patientId % 3 === 0 ? 'Yes' : 'No'}`;
         
         const risks = ['LOW RISK', 'MODERATE', 'CRITICAL RISK'];
         const riskLabel = document.getElementById('patientRisk');
@@ -1015,14 +1015,14 @@
         document.getElementById('timelineDesc1').innerText = descs1[patientId % 3];
 
         const dates2 = ['Sep 12, 2024', 'Aug 10, 2024', 'Jul 05, 2024'];
-        const descs2 = ['Diagnostic consult and vitals mapping', 'Wearable syncing protocol registered', 'Initial ECG diagnostics run'];
+        const descs2 = ['Diagnostic consult and vitals mapping', 'Wearable syncing protocol registered', 'Initial heart disease analysiss run'];
         document.getElementById('timelineDate2').innerText = dates2[patientId % 3];
         document.getElementById('timelineDesc2').innerText = descs2[patientId % 3];
 
         const recommendations = [
             "Initiate dual antiplatelet therapy. Schedule follow-up ECHO in 48 hours to monitor ejection fraction. Current EF: 45%.",
             "Adjust sodium targets to <1.5g daily. Log daily blood pressure readings inside health journal.",
-            "Schedule diagnostic cardiovascular rehab session. Review blood sugar metrics bi-weekly.",
+            "Schedule cardiovascular analysis rehab session. Review blood sugar metrics bi-weekly.",
             "Maintain Metoprolol schema. Review stress threshold levels before next clinic checkup."
         ];
         document.getElementById('patientRecommendation').innerText = recommendations[patientId % 4];

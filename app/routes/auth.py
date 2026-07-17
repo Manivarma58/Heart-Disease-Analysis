@@ -1,4 +1,4 @@
-from functools import wraps
+﻿from functools import wraps
 import secrets
 import random
 import string
@@ -145,7 +145,7 @@ def social_login():
             
         db.execute(
             "INSERT INTO users (name, email, password_hash, role, persona) VALUES (?, ?, ?, ?, ?)",
-            (name, email, generate_password_hash("datavibe123"), role, persona)
+            (name, email, generate_password_hash("cardioviz123"), role, persona)
         )
         db.commit()
         
@@ -170,7 +170,7 @@ def social_login():
                 (patient_id, )
             )
             db.execute(
-                """INSERT INTO medical_history (patient_id, diagnosis_date, heart_disease, heart_disease_type, hypertension, diabetes, family_history, previous_cardiac_event, current_medications)
+                """INSERT INTO medical_history (patient_id, condition_date, heart_disease, heart_disease_type, hypertension, diabetes, family_history, previous_cardiac_event, current_medications)
                    VALUES (?, ?, 'No', NULL, 'Yes', 'Yes', 'No', 'No', 'Atorvastatin 40mg, Aspirin 81mg')""",
                 (patient_id, date.today().isoformat())
             )

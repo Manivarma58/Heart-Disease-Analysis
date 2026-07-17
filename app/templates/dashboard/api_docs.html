@@ -1,4 +1,4 @@
-{% set hide_default_header = true %}
+﻿{% set hide_default_header = true %}
 {% extends "base.html" %}
 {% block title %}API Reference - CardioViz{% endblock %}
 {% block content %}
@@ -421,7 +421,7 @@
     <!-- Tab 1: Patients -->
     <div id="api-doc-patients" class="tab-content active">
       <h1>Patient Data Access</h1>
-      <p>The Clinical Intelligence API provides programmatic access to anonymized patient records, diagnostic histories, and risk metrics. Use this endpoint to retrieve comprehensive profiles required for population health management and research analysis.</p>
+      <p>The Clinical Intelligence API provides programmatic access to anonymized patient records, health history metrics, and risk metrics. Use this endpoint to retrieve comprehensive profiles required for population health management and research analysis.</p>
 
       <div class="auth-banner-box">
         <h4><i data-lucide="shield-check" style="color:#10b981; width:1.1rem; height:1.1rem;"></i> Authentication</h4>
@@ -596,7 +596,7 @@
         "level": "low",
         "last_updated": "2023-11-20T18:38Z"
       },
-      "diagnoses": [
+      "conditions": [
         {
           "code": "I10",
           "name": "Essential hypertension"
@@ -678,7 +678,7 @@
             id: "dv_8829_x12",
             first_name: "Helena",
             risk_assessment: { score: 8.14, level: "low", last_updated: "2023-11-20T18:38Z" },
-            diagnoses: [{ code: "I10", name: "Essential hypertension" }],
+            conditions: [{ code: "I10", name: "Essential hypertension" }],
             vitals: { bpm: 72, spo2: 98 }
           }],
           meta: { total_count: 1240, limit: 1 }

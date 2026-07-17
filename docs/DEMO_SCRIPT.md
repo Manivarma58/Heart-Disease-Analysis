@@ -1,8 +1,8 @@
-# DataVibe Demo Script
+﻿# CardioViz Demo Script
 
 ## 1. Project Introduction
 
-DataVibe is a heart disease analytics platform that combines a Flask web app, a structured database, Tableau-ready MySQL views, and role-specific healthcare dashboards.
+CardioViz is a heart disease analytics platform that combines a Flask web app, a structured database, Tableau-ready MySQL views, and role-specific healthcare dashboards.
 
 ## 2. Dataset
 
@@ -19,16 +19,16 @@ Open `http://127.0.0.1:5000`.
 
 ## 4. Demo Accounts
 
-Use password `datavibe123` for all accounts.
+Use password `cardioviz123` for all accounts.
 
-- `doctor@datavibe.local`
-- `ramesh@datavibe.local`
-- `anita@datavibe.local`
-- `admin@datavibe.local`
+- `doctor@cardioviz.local`
+- `ramesh@cardioviz.local`
+- `anita@cardioviz.local`
+- `admin@cardioviz.local`
 
 ## 5. Dr. Sharma Demo
 
-Log in as `doctor@datavibe.local`.
+Log in as `doctor@cardioviz.local`.
 
 Show:
 
@@ -40,7 +40,7 @@ Show:
 
 ## 6. Ramesh Demo
 
-Log in as `ramesh@datavibe.local`.
+Log in as `ramesh@cardioviz.local`.
 
 Show:
 
@@ -51,7 +51,7 @@ Show:
 
 ## 7. Anita Demo
 
-Log in as `anita@datavibe.local`.
+Log in as `anita@cardioviz.local`.
 
 Show:
 
@@ -61,7 +61,7 @@ Show:
 
 ## 8. Admin Demo
 
-Log in as `admin@datavibe.local`.
+Log in as `admin@cardioviz.local`.
 
 Show:
 

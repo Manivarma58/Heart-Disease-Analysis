@@ -17,7 +17,7 @@ class SmokeTestCase(unittest.TestCase):
         with client.session_transaction() as sess:
             sess["user"] = {
                 "name": "Ramesh Iyer",
-                "email": "ramesh@datavibe.local",
+                "email": "ramesh@cardioviz.local",
                 "role": "Health Official",
                 "persona": "public_health"
             }

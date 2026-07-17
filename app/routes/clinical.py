@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, render_template, request, redirect, url_for, session
+﻿from flask import Blueprint, jsonify, render_template, request, redirect, url_for, session
 
 from app.routes.auth import role_required
 from app.services.database_service import get_db, query_all, query_one
@@ -45,7 +45,7 @@ def clinical_dashboard():
         "total_patients": total_patients,
         "high_risk_count": high_risk_count,
         "high_risk_pct": high_risk_pct,
-        "new_diagnoses": 45,
+        "new_conditions": 45,
         "success_rate": 94.5
     }
 
