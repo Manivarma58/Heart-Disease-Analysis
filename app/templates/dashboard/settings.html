@@ -161,7 +161,7 @@
             <button class="p-2 rounded-full hover:bg-surface-muted text-primary transition-all cursor-pointer bg-surface-container-low">
                 <span class="material-symbols-outlined">settings</span>
             </button>
-            <img class="w-8 h-8 rounded-full object-cover border border-outline-variant" alt="Cardiologist Vance" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZTKRi-DXydjkL0eR4tbZbmVUD3c4971GVUsBcMjfdn5CQheppef-IuA2z4Y16Vz-RO8juseioH5x3z_ZD5GUS-DUL5JHXhpumWJ6mgo7uJ8K3TdpJ3vSb7_AF4Zz2g-wEl2QCfZ5gN2x_p-PCn9o9f9ujcSPozSa6IQiUSQR8fwnSugiDYK9IhyZtjx_lVbDESzv5VSgGybfrQvArJ51p00Bj4qHNtP6XHyVx8foaRQv4aeQ3tBpZSbn0UZw4ovt22gUUWegXjL5U"/>
+            <img class="w-8 h-8 rounded-full object-cover border border-outline-variant" alt="{{ first_name }} {{ last_name }} Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZTKRi-DXydjkL0eR4tbZbmVUD3c4971GVUsBcMjfdn5CQheppef-IuA2z4Y16Vz-RO8juseioH5x3z_ZD5GUS-DUL5JHXhpumWJ6mgo7uJ8K3TdpJ3vSb7_AF4Zz2g-wEl2QCfZ5gN2x_p-PCn9o9f9ujcSPozSa6IQiUSQR8fwnSugiDYK9IhyZtjx_lVbDESzv5VSgGybfrQvArJ51p00Bj4qHNtP6XHyVx8foaRQv4aeQ3tBpZSbn0UZw4ovt22gUUWegXjL5U"/>
         </div>
     </div>
 </nav>
@@ -255,7 +255,7 @@
                     <!-- Photo upload -->
                     <div class="flex flex-col items-center gap-2">
                         <div class="relative">
-                            <img id="avatar-img" class="w-32 h-32 rounded-xl object-cover border-4 border-surface-container-low shadow-sm" alt="Julian Vance" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBenOij7uQypjlgnfpj-rgKSsQ2naV9641rP8HpQr0HEshjZBfRiarvJd1-3m2ki5siOBnAEek8gBmDgcz5TsTJB0giUOK7IqFdNkQnSf7UIKMKamVCV46JHPx9oVqVmwZnlYJfhUJmg2ITJ-MWLl0CYM6IOJl5tqVMNVaZToelKz30G4WpZmUVY1ZSPeuEPNL5MYf_zH9vtirU76TDwUjF_Cqv3TKJnIxG1qnEboAvCNOY5FTyw921rX_5B-SgrEg_B0OmGCogkVkc"/>
+                            <img id="avatar-img" class="w-32 h-32 rounded-xl object-cover border-4 border-surface-container-low shadow-sm" alt="{{ first_name }} {{ last_name }}" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBenOij7uQypjlgnfpj-rgKSsQ2naV9641rP8HpQr0HEshjZBfRiarvJd1-3m2ki5siOBnAEek8gBmDgcz5TsTJB0giUOK7IqFdNkQnSf7UIKMKamVCV46JHPx9oVqVmwZnlYJfhUJmg2ITJ-MWLl0CYM6IOJl5tqVMNVaZToelKz30G4WpZmUVY1ZSPeuEPNL5MYf_zH9vtirU76TDwUjF_Cqv3TKJnIxG1qnEboAvCNOY5FTyw921rX_5B-SgrEg_B0OmGCogkVkc"/>
                             <button onclick="triggerPhotoUpload()" class="absolute -bottom-2 -right-2 bg-white p-2 rounded-full shadow-md border border-outline-variant hover:text-primary transition-all">
                                 <span class="material-symbols-outlined text-[16px]">photo_camera</span>
                             </button>
@@ -282,23 +282,23 @@
 
                         <div>
                             <label class="block text-xs font-bold text-on-surface-variant mb-1">First Name</label>
-                            <input type="text" id="prof-fname" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs focus:ring-primary focus:border-primary transition-all font-semibold" value="Julian"/>
+                            <input type="text" id="prof-fname" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs focus:ring-primary focus:border-primary transition-all font-semibold" value="{{ first_name }}"/>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-on-surface-variant mb-1">Last Name</label>
-                            <input type="text" id="prof-lname" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs focus:ring-primary focus:border-primary transition-all font-semibold" value="Vance"/>
+                            <input type="text" id="prof-lname" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs focus:ring-primary focus:border-primary transition-all font-semibold" value="{{ last_name }}"/>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-on-surface-variant mb-1">Email Address</label>
-                            <input type="email" id="prof-email" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs focus:ring-primary focus:border-primary transition-all font-semibold" value="julian.vance@stjude.org"/>
+                            <input type="email" id="prof-email" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs focus:ring-primary focus:border-primary transition-all font-semibold" value="{{ email }}"/>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-on-surface-variant mb-1">Phone Number</label>
-                            <input type="text" id="prof-phone" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs focus:ring-primary focus:border-primary transition-all font-semibold" value="+1 (555) 902-3412"/>
+                            <input type="text" id="prof-phone" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs focus:ring-primary focus:border-primary transition-all font-semibold" value="{% if patient %}+1 (555) 019-8800{% else %}+1 (555) 902-3412{% endif %}"/>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-on-surface-variant mb-1">Date of Birth</label>
-                            <input type="date" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs focus:ring-primary focus:border-primary transition-all font-semibold" value="1978-04-12"/>
+                            <input type="date" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs focus:ring-primary focus:border-primary transition-all font-semibold" value="{{ patient.date_of_birth if patient else '1978-04-12' }}"/>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-on-surface-variant mb-1">Gender</label>
@@ -313,7 +313,7 @@
                         <div class="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4" id="doctor-fields-container">
                             <div>
                                 <label class="block text-xs font-bold text-on-surface-variant mb-1">Medical License ID</label>
-                                <input type="text" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs focus:ring-primary focus:border-primary transition-all font-semibold" value="MD-9981-XX-2023"/>
+                                <input type="text" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs focus:ring-primary focus:border-primary transition-all font-semibold" value="MD-{{ user.user_id or user.id or 9981 }}-XX-2026"/>
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-on-surface-variant mb-1">Specialization (Multi-select)</label>
@@ -326,11 +326,11 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-on-surface-variant mb-1">Hospital / Clinic</label>
-                                <input type="text" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs focus:ring-primary focus:border-primary transition-all font-semibold" value="St. Jude Cardiac Center"/>
+                                <input type="text" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs focus:ring-primary focus:border-primary transition-all font-semibold" value="Metropolitan General Hospital"/>
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-on-surface-variant mb-1">Department</label>
-                                <input type="text" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs focus:ring-primary focus:border-primary transition-all font-semibold" value="Cardiovascular Ward"/>
+                                <input type="text" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs focus:ring-primary focus:border-primary transition-all font-semibold" value="Cardiology Unit"/>
                             </div>
                             <div class="col-span-2 pt-2">
                                 <label class="text-xs font-bold text-on-surface-variant flex justify-between">
@@ -349,15 +349,15 @@
                         <div class="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 hidden" id="patient-fields-container">
                             <div>
                                 <label class="block text-xs font-bold text-on-surface-variant mb-1">Primary Care Physician</label>
-                                <input type="text" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs focus:ring-primary focus:border-primary transition-all font-semibold" value="Dr. Sarah Johnson"/>
+                                <input type="text" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs focus:ring-primary focus:border-primary transition-all font-semibold" value="{{ patient.primary_physician if (patient and patient.primary_physician) else 'Dr. Sarah Sharma' }}"/>
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-on-surface-variant mb-1">Insurance Provider</label>
-                                <input type="text" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs focus:ring-primary focus:border-primary transition-all font-semibold" value="BlueShield Premium Health"/>
+                                <input type="text" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs focus:ring-primary focus:border-primary transition-all font-semibold" value="National Health Insurance"/>
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-on-surface-variant mb-1">Emergency Contact</label>
-                                <input type="text" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs focus:ring-primary focus:border-primary transition-all font-semibold" value="Jane Vance (+1 555-091-2311)"/>
+                                <input type="text" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs focus:ring-primary focus:border-primary transition-all font-semibold" value="Family Contact (+1 555-019-8800)"/>
                             </div>
                             <div class="col-span-2">
                                 <label class="block text-xs font-bold text-on-surface-variant mb-1">Health Goals</label>
@@ -379,7 +379,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-on-surface-variant mb-1">Username</label>
-                        <input type="text" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs focus:ring-primary" value="dr_julian_vance" />
+                        <input type="text" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs focus:ring-primary" value="{{ email.split('@')[0] if email else 'user' }}" />
                     </div>
                     <div class="flex items-end">
                         <button onclick="openPasswordModal()" class="w-full py-2 bg-surface-muted hover:bg-surface-container-high border border-outline-variant text-xs font-bold rounded-lg text-primary transition-all">Change Password</button>
@@ -389,7 +389,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
                     <div class="p-3 bg-surface-light rounded-lg border">
                         <span class="block text-[10px] text-on-surface-variant uppercase font-bold">Current Role</span>
-                        <span class="text-sm font-bold text-primary block mt-1">Doctor</span>
+                        <span class="text-sm font-bold text-primary block mt-1">{{ user.role }}</span>
                         <button onclick="alert('Clinical access change request logged.')" class="text-[10px] text-secondary font-bold hover:underline mt-2">Request Change</button>
                     </div>
                     <div class="p-3 bg-surface-light rounded-lg border">
@@ -409,11 +409,11 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-on-surface-variant mb-1">Recovery Email</label>
-                            <input type="email" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs" value="recovery.vance@mail.com" />
+                            <input type="email" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs" value="recovery.{{ email.split('@')[0] if email else 'user' }}@mail.com" />
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-on-surface-variant mb-1">Recovery Phone</label>
-                            <input type="text" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs" value="+1 (555) 902-3900" />
+                            <input type="text" class="w-full bg-surface-light border-outline-variant rounded-lg px-3 py-2 text-xs" value="+1 (555) 019-{{ user.user_id or user.id or 8900 }}" />
                         </div>
                     </div>
                     <button onclick="alert('Generated Recovery Codes: CARDIO-VANCE-890A')" class="text-xs text-primary font-bold hover:underline">Get Backup Recovery Code</button>
@@ -1500,6 +1500,7 @@
 
     window.addEventListener('DOMContentLoaded', () => {
         renderTeamMembers();
+        toggleProfileRole('{{ persona }}');
     });
 
     // Toast alerts helper

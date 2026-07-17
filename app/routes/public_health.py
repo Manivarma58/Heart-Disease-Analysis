@@ -65,12 +65,86 @@ def public_health_dashboard():
         "prevention_impact": 2.5
     }
 
+    # Query additional visualizations data:
+    # 1. Urban vs Rural
+    urban_rural_rows = query_all(
+        """SELECT p.urban_rural, COUNT(*) AS total, SUM(CASE WHEN m.heart_disease = 'Yes' THEN 1 ELSE 0 END) AS cases
+           FROM patients p
+           JOIN medical_history m ON p.patient_id = m.patient_id
+           GROUP BY p.urban_rural"""
+    )
+    urban_rural_data = [dict(r) for r in urban_rural_rows]
+
+    # 2. Age & Gender Trends
+    age_gender_rows = query_all(
+        """SELECT
+             CASE
+               WHEN (strftime('%Y', 'now') - strftime('%Y', p.date_of_birth)) < 30 THEN '18-29'
+               WHEN (strftime('%Y', 'now') - strftime('%Y', p.date_of_birth)) BETWEEN 30 AND 45 THEN '30-45'
+               WHEN (strftime('%Y', 'now') - strftime('%Y', p.date_of_birth)) BETWEEN 46 AND 60 THEN '46-60'
+               ELSE '60+'
+             END AS age_category,
+             p.gender AS sex,
+             COUNT(*) AS total,
+             SUM(CASE WHEN m.heart_disease = 'Yes' THEN 1 ELSE 0 END) AS cases
+           FROM patients p
+           JOIN medical_history m ON p.patient_id = m.patient_id
+           GROUP BY age_category, sex"""
+    )
+    age_gender_data = [dict(r) for r in age_gender_rows]
+
+    # 3. Race Distribution (using last_name which holds Race from import)
+    race_rows = query_all(
+        """SELECT p.last_name AS race, COUNT(*) AS total, SUM(CASE WHEN m.heart_disease = 'Yes' THEN 1 ELSE 0 END) AS cases
+           FROM patients p
+           JOIN medical_history m ON p.patient_id = m.patient_id
+           GROUP BY race"""
+    )
+    race_data = [dict(r) for r in race_rows]
+
+    # 4. Income range correlation
+    income_rows = query_all(
+        """SELECT p.income_range, COUNT(*) AS total, SUM(CASE WHEN m.heart_disease = 'Yes' THEN 1 ELSE 0 END) AS cases
+           FROM patients p
+           JOIN medical_history m ON p.patient_id = m.patient_id
+           GROUP BY p.income_range"""
+    )
+    income_data = [dict(r) for r in income_rows]
+
+    # 5. Education impact
+    edu_rows = query_all(
+        """SELECT p.education_level, COUNT(*) AS total, SUM(CASE WHEN m.heart_disease = 'Yes' THEN 1 ELSE 0 END) AS cases
+           FROM patients p
+           JOIN medical_history m ON p.patient_id = m.patient_id
+           GROUP BY p.education_level"""
+    )
+    edu_data = [dict(r) for r in edu_rows]
+
+    # 6. Lifestyle (Smoking status by region)
+    lifestyle_smoke_rows = query_all(
+        """SELECT l.smoking_status, COUNT(*) AS total, SUM(CASE WHEN m.heart_disease = 'Yes' THEN 1 ELSE 0 END) AS cases
+           FROM lifestyle_factors l
+           JOIN medical_history m ON m.patient_id = l.patient_id
+           GROUP BY smoking_status"""
+    )
+    lifestyle_smoke_data = [dict(r) for r in lifestyle_smoke_rows]
+
+    chart_data = {
+        "urban_rural": urban_rural_data,
+        "age_gender": age_gender_data,
+        "race": race_data,
+        "income": income_data,
+        "edu": edu_data,
+        "smoke": lifestyle_smoke_data
+    }
+
     return render_template(
         "dashboard/public_health.html",
         regional=regional,
         lifestyle=lifestyle,
         totals=totals,
         stats=stats,
+        chart_data=chart_data,
         report=population_report(),
         tableau=tableau_status("public_health"),
     )

@@ -39,10 +39,12 @@ def patient_dashboard():
                ORDER BY r.framingham_score DESC LIMIT 1"""
         )
         
+    patient_dict = dict(patient) if patient else {}
+
     return render_template(
         "dashboard/patient.html",
-        patient=patient,
-        age=age_from_dob(patient["date_of_birth"]) if patient else None,
-        recommendation=recommendation_for(patient["risk_category"]) if patient else "",
+        patient=patient_dict,
+        age=age_from_dob(patient_dict["date_of_birth"]) if patient_dict else None,
+        recommendation=recommendation_for(patient_dict["risk_category"]) if patient_dict else "",
         tableau=tableau_status("patient"),
     )

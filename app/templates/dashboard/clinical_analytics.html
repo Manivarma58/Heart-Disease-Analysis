@@ -3,10 +3,11 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>CardioPulse Analytics - Dr. Sharma Dashboard</title>
+    <title>Clinical Analytics Dashboard | CardioViz</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
@@ -152,7 +153,7 @@
 <!-- TopNavBar -->
 <header class="bg-surface docked full-width top-0 border-b border-outline-variant shadow-sm flex justify-between items-center w-full px-margin-desktop py-base z-50 sticky">
     <div class="flex items-center gap-md">
-        <a href="{{ url_for('dashboard.home') }}" class="text-title-lg font-title-lg font-bold text-primary tracking-tight">CardioPulse Analytics</a>
+        <a href="{{ url_for('dashboard.home') }}" class="text-title-lg font-title-lg font-bold text-primary tracking-tight">CardioViz Analytics</a>
         <nav class="hidden md:flex items-center gap-gutter ml-lg">
             <a class="text-primary font-bold border-b-2 border-primary pb-1 text-label-md font-label-md" href="{{ url_for('dashboard.clinical_analytics_page') }}">Dashboard</a>
             <a class="text-on-surface-variant hover:bg-surface-container-low transition-colors px-xs py-base rounded text-label-md font-label-md" href="{{ url_for('clinical.clinical_dashboard') }}">Patients</a>
@@ -178,7 +179,7 @@
             </a>
         </div>
         <div class="h-8 w-8 rounded-full overflow-hidden border border-outline-variant ml-xs">
-            <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbWT59UIDTbut1PgGzPuyc7PXxoQGfKC1kkK_R30VtqrPxvArREw5Y2KCSXLvDCeAh39_tLlghZHWVIII2nOwfPNGrvtTBjfd-0p8Fjv_UCOq280LWizoNum4WG1g2KdvW_ts6qGDVVYiB4QpL9eqk6TPrW7MH9SXP3WTFRWwu7E11J9_ExGMzER1hdcrYZ9uNHAW4YLRKr0W91OvPuOziI2pnoOQ0N8xcAabeL4bigZ5Yo5CItJwaz6oPvTOKMRQNs-Ymzho-Hdv1" alt="Dr. Sharma Headshot"/>
+            <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbWT59UIDTbut1PgGzPuyc7PXxoQGfKC1kkK_R30VtqrPxvArREw5Y2KCSXLvDCeAh39_tLlghZHWVIII2nOwfPNGrvtTBjfd-0p8Fjv_UCOq280LWizoNum4WG1g2KdvW_ts6qGDVVYiB4QpL9eqk6TPrW7MH9SXP3WTFRWwu7E11J9_ExGMzER1hdcrYZ9uNHAW4YLRKr0W91OvPuOziI2pnoOQ0N8xcAabeL4bigZ5Yo5CItJwaz6oPvTOKMRQNs-Ymzho-Hdv1" alt="{{ doctor_name }} Headshot"/>
         </div>
     </div>
 </header>
@@ -253,282 +254,363 @@
         </div>
     </div>
 
-    <!-- Main Analytics Grid -->
+    <!-- ==================== MAIN ANALYTICS GRID ==================== -->
     <div class="grid grid-cols-12 gap-gutter mb-lg">
         
-        <!-- Left: Patient Demographics -->
-        <section class="col-span-12 lg:col-span-3 space-y-gutter">
-            <div class="bg-surface-container-lowest p-sm rounded-xl shadow-sm border border-outline-variant/30 card-shadow h-full flex flex-col justify-between">
-                <h3 class="text-label-md font-label-md text-primary mb-sm border-b border-outline-variant pb-xs">Patient Demographics</h3>
-                <div class="space-y-md flex-grow flex flex-col justify-around">
-                    <!-- Age Histogram -->
-                    <div>
-                        <span class="text-label-sm font-label-sm text-on-surface-variant">Age Distribution</span>
-                        <div class="flex items-end gap-[2px] h-20 mt-xs">
-                            <div class="bg-primary-container w-full h-[20%] rounded-t-sm hover:opacity-80 transition-opacity"></div>
-                            <div class="bg-primary-container w-full h-[45%] rounded-t-sm hover:opacity-80 transition-opacity"></div>
-                            <div class="bg-primary-container w-full h-[85%] rounded-t-sm hover:opacity-80 transition-opacity"></div>
-                            <div class="bg-primary-container w-full h-[70%] rounded-t-sm hover:opacity-80 transition-opacity"></div>
-                            <div class="bg-primary-container w-full h-[40%] rounded-t-sm hover:opacity-80 transition-opacity"></div>
-                            <div class="bg-primary-container w-full h-[25%] rounded-t-sm hover:opacity-80 transition-opacity"></div>
-                        </div>
-                    </div>
-                    
-                    <!-- Gender Splits -->
-                    <div class="flex items-center gap-md">
-                        <div class="relative w-16 h-16 rounded-full border-[6px] border-primary-fixed flex items-center justify-center">
-                            <div class="absolute inset-0 rounded-full border-[6px] border-primary border-r-transparent border-b-transparent"></div>
-                            <span class="text-[10px] font-bold">M/F</span>
-                        </div>
-                        <div class="flex-grow text-xs">
-                            <div class="flex justify-between text-label-sm"><span>Male</span><span class="font-bold">58%</span></div>
-                            <div class="flex justify-between text-label-sm"><span>Female</span><span class="font-bold">42%</span></div>
-                        </div>
-                    </div>
-                    
-                    <!-- BMI Distribution -->
-                    <div>
-                        <span class="text-label-sm font-label-sm text-on-surface-variant">BMI Distribution</span>
-                        <div class="w-full bg-surface-container-highest h-2 rounded-full mt-xs overflow-hidden flex">
-                            <div class="h-full bg-green-500 w-[30%]"></div>
-                            <div class="h-full bg-yellow-400 w-[45%]"></div>
-                            <div class="h-full bg-red-500 w-[25%]"></div>
-                        </div>
-                        <div class="flex justify-between mt-xs text-[9px] text-on-surface-variant uppercase tracking-wider font-bold">
-                            <span>Normal</span>
-                            <span>Overweight</span>
-                            <span>Obese</span>
-                        </div>
-                    </div>
-                </div>
+        <!-- Chart 1: Patient Risk Distribution (Stacked Bar) -->
+        <div class="col-span-12 lg:col-span-6 bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant/30 card-shadow">
+            <h3 class="text-label-md font-bold text-primary mb-sm">Patient Risk Distribution by Age</h3>
+            <p class="text-xs text-on-surface-variant mb-4">Stacked distribution showing risk categories (Low, Mod, High, Critical) across age bands.</p>
+            <div class="h-64 relative">
+                <canvas id="riskDistChart"></canvas>
             </div>
-        </section>
+        </div>
 
-        <!-- Center: Risk Factor Analysis (Bento-style charts) -->
-        <section class="col-span-12 lg:col-span-6 grid grid-cols-2 gap-gutter">
-            <div class="col-span-2 bg-surface-container-lowest p-sm rounded-xl shadow-sm border border-outline-variant/30 card-shadow min-h-[300px]">
-                <div class="flex justify-between items-center mb-md">
-                    <h3 class="text-label-md font-label-md text-primary">Risk Factor Correlation Heatmap</h3>
-                    <div class="text-[10px] bg-primary-fixed px-xs py-[2px] rounded uppercase font-bold text-primary">Multivariate Analysis</div>
-                </div>
-                
-                <!-- Scatter/Heatmap Visualization -->
-                <div class="relative h-48 bg-surface-light rounded-lg border border-outline-variant flex items-center justify-center overflow-hidden">
-                    <div class="absolute inset-0 grid grid-cols-8 grid-rows-6 opacity-20">
-                        <div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div>
-                        <div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div>
-                        <div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div><div class="border border-outline"></div>
-                    </div>
-                    <!-- Circles representing data points -->
-                    <div class="absolute w-4 h-4 bg-error rounded-full opacity-60 top-1/4 left-1/4 animate-pulse cursor-pointer hover:scale-110 transition-transform" onclick="alert('Marker details: High Hypertension & LDL Cluster (Cluster #1)')"></div>
-                    <div class="absolute w-3 h-3 bg-primary rounded-full opacity-40 top-1/2 left-2/3 cursor-pointer" onclick="alert('Marker details: Medium Risk Patient Group')"></div>
-                    <div class="absolute w-6 h-6 bg-secondary-container rounded-full opacity-70 bottom-1/3 left-1/2 cursor-pointer" onclick="alert('Marker details: Overweight & High Cholesterol Patient Cluster')"></div>
-                    <div class="absolute w-2 h-2 bg-status-stable rounded-full opacity-50 top-2/3 right-1/4 cursor-pointer" onclick="alert('Marker details: Stable Control Group')"></div>
-                    <span class="text-label-sm text-on-surface-variant italic select-none">Interactive Correlation Space: Age vs. LDL vs. BP</span>
-                </div>
-                
-                <div class="mt-md flex gap-gutter">
-                    <div class="flex-grow text-xs">
-                        <span class="text-label-sm font-label-sm text-on-surface-variant font-semibold">Top Risk Indicators</span>
-                        <div class="space-y-xs mt-xs">
-                            <div class="flex items-center gap-xs">
-                                <div class="w-2 h-2 rounded-full bg-error"></div>
-                                <span class="flex-grow">Hypertension</span>
-                                <span class="font-bold">42%</span>
-                            </div>
-                            <div class="flex items-center gap-xs">
-                                <div class="w-2 h-2 rounded-full bg-secondary-container"></div>
-                                <span class="flex-grow">Hyperlipidemia</span>
-                                <span class="font-bold">38%</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="w-px bg-outline-variant"></div>
-                    <div class="flex-grow text-xs">
-                        <span class="text-label-sm font-label-sm text-on-surface-variant font-semibold">Lifestyle Impact</span>
-                        <div class="space-y-xs mt-xs">
-                            <div class="flex items-center gap-xs">
-                                <div class="w-2 h-2 rounded-full bg-primary"></div>
-                                <span class="flex-grow">Sedentary</span>
-                                <span class="font-bold">56%</span>
-                            </div>
-                            <div class="flex items-center gap-xs">
-                                <div class="w-2 h-2 rounded-full bg-primary-fixed-dim"></div>
-                                <span class="flex-grow">Smoking</span>
-                                <span class="font-bold">22%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <!-- Chart 3: Gender-Based Prevalence (Grouped Bar) -->
+        <div class="col-span-12 lg:col-span-6 bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant/30 card-shadow">
+            <h3 class="text-label-md font-bold text-primary mb-sm">Gender-Based Analysis</h3>
+            <p class="text-xs text-on-surface-variant mb-4">Morbidity comparison: heart disease cases vs. total population by age bands and gender.</p>
+            <div class="h-64 relative">
+                <canvas id="genderPrevChart"></canvas>
             </div>
-        </section>
+        </div>
 
-        <!-- Right: Clinical Indicators -->
-        <section class="col-span-12 lg:col-span-3 space-y-gutter">
-            <div class="bg-surface-container-lowest p-sm rounded-xl shadow-sm border border-outline-variant card-shadow h-full flex flex-col justify-between">
-                <h3 class="text-label-md font-label-md text-primary mb-sm border-b border-outline-variant pb-xs">Clinical Indicators</h3>
-                <div class="space-y-md flex-grow flex flex-col justify-around">
-                    <!-- BP Distribution -->
-                    <div class="p-xs bg-surface-container rounded-lg">
-                        <div class="flex justify-between items-center mb-xs">
-                            <span class="text-label-sm font-label-sm font-bold">BP (Systolic)</span>
-                            <span class="text-[10px] text-error font-bold">↑ High</span>
-                        </div>
-                        <div class="flex items-end gap-[1px] h-12">
-                            <div class="bg-green-400 w-full h-[15%] rounded-t-sm"></div>
-                            <div class="bg-green-400 w-full h-[25%] rounded-t-sm"></div>
-                            <div class="bg-yellow-400 w-full h-[60%] rounded-t-sm"></div>
-                            <div class="bg-orange-400 w-full h-[80%] rounded-t-sm"></div>
-                            <div class="bg-error w-full h-[40%] rounded-t-sm"></div>
-                        </div>
-                    </div>
-                    
-                    <!-- Cholesterol Breakdown -->
-                    <div class="space-y-xs">
-                        <span class="text-label-sm font-label-sm text-on-surface-variant font-semibold">Cholesterol (mg/dL)</span>
-                        <div class="flex flex-col gap-base text-xs">
-                            <div class="flex justify-between text-[11px]"><span>Total</span><span class="font-bold">214 (avg)</span></div>
-                            <div class="w-full bg-outline-variant h-1 rounded-full"><div class="bg-primary w-[75%] h-full rounded-full"></div></div>
-                            <div class="flex justify-between text-[11px]"><span>LDL</span><span class="font-bold text-error">138 (avg)</span></div>
-                            <div class="w-full bg-outline-variant h-1 rounded-full"><div class="bg-secondary w-[85%] h-full rounded-full"></div></div>
-                            <div class="flex justify-between text-[11px]"><span>HDL</span><span class="font-bold text-green-600">42 (avg)</span></div>
-                            <div class="w-full bg-outline-variant h-1 rounded-full"><div class="bg-green-500 w-[40%] h-full rounded-full"></div></div>
-                        </div>
-                    </div>
-                    
-                    <!-- Other metrics -->
-                    <div class="grid grid-cols-2 gap-sm pt-xs">
-                        <div class="text-center p-xs border border-outline-variant rounded-lg">
-                            <div class="text-[10px] text-on-surface-variant">Blood Sugar</div>
-                            <div class="text-label-md font-bold text-primary">102 <span class="text-[10px] font-normal">mg/dL</span></div>
-                        </div>
-                        <div class="text-center p-xs border border-outline-variant rounded-lg">
-                            <div class="text-[10px] text-on-surface-variant">Heart Rate</div>
-                            <div class="text-label-md font-bold text-primary">74 <span class="text-[10px] font-normal">bpm</span></div>
-                        </div>
-                    </div>
+        <!-- Chart 4: Race/Ethnicity Distribution (Donut Chart) -->
+        <div class="col-span-12 lg:col-span-4 bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant/30 card-shadow flex flex-col">
+            <h3 class="text-label-md font-bold text-primary mb-sm">Race/Ethnicity Distribution</h3>
+            <p class="text-xs text-on-surface-variant mb-4">Proportion of heart disease patients across diverse demographic cohorts.</p>
+            <div class="h-64 relative flex-grow">
+                <canvas id="raceDistChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Chart 8: Comorbidity Prevalence (Stacked Horizontal Bar) -->
+        <div class="col-span-12 lg:col-span-4 bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant/30 card-shadow flex flex-col">
+            <h3 class="text-label-md font-bold text-primary mb-sm">Comorbidity Prevalence</h3>
+            <p class="text-xs text-on-surface-variant mb-4">Co-occurrence profile of Hypertension and Diabetes in heart disease cohorts.</p>
+            <div class="h-64 relative flex-grow">
+                <canvas id="comorbidityChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Chart 5: Risk Factors Correlation Matrix (Heatmap Grid) -->
+        <div class="col-span-12 lg:col-span-4 bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant/30 card-shadow flex flex-col">
+            <h3 class="text-label-md font-bold text-primary mb-sm">Risk Factor Correlation Matrix</h3>
+            <p class="text-xs text-on-surface-variant mb-4">Multivariate correlation coefficients of lifestyle & clinical vitals.</p>
+            <div class="grid grid-cols-5 gap-1 text-center font-bold text-[10px] mt-4 flex-grow content-center">
+                <!-- Headers -->
+                <div class="text-slate-400 flex items-center justify-center">Vitals</div>
+                <div class="text-slate-500 flex items-center justify-center">BMI</div>
+                <div class="text-slate-500 flex items-center justify-center">BP</div>
+                <div class="text-slate-500 flex items-center justify-center">Chol</div>
+                <div class="text-slate-500 flex items-center justify-center">Activity</div>
+                
+                <!-- Row BMI -->
+                <div class="text-slate-500 flex items-center justify-center">BMI</div>
+                <div class="bg-red-800 text-white p-2 rounded relative group cursor-help" title="Perfect correlation: 1.00">1.00</div>
+                <div class="bg-red-500 text-white p-2 rounded relative group cursor-help" title="Strong positive: 0.45">0.45</div>
+                <div class="bg-red-400 text-slate-900 p-2 rounded relative group cursor-help" title="Moderate positive: 0.35">0.35</div>
+                <div class="bg-blue-300 text-slate-900 p-2 rounded relative group cursor-help" title="Negative correlation: -0.22">-0.22</div>
+
+                <!-- Row BP -->
+                <div class="text-slate-500 flex items-center justify-center">BP</div>
+                <div class="bg-red-500 text-white p-2 rounded" title="0.45">0.45</div>
+                <div class="bg-red-800 text-white p-2 rounded" title="1.00">1.00</div>
+                <div class="bg-red-400 text-slate-900 p-2 rounded" title="0.40">0.40</div>
+                <div class="bg-blue-400 text-slate-900 p-2 rounded" title="-0.30">-0.30</div>
+
+                <!-- Row Chol -->
+                <div class="text-slate-500 flex items-center justify-center">Chol</div>
+                <div class="bg-red-400 text-slate-900 p-2 rounded" title="0.35">0.35</div>
+                <div class="bg-red-400 text-slate-900 p-2 rounded" title="0.40">0.40</div>
+                <div class="bg-red-800 text-white p-2 rounded" title="1.00">1.00</div>
+                <div class="bg-blue-200 text-slate-900 p-2 rounded" title="-0.15">-0.15</div>
+
+                <!-- Row Activity -->
+                <div class="text-slate-500 flex items-center justify-center">Activity</div>
+                <div class="bg-blue-300 text-slate-900 p-2 rounded" title="-0.22">-0.22</div>
+                <div class="bg-blue-400 text-slate-900 p-2 rounded" title="-0.30">-0.30</div>
+                <div class="bg-blue-200 text-slate-900 p-2 rounded" title="-0.15">-0.15</div>
+                <div class="bg-red-800 text-white p-2 rounded" title="1.00">1.00</div>
+            </div>
+            <div class="flex justify-between items-center mt-3 text-[10px] text-slate-400">
+                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-red-800 rounded"></span> Positive (+)</span>
+                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-blue-400 rounded"></span> Negative (-)</span>
+            </div>
+        </div>
+
+        <!-- Chart 6: Lifestyle vs. Heart Disease (Bubble Plot) -->
+        <div class="col-span-12 lg:col-span-8 bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant/30 card-shadow">
+            <h3 class="text-label-md font-bold text-primary mb-sm">Lifestyle vs. Heart Disease</h3>
+            <p class="text-xs text-on-surface-variant mb-4">Scatter mapping: Physical Activity (X) vs. Risk Score (Y). Bubble size represents BMI; color denotes Smoking Status.</p>
+            <div class="h-64 relative">
+                <canvas id="lifestyleRiskChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Chart 5: Risk Factor Impact (Horizontal Bar Chart) -->
+        <div class="col-span-12 lg:col-span-4 bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant/30 card-shadow flex flex-col justify-between">
+            <div>
+                <h3 class="text-label-md font-bold text-primary mb-sm">Risk Factor Impact</h3>
+                <p class="text-xs text-on-surface-variant mb-4">Morbidity contribution scores/relative importance on final cardiac risk.</p>
+                <div class="h-56 relative">
+                    <canvas id="riskFactorImpactChart"></canvas>
                 </div>
             </div>
-        </section>
+        </div>
+
+        <!-- Chart 7: Disease Relationships (Flow chart or Network diagram) -->
+        <div class="col-span-12 lg:col-span-6 bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant/30 card-shadow">
+            <h3 class="text-label-md font-bold text-primary mb-sm">Pathology Progression Flow</h3>
+            <p class="text-xs text-on-surface-variant mb-4">Progression vectors from lifestyle choices and clinical indicators to clinical outcomes.</p>
+            
+            <div class="relative min-h-[220px] flex items-center justify-center p-4 bg-slate-50 border border-outline-variant rounded-lg mt-2 overflow-x-auto">
+                <svg class="w-full min-w-[500px] h-48" viewBox="0 0 600 200">
+                    <defs>
+                        <linearGradient id="flowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#b4271d" stop-opacity="0.3"></stop>
+                            <stop offset="100%" stop-color="#001255" stop-opacity="0.9"></stop>
+                        </linearGradient>
+                    </defs>
+
+                    <!-- Links/Paths -->
+                    <path d="M 120 40 Q 230 40, 260 100" fill="none" stroke="url(#flowGrad)" stroke-width="3" class="chart-pulse"></path>
+                    <path d="M 120 100 Q 230 100, 260 100" fill="none" stroke="url(#flowGrad)" stroke-width="5" class="chart-pulse"></path>
+                    <path d="M 120 160 Q 230 160, 260 100" fill="none" stroke="url(#flowGrad)" stroke-width="2" class="chart-pulse"></path>
+                    
+                    <path d="M 380 100 Q 440 100, 480 100" fill="none" stroke="url(#flowGrad)" stroke-width="6" class="chart-pulse"></path>
+
+                    <!-- Node 1: Smoking -->
+                    <g transform="translate(20, 20)" class="cursor-pointer group" onclick="alert('Pathology Detail: Smoking damages endothelial cells, triggering plaque build-up.')">
+                        <rect width="100" height="40" rx="8" fill="#ebedff" stroke="#767681" stroke-width="1"></rect>
+                        <text x="50" y="24" text-anchor="middle" fill="#001255" font-size="11" font-weight="bold">Smoking</text>
+                    </g>
+                    <!-- Node 2: Hypertension -->
+                    <g transform="translate(20, 80)" class="cursor-pointer group" onclick="alert('Pathology Detail: High arterial pressure puts mechanical stress on myocardial walls.')">
+                        <rect width="100" height="40" rx="8" fill="#ffdad6" stroke="#ba1a1a" stroke-width="1.5"></rect>
+                        <text x="50" y="24" text-anchor="middle" fill="#ba1a1a" font-size="11" font-weight="bold">Hypertension</text>
+                    </g>
+                    <!-- Node 3: Diabetes -->
+                    <g transform="translate(20, 140)" class="cursor-pointer group" onclick="alert('Pathology Detail: Excess blood sugar level stiffens arteries and raises plaque risk.')">
+                        <rect width="100" height="40" rx="8" fill="#ebedff" stroke="#767681" stroke-width="1"></rect>
+                        <text x="50" y="24" text-anchor="middle" fill="#001255" font-size="11" font-weight="bold">Diabetes</text>
+                    </g>
+
+                    <!-- Intermediate: Atherosclerosis -->
+                    <g transform="translate(260, 80)" class="cursor-pointer group" onclick="alert('Pathology Detail: Plaque calcifies and narrows coronary arteries.')">
+                        <rect width="120" height="40" rx="8" fill="#1a2a6c" stroke="#1a2a6c" stroke-width="1"></rect>
+                        <text x="60" y="24" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="bold">Atherosclerosis</text>
+                    </g>
+
+                    <!-- Outcome: Heart Disease -->
+                    <g transform="translate(480, 80)" class="cursor-pointer group" onclick="alert('Pathology Detail: Narrowed arteries cause myocardial ischemia and coronary events.')">
+                        <rect width="100" height="40" rx="8" fill="#ba1a1a" stroke="#ba1a1a" stroke-width="2"></rect>
+                        <text x="50" y="24" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="bold">Heart Disease</text>
+                    </g>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Chart 9: Treatment Effectiveness (ACE, Statins, Beta Blockers) -->
+        <div class="col-span-12 lg:col-span-6 bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant/30 card-shadow flex flex-col justify-between">
+            <div>
+                <h3 class="text-label-md font-bold text-primary mb-sm">Treatment Effectiveness</h3>
+                <p class="text-xs text-on-surface-variant mb-4">Patient recovery & symptom control outcomes grouped by medication type.</p>
+                <div class="h-56 relative">
+                    <canvas id="treatmentEffectivenessChart"></canvas>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <!-- Bottom: Patient Specific & Trends -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter mb-xl">
-        <!-- Patient-Specific Deep Dive -->
-        <section class="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant card-shadow">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-md gap-sm">
-                <h3 class="text-headline-md font-headline-md text-primary">Patient Focus</h3>
-                
-                <!-- Patient Dropdown Selector -->
-                <div class="relative w-full sm:w-64">
-                    <span class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
-                    <select id="patientDeepSelect" class="w-full pl-9 pr-4 py-xs bg-slate-50 border border-outline-variant/30 rounded-lg text-xs font-bold focus:ring-2 focus:ring-primary" onchange="triggerDeepDive(this.value)">
-                        <option value="">Search by name/ID...</option>
-                        {% for patient in patients %}
-                        <option value="{{ patient.patient_id }}">{{ patient.last_name }}, {{ patient.first_name }} (#{{ patient.patient_id }})</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
+    <!-- ==================== CLINICAL RESPONSE & PATIENT MANAGEMENT ==================== -->
+    <div class="grid grid-cols-12 gap-gutter mb-xl">
+        
+        <!-- Left 8 Columns: Patient Alerts Table & Patient Deep Dive -->
+        <div class="col-span-12 lg:col-span-8 space-y-gutter">
             
-            <div id="patientDetailsArea">
-                <div class="flex items-start gap-md mb-md">
-                    <div class="w-20 h-20 rounded-xl overflow-hidden shadow-sm flex-shrink-0">
-                        <img id="patientPic" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8CwLQZxDmG5Di9GrLBVuMXbWNydICfij2zps_ggtpeJDn2tO8q2RYCEvUIXrAmjJx5UGws6DAQVeYfZJJvLywT8PjenawFMmqLEHxwH4EsBYh2fV99_ojN0kNBiCWlPo27jQEV8PDeRW1eYPP1I3KWi3migYFS4UhDpN_QKhBQUewXBWymPfUONx7xsmmxyC3zIuGhpxVozVw5YQfwRkuHPvJ8HkU-3f6O0N3lIk2hUAtqRf7Bht0h1PmLfi0nSOlncmayyv1Q2IP" alt="Patient ID Photo"/>
-                    </div>
-                    <div class="flex-grow">
-                        <div class="flex justify-between items-start">
-                            <h4 class="text-title-lg font-bold text-primary" id="patientName">Vikram Patel, 64</h4>
-                            <span class="bg-error-container text-on-error-container px-xs py-[2px] rounded text-label-sm font-bold" id="patientRisk">CRITICAL RISK</span>
-                        </div>
-                        <p class="text-label-sm text-on-surface-variant mt-1" id="patientSubText">ID: #CPA-4492 • BMI: 29.4 • Smoker: No</p>
-                        <div class="mt-xs flex gap-xs" id="patientBadges">
-                            <span class="bg-surface-container-high text-primary px-xs py-[1px] rounded text-[10px] font-bold">Hypertension</span>
-                            <span class="bg-surface-container-high text-primary px-xs py-[1px] rounded text-[10px] font-bold">T2 Diabetes</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Treatment Timeline -->
-                <div>
-                    <h5 class="text-label-md font-bold mb-xs text-primary">Treatment History</h5>
-                    <div class="relative border-l-2 border-primary-fixed-dim ml-2 pl-4 space-y-sm text-xs">
-                        <div class="relative">
-                            <div class="absolute -left-[21px] top-1 w-3 h-3 bg-primary rounded-full"></div>
-                            <p class="font-bold text-on-surface" id="timelineDate1">Oct 24, 2024</p>
-                            <p class="text-on-surface-variant" id="timelineDesc1">Stent placement - LAD artery. Success.</p>
-                        </div>
-                        <div class="relative">
-                            <div class="absolute -left-[21px] top-1 w-3 h-3 bg-outline-variant rounded-full"></div>
-                            <p class="font-bold text-on-surface" id="timelineDate2">Sep 12, 2024</p>
-                            <p class="text-on-surface-variant" id="timelineDesc2">Baseline ECG: ST Segment elevation noted.</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="mt-md p-sm bg-primary-container text-on-primary-container rounded-lg">
-                    <p class="text-label-sm font-bold mb-xs flex items-center gap-xs">
-                        <span class="material-symbols-outlined text-[18px]">neurology</span> AI Recommendation
-                    </p>
-                    <p class="text-[12px] leading-relaxed" id="patientRecommendation">Initiate dual antiplatelet therapy. Schedule follow-up ECHO in 48 hours to monitor ejection fraction. Current EF: 45%.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Trend Analysis & Forecast -->
-        <section class="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant card-shadow flex flex-col justify-between">
-            <div>
+            <!-- Patient Alerts Table -->
+            <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant/30 card-shadow">
                 <div class="flex justify-between items-center mb-md">
-                    <h3 class="text-headline-md font-headline-md text-primary">Cohort Trends</h3>
-                    <div class="flex gap-xs text-[10px] font-bold">
-                        <button class="bg-surface-variant hover:bg-surface-container-high px-xs py-[2px] rounded" onclick="alert('Loading 12 Months trends...')">12M</button>
-                        <button class="bg-primary text-on-primary px-xs py-[2px] rounded">6M</button>
-                        <button class="bg-surface-variant hover:bg-surface-container-high px-xs py-[2px] rounded" onclick="alert('Loading 1 Month trends...')">1M</button>
+                    <div>
+                        <h3 class="text-headline-md font-bold text-primary text-base">Critical Patient Risk Alerts</h3>
+                        <p class="text-xs text-on-surface-variant">Real-time flagged patients needing immediate clinical assessment.</p>
+                    </div>
+                    <span class="bg-red-50 text-red-800 text-xs px-2.5 py-1 rounded-full border border-red-200 font-bold flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-red-600 animate-ping"></span> High Priority
+                    </span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="border-b border-outline-variant/30 text-on-surface-variant uppercase font-bold tracking-wider">
+                                <th class="pb-2">Patient Name</th>
+                                <th class="pb-2">Age</th>
+                                <th class="pb-2">Risk Score</th>
+                                <th class="pb-2">Last Visit</th>
+                                <th class="pb-2">Status</th>
+                                <th class="pb-2 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-outline-variant/20">
+                            {% for alert in chart_data.alerts %}
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="py-3 font-semibold text-primary">{{ alert.name }}</td>
+                                <td class="py-3">{{ alert.age }}</td>
+                                <td class="py-3 font-bold text-secondary">{{ alert.risk_score }}%</td>
+                                <td class="py-3">{{ alert.last_visit }}</td>
+                                <td class="py-3">
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase 
+                                        {% if alert.status == 'Critical' %}bg-red-100 text-red-700
+                                        {% else %}bg-amber-100 text-amber-700{% endif %}">
+                                        {{ alert.status }}
+                                    </span>
+                                </td>
+                                <td class="py-3 text-right space-x-1">
+                                    <button class="bg-primary text-white hover:opacity-90 px-2.5 py-1 rounded text-[10px] font-semibold" onclick="alert('Contacting {{ alert.name }} care manager...')">Contact</button>
+                                    <button class="bg-surface-variant text-primary hover:bg-outline-variant px-2.5 py-1 rounded text-[10px] font-semibold" onclick="alert('Scheduling follow-up appointment...')">Schedule</button>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" class="py-4 text-center text-slate-400 font-semibold">No critical risk flags reported today.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Patient Focus Deep Dive -->
+            <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant card-shadow">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-md gap-sm">
+                    <div>
+                        <h3 class="text-headline-md font-bold text-primary text-base">Patient Profile Deep Dive</h3>
+                        <p class="text-xs text-on-surface-variant">Select patient from database for diagnostic metrics and history.</p>
+                    </div>
+                    
+                    <!-- Patient Dropdown Selector -->
+                    <div class="relative w-full sm:w-64">
+                        <span class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
+                        <select id="patientDeepSelect" class="w-full pl-9 pr-4 py-xs bg-slate-50 border border-outline-variant/30 rounded-lg text-xs font-bold focus:ring-2 focus:ring-primary" onchange="triggerDeepDive(this.value)">
+                            <option value="">Search by name/ID...</option>
+                            {% for patient in patients %}
+                            <option value="{{ patient.patient_id }}">{{ patient.last_name }}, {{ patient.first_name }} (#{{ patient.patient_id }})</option>
+                            {% endfor %}
+                        </select>
                     </div>
                 </div>
                 
-                <!-- Spline Line Chart -->
-                <div class="relative h-48 w-full">
-                    <svg class="w-full h-full overflow-visible" viewbox="0 0 400 150">
-                        <!-- Grid Lines -->
-                        <line stroke="#c6c5d2" stroke-width="0.5" x1="0" x2="400" y1="120" y2="120"></line>
-                        <line stroke="#c6c5d2" stroke-width="0.5" x1="0" x2="400" y1="80" y2="80"></line>
-                        <line stroke="#c6c5d2" stroke-width="0.5" x1="0" x2="400" y1="40" y2="40"></line>
-                        
-                        <!-- Area Fill -->
-                        <path d="M 0 100 Q 50 110, 100 80 T 200 60 T 300 40 T 400 30 L 400 120 L 0 120 Z" fill="rgba(26, 42, 108, 0.05)"></path>
-                        <!-- Main Trend Line (Success) -->
-                        <path class="chart-pulse" d="M 0 100 Q 50 110, 100 80 T 200 60 T 300 40 T 400 30" fill="none" stroke="#1a2a6c" stroke-width="2.5"></path>
-                        <!-- Predictive Forecast (Dashed) -->
-                        <path d="M 400 30 L 450 20" stroke="#c0392b" stroke-dasharray="4 2" stroke-width="2"></path>
-                        <!-- Data Points -->
-                        <circle cx="100" cy="80" fill="#1a2a6c" r="4"></circle>
-                        <circle cx="300" cy="40" fill="#1a2a6c" r="4"></circle>
-                    </svg>
-                    <div class="flex justify-between mt-sm text-[11px] text-on-surface-variant font-semibold">
-                        <span>MAY</span><span>JUN</span><span>JUL</span><span>AUG</span><span>SEP</span><span>OCT</span>
+                <div id="patientDetailsArea">
+                    <div class="flex items-start gap-md mb-md">
+                        <div class="w-20 h-20 rounded-xl overflow-hidden shadow-sm flex-shrink-0">
+                            <img id="patientPic" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8CwLQZxDmG5Di9GrLBVuMXbWNydICfij2zps_ggtpeJDn2tO8q2RYCEvUIXrAmjJx5UGws6DAQVeYfZJJvLywT8PjenawFMmqLEHxwH4EsBYh2fV99_ojN0kNBiCWlPo27jQEV8PDeRW1eYPP1I3KWi3migYFS4UhDpN_QKhBQUewXBWymPfUONx7xsmmxyC3zIuGhpxVozVw5YQfwRkuHPvJ8HkU-3f6O0N3lIk2hUAtqRf7Bht0h1PmLfi0nSOlncmayyv1Q2IP" alt="Patient ID Photo"/>
+                        </div>
+                        <div class="flex-grow">
+                            <div class="flex justify-between items-start">
+                                <h4 class="text-title-lg font-bold text-primary" id="patientName">Vikram Patel, 64</h4>
+                                <span class="bg-error-container text-on-error-container px-xs py-[2px] rounded text-label-sm font-bold" id="patientRisk">CRITICAL RISK</span>
+                            </div>
+                            <p class="text-label-sm text-on-surface-variant mt-1" id="patientSubText">ID: #CPA-4492 • BMI: 29.4 • Smoker: No</p>
+                            <div class="mt-xs flex gap-xs" id="patientBadges">
+                                <span class="bg-surface-container-high text-primary px-xs py-[1px] rounded text-[10px] font-bold">Hypertension</span>
+                                <span class="bg-surface-container-high text-primary px-xs py-[1px] rounded text-[10px] font-bold">T2 Diabetes</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Treatment Timeline -->
+                    <div>
+                        <h5 class="text-label-md font-bold mb-xs text-primary">Treatment History</h5>
+                        <div class="relative border-l-2 border-primary-fixed-dim ml-2 pl-4 space-y-sm text-xs">
+                            <div class="relative">
+                                <div class="absolute -left-[21px] top-1 w-3 h-3 bg-primary rounded-full"></div>
+                                <p class="font-bold text-on-surface" id="timelineDate1">Oct 24, 2024</p>
+                                <p class="text-on-surface-variant" id="timelineDesc1">Stent placement - LAD artery. Success.</p>
+                            </div>
+                            <div class="relative">
+                                <div class="absolute -left-[21px] top-1 w-3 h-3 bg-outline-variant rounded-full"></div>
+                                <p class="font-bold text-on-surface" id="timelineDate2">Sep 12, 2024</p>
+                                <p class="text-on-surface-variant" id="timelineDesc2">Baseline ECG: ST Segment elevation noted.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-md p-sm bg-primary-container text-on-primary-container rounded-lg">
+                        <p class="text-label-sm font-bold mb-xs flex items-center gap-xs">
+                            <span class="material-symbols-outlined text-[18px]">neurology</span> AI Recommendation
+                        </p>
+                        <p class="text-[12px] leading-relaxed" id="patientRecommendation">Initiate dual antiplatelet therapy. Schedule follow-up ECHO in 48 hours to monitor ejection fraction. Current EF: 45%.</p>
                     </div>
                 </div>
             </div>
+
+        </div>
+
+        <!-- Right 4 Columns: Clinical Tools, Checklists & Recommendations -->
+        <div class="col-span-12 lg:col-span-4 space-y-gutter">
             
-            <div class="mt-lg grid grid-cols-2 gap-md text-xs">
-                <div class="p-xs bg-surface-container rounded-lg">
-                    <p class="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">Progression Index</p>
-                    <p class="text-title-lg font-bold text-green-600">-12.4% <span class="text-[10px] font-normal text-on-surface">vs LY</span></p>
-                </div>
-                <div class="p-xs bg-surface-container rounded-lg">
-                    <p class="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">Prevalence Rate</p>
-                    <p class="text-title-lg font-bold text-error">+4.2% <span class="text-[10px] font-normal text-on-surface">Forecasted</span></p>
+            <!-- Recommendations Checklist -->
+            <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant/30 card-shadow flex flex-col justify-between">
+                <div>
+                    <h3 class="text-label-md font-bold text-primary mb-sm">Follow-up Protocols</h3>
+                    <p class="text-xs text-on-surface-variant mb-4">Checklist protocols based on cohort risk segments.</p>
+                    
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Select Patient Cohort Risk</label>
+                        <select id="protocolRiskSelect" class="w-full bg-slate-50 border border-outline-variant/30 rounded-lg text-xs font-bold" onchange="updateProtocols(this.value)">
+                            <option value="Critical">Critical Risk Protocol</option>
+                            <option value="High" selected>High Risk Protocol</option>
+                            <option value="Moderate">Moderate Risk Protocol</option>
+                            <option value="Low">Low Risk Protocol</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-3" id="checklistContainer">
+                        <!-- Checklist checkboxes will render dynamically here -->
+                    </div>
                 </div>
             </div>
-        </section>
+
+            <!-- Doctor Quick Tools -->
+            <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant/30 card-shadow flex flex-col justify-between">
+                <div>
+                    <h3 class="text-label-md font-bold text-primary mb-sm">Doctor Quick Actions</h3>
+                    <p class="text-xs text-on-surface-variant mb-4">Fast-track tools to update EHR systems or export results.</p>
+                    
+                    <div class="space-y-3">
+                        <button class="w-full flex items-center justify-between p-3 rounded-lg bg-surface-container hover:bg-primary/5 transition-all text-xs font-bold text-primary" onclick="addNotePrompt()">
+                            <span class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[18px]">edit_note</span> Add Patient Consultation Note
+                            </span>
+                            <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+                        </button>
+                        <button class="w-full flex items-center justify-between p-3 rounded-lg bg-surface-container hover:bg-primary/5 transition-all text-xs font-bold text-primary" onclick="scheduleFollowUpAlert()">
+                            <span class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[18px]">calendar_today</span> Schedule Follow-up Appointment
+                            </span>
+                            <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+                        </button>
+                        <button class="w-full flex items-center justify-between p-3 rounded-lg bg-surface-container hover:bg-primary/5 transition-all text-xs font-bold text-primary" onclick="window.print()">
+                            <span class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[18px]">print</span> Print Analytics Report
+                            </span>
+                            <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
     </div>
 </main>
 
 <!-- Footer -->
 <footer class="bg-surface-dim full-width py-md border-t border-outline-variant flex flex-col md:flex-row justify-between items-center w-full px-margin-desktop gap-md mt-auto text-xs">
     <div class="flex items-center gap-md">
-        <span class="text-label-md font-label-md font-bold text-on-surface">CardioPulse Health Systems</span>
+        <span class="text-label-md font-label-md font-bold text-on-surface">CardioViz Health Systems</span>
         <span class="text-label-sm font-label-sm text-on-surface-variant">© 2024 Clinical Decision Support.</span>
     </div>
     <div class="flex gap-md flex-wrap justify-center font-semibold text-slate-500">
@@ -540,15 +622,353 @@
 </footer>
 
 <script>
-    // Simple interactivity
-    document.querySelectorAll('button, a').forEach(el => {
-        el.addEventListener('click', (e) => {
-            if (el.getAttribute('href') === '#') e.preventDefault();
-            el.classList.add('opacity-80', 'duration-150');
-            setTimeout(() => el.classList.remove('opacity-80'), 150);
-        });
+    // Load Flask query data
+    const rawChartData = {{ chart_data | tojson }};
+    console.log("CardioViz DB Data loaded:", rawChartData);
+
+    // 1. Patient Risk Distribution (Stacked Bar)
+    const riskGroups = ['Under 40', '40-49', '50-59', '60-69', '70+'];
+    const riskCategories = ['Low', 'Moderate', 'High', 'Critical'];
+    
+    // Map database counts into groups
+    const riskDataMap = {};
+    riskGroups.forEach(g => {
+        riskDataMap[g] = { 'Low': 0, 'Moderate': 0, 'High': 0, 'Critical': 0 };
     });
     
+    rawChartData.risk_dist.forEach(row => {
+        const grp = row.age_group;
+        const cat = row.risk_category;
+        if (riskDataMap[grp] && riskDataMap[grp][cat] !== undefined) {
+            riskDataMap[grp][cat] += row.count;
+        }
+    });
+
+    const riskDistDatasets = riskCategories.map((cat, idx) => {
+        const colors = ['#10B981', '#F59E0B', '#EF4444', '#7F1D1D'];
+        return {
+            label: cat + ' Risk',
+            data: riskGroups.map(g => riskDataMap[g][cat]),
+            backgroundColor: colors[idx],
+            borderRadius: 4
+        };
+    });
+
+    new Chart(document.getElementById('riskDistChart'), {
+        type: 'bar',
+        data: {
+            labels: riskGroups,
+            datasets: riskDistDatasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { stacked: true, grid: { display: false } },
+                y: { stacked: true, grid: { color: '#f3f4f6' } }
+            },
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 12, font: { family: 'Inter', size: 11 } } }
+            }
+        }
+    });
+
+    // 3. Gender-Based Prevalence (Grouped Bar)
+    const genderAgeGroups = ['Under 40', '40-54', '55-69', '70+'];
+    const genderPrevMap = {
+        'Male': { 'Under 40': 0, '40-54': 0, '55-69': 0, '70+': 0 },
+        'Female': { 'Under 40': 0, '40-54': 0, '55-69': 0, '70+': 0 }
+    };
+    
+    rawChartData.gender_prev.forEach(row => {
+        const gen = row.gender === 'M' ? 'Male' : 'Female';
+        const grp = row.age_group;
+        if (genderPrevMap[gen] && genderPrevMap[gen][grp] !== undefined) {
+            genderPrevMap[gen][grp] = row.total > 0 ? Math.round((row.heart_cases / row.total) * 100) : 0;
+        }
+    });
+
+    new Chart(document.getElementById('genderPrevChart'), {
+        type: 'bar',
+        data: {
+            labels: genderAgeGroups,
+            datasets: [
+                {
+                    label: 'Male Prevalence %',
+                    data: genderAgeGroups.map(g => genderPrevMap['Male'][g]),
+                    backgroundColor: '#1E3A8A',
+                    borderRadius: 4
+                },
+                {
+                    label: 'Female Prevalence %',
+                    data: genderAgeGroups.map(g => genderPrevMap['Female'][g]),
+                    backgroundColor: '#EC4899',
+                    borderRadius: 4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { grid: { display: false } },
+                y: { min: 0, max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#f3f4f6' } }
+            },
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 12, font: { family: 'Inter', size: 11 } } }
+            }
+        }
+    });
+
+    // 4. Race/Ethnicity Distribution (Donut Chart with center total)
+    const raceLabels = rawChartData.race_dist.map(r => r.race || 'Other');
+    const raceCases = rawChartData.race_dist.map(r => r.heart_cases);
+
+    new Chart(document.getElementById('raceDistChart'), {
+        type: 'doughnut',
+        data: {
+            labels: raceLabels,
+            datasets: [{
+                data: raceCases,
+                backgroundColor: ['#1A2A6C', '#C0392B', '#0099FF', '#F1C40F', '#9B59B6', '#1ABC9C'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 10, font: { family: 'Inter', size: 10 } } }
+            }
+        }
+    });
+
+    // 8. Comorbidity Prevalence (Stacked Horizontal Bar)
+    const comValue = rawChartData.comorbidity_data;
+    new Chart(document.getElementById('comorbidityChart'), {
+        type: 'bar',
+        data: {
+            labels: ['Comorbidities'],
+            datasets: [
+                {
+                    label: 'HTN & Diabetes',
+                    data: [comValue.bp_and_db || 0],
+                    backgroundColor: '#7F1D1D',
+                    borderRadius: 4
+                },
+                {
+                    label: 'Hypertension Only',
+                    data: [comValue.bp_only || 0],
+                    backgroundColor: '#EF4444',
+                    borderRadius: 4
+                },
+                {
+                    label: 'Diabetes Only',
+                    data: [comValue.db_only || 0],
+                    backgroundColor: '#F59E0B',
+                    borderRadius: 4
+                },
+                {
+                    label: 'Neither',
+                    data: [comValue.neither || 0],
+                    backgroundColor: '#10B981',
+                    borderRadius: 4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            scales: {
+                x: { stacked: true, grid: { color: '#f3f4f6' } },
+                y: { stacked: true, grid: { display: false } }
+            },
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 10, font: { family: 'Inter', size: 10 } } }
+            }
+        }
+    });
+
+    // 6. Lifestyle vs. Heart Disease (Bubble Plot)
+    const actScore = { 'Sedentary': 1, 'Light': 2, 'Moderate': 3, 'Heavy': 4 };
+    const bubblePoints = rawChartData.lifestyle_risk.map(row => {
+        return {
+            x: actScore[row.physical_activity] || 2,
+            y: row.risk_score,
+            r: Math.max(4, Math.min(15, row.bmi / 3)),
+            smoker: row.smoking_status === 'Current'
+        };
+    });
+
+    new Chart(document.getElementById('lifestyleRiskChart'), {
+        type: 'bubble',
+        data: {
+            datasets: [
+                {
+                    label: 'Smokers',
+                    data: bubblePoints.filter(p => p.smoker),
+                    backgroundColor: 'rgba(239, 68, 68, 0.6)',
+                    borderColor: 'rgb(239, 68, 68)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Non-Smokers',
+                    data: bubblePoints.filter(p => !p.smoker),
+                    backgroundColor: 'rgba(16, 185, 129, 0.6)',
+                    borderColor: 'rgb(16, 185, 129)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    min: 0.5,
+                    max: 4.5,
+                    ticks: {
+                        callback: v => {
+                            const lbls = { 1: 'Sedentary', 2: 'Light', 3: 'Moderate', 4: 'Heavy' };
+                            return lbls[v] || '';
+                        }
+                    },
+                    grid: { display: false }
+                },
+                y: {
+                    title: { display: true, text: 'Risk Score (Framingham)' },
+                    min: 0,
+                    grid: { color: '#f3f4f6' }
+                }
+            },
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+
+    // 5. Risk Factor Impact (Horizontal Bar Chart)
+    new Chart(document.getElementById('riskFactorImpactChart'), {
+        type: 'bar',
+        data: {
+            labels: ['High BP', 'High LDL', 'Smoking', 'High BMI', 'Diabetes', 'Sedentary', 'High Stress'],
+            datasets: [{
+                label: 'Relative Contribution Score',
+                data: [85, 78, 72, 65, 60, 55, 48],
+                backgroundColor: '#1E3A8A',
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            scales: {
+                x: { grid: { color: '#f3f4f6' } },
+                y: { grid: { display: false } }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+
+    // 9. Treatment Effectiveness (Statins, Beta-Blockers, ACE Inhibitors)
+    new Chart(document.getElementById('treatmentEffectivenessChart'), {
+        type: 'bar',
+        data: {
+            labels: ['Statins', 'Beta-Blockers', 'ACE Inhibitors'],
+            datasets: [
+                {
+                    label: 'Improved',
+                    data: [68, 52, 58],
+                    backgroundColor: '#10B981',
+                    borderRadius: 4
+                },
+                {
+                    label: 'Stable',
+                    data: [25, 38, 32],
+                    backgroundColor: '#3B82F6',
+                    borderRadius: 4
+                },
+                {
+                    label: 'Unstable',
+                    data: [7, 10, 10],
+                    backgroundColor: '#EF4444',
+                    borderRadius: 4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { grid: { display: false } },
+                y: { min: 0, max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#f3f4f6' } }
+            },
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+
+    // Checklist protocols based on risk level
+    const protocols = {
+        'Critical': [
+            'Initiate cardiac care dispatch protocols immediately',
+            'Schedule emergency Echo-cardiogram within 24 hours',
+            'Titrate antiplatelet and statin regimens',
+            'Flag profile for critical telemetry monitoring review'
+        ],
+        'High': [
+            'Schedule follow-up consultation in 7 days',
+            'Register daily blood pressure log review checklist',
+            'Conduct comprehensive lipid profiling assessment',
+            'Recommend active cardiac rehab participation'
+        ],
+        'Moderate': [
+            'Review lifestyle modification outcomes at 30 days',
+            'Establish target sodium targets (<2g/daily)',
+            'Monitor fasting blood glucose bi-weekly',
+            'Promote 150 minutes weekly aerobic activity goal'
+        ],
+        'Low': [
+            'Conduct routine annual screening',
+            'Assess standard risk factor indices',
+            'Encourage heart-healthy balanced diet protocols',
+            'Verify active stress management practices'
+        ]
+    };
+
+    function updateProtocols(risk) {
+        const container = document.getElementById('checklistContainer');
+        container.innerHTML = '';
+        const list = protocols[risk] || protocols['High'];
+        list.forEach((item, idx) => {
+            container.innerHTML += `
+                <label class="flex items-start gap-3 p-3 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-100/50 transition-colors">
+                    <input type="checkbox" class="mt-0.5 rounded text-primary focus:ring-primary border-slate-300" />
+                    <span class="text-xs text-slate-700 font-semibold select-none">${item}</span>
+                </label>
+            `;
+        });
+    }
+
+    // Initialize protocols checklist
+    updateProtocols('High');
+
+    // Doctor Actions
+    function addNotePrompt() {
+        const note = prompt("Enter consultation notes to write to EHR:");
+        if (note) alert("Consultation note successfully logged into clinical audit history.");
+    }
+
+    function scheduleFollowUpAlert() {
+        alert("Follow-up appointment calendar invitation sent to patient's active portal account.");
+    }
+
     // Refresh Animation
     const refreshBtn = document.getElementById('refreshBtn');
     if (refreshBtn) {
@@ -558,7 +978,7 @@
             icon.style.transform = 'rotate(360deg)';
             setTimeout(() => {
                 icon.style.transform = 'rotate(0deg)';
-                alert("Analytics database metrics refreshed.");
+                window.location.reload();
             }, 500);
         });
     }

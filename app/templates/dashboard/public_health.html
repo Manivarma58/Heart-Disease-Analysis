@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Tailwind Configuration -->
     <script id="tailwind-config">
       tailwind.config = {
@@ -250,26 +251,26 @@
 
         <!-- Bento Layout Content -->
         <div class="bento-grid">
-            <!-- Large Interactive Map -->
+            <!-- 1. Large Interactive Map -->
             <div class="col-span-12 lg:col-span-8 clinical-card h-[600px] flex flex-col relative overflow-hidden p-0">
                 <div class="p-md flex justify-between items-center bg-white/80 backdrop-blur absolute top-0 left-0 right-0 z-10 border-b border-outline-variant/30">
-                    <h3 class="font-headline-md text-headline-md text-primary">Regional Disease Prevalence</h3>
+                    <h3 class="font-headline-md text-headline-md text-primary">Geographic Disease Prevalence Map</h3>
                     <div class="flex gap-sm items-center font-bold text-xs">
                         <div class="flex items-center gap-xs">
                             <span class="w-3 h-3 rounded-full bg-red-500"></span>
-                            <span class="text-label-sm font-label-sm">&gt;15%</span>
+                            <span class="text-label-sm font-label-sm">&gt;12%</span>
                         </div>
                         <div class="flex items-center gap-xs">
                             <span class="w-3 h-3 rounded-full bg-orange-500"></span>
-                            <span class="text-label-sm font-label-sm">8-15%</span>
+                            <span class="text-label-sm font-label-sm">8-12%</span>
                         </div>
                         <div class="flex items-center gap-xs">
                             <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
-                            <span class="text-label-sm font-label-sm">3-8%</span>
+                            <span class="text-label-sm font-label-sm">5-8%</span>
                         </div>
                         <div class="flex items-center gap-xs">
                             <span class="w-3 h-3 rounded-full bg-green-500"></span>
-                            <span class="text-label-sm font-label-sm">&lt;3%</span>
+                            <span class="text-label-sm font-label-sm">&lt;5%</span>
                         </div>
                     </div>
                 </div>
@@ -292,7 +293,7 @@
                 </div>
             </div>
             
-            <!-- Policy Impact Simulator -->
+            <!-- 2. Policy Impact Simulator -->
             <div class="col-span-12 lg:col-span-4 clinical-card flex flex-col gap-md">
                 <h3 class="font-headline-md text-headline-md text-primary">Policy Impact Simulator</h3>
                 <p class="text-label-sm text-on-surface-variant -mt-2">Predictive outcome shifts based on intervention adjustments.</p>
@@ -338,101 +339,100 @@
                 </div>
             </div>
             
-            <!-- Urban vs Rural Comparison -->
-            <div class="col-span-12 lg:col-span-6 clinical-card">
-                <div class="flex justify-between items-center mb-md">
-                    <h3 class="font-headline-md text-headline-md text-primary">Urban vs Rural Analysis</h3>
-                    <span class="material-symbols-outlined text-on-surface-variant">compare_arrows</span>
+            <!-- 3. Urban vs Rural Comparison (Chart) -->
+            <div class="col-span-12 lg:col-span-6 clinical-card flex flex-col justify-between">
+                <div>
+                    <h3 class="font-headline-md text-headline-md text-primary mb-sm">Urban vs Rural Analysis</h3>
+                    <p class="text-xs text-on-surface-variant mb-4">Morbidity comparison & allocation trends between city centers and rural districts.</p>
                 </div>
-                
-                <div class="flex gap-md h-64 items-end">
-                    <div class="flex-grow flex flex-col gap-2 h-full justify-end">
-                        <div class="flex gap-sm items-end h-[80%]">
-                            <div class="bg-primary w-full h-[85%] rounded-lg transition-all hover:opacity-80 cursor-pointer" title="Urban: 18.2%"></div>
-                            <div class="bg-secondary w-full h-[60%] rounded-lg transition-all hover:opacity-80 cursor-pointer" title="Rural: 12.4%"></div>
-                        </div>
-                        <span class="text-center text-label-sm font-label-sm font-semibold text-slate-500">Prevalence (%)</span>
-                    </div>
-                    
-                    <div class="flex-grow flex flex-col gap-2 h-full justify-end">
-                        <div class="flex gap-sm items-end h-[80%]">
-                            <div class="bg-primary w-full h-[40%] rounded-lg transition-all hover:opacity-80 cursor-pointer" title="Urban: 4k"></div>
-                            <div class="bg-secondary w-full h-[90%] rounded-lg transition-all hover:opacity-80 cursor-pointer" title="Rural: 9k"></div>
-                        </div>
-                        <span class="text-center text-label-sm font-label-sm font-semibold text-slate-500">Budget Gap ($)</span>
-                    </div>
-                </div>
-                
-                <div class="mt-md flex justify-center gap-lg text-xs font-semibold">
-                    <div class="flex items-center gap-xs">
-                        <span class="w-3 h-3 rounded bg-primary"></span>
-                        <span>Urban Centres</span>
-                    </div>
-                    <div class="flex items-center gap-xs">
-                        <span class="w-3 h-3 rounded bg-secondary"></span>
-                        <span>Rural Clusters</span>
-                    </div>
+                <div class="h-64 relative">
+                    <canvas id="urbanRuralChart"></canvas>
                 </div>
             </div>
             
-            <!-- Socioeconomic Analysis -->
-            <div class="col-span-12 lg:col-span-6 clinical-card">
-                <h3 class="font-headline-md text-headline-md text-primary mb-md">Income Correlation</h3>
-                <div class="relative h-64 w-full border-b border-l border-outline-variant">
-                    <!-- Scatter plot points -->
-                    <div class="absolute bottom-1/4 left-1/4 w-3 h-3 bg-primary/40 rounded-full cursor-pointer hover:scale-125 transition-transform" onclick="alert('Income Cohort A: 12.4% rate')"></div>
-                    <div class="absolute bottom-1/2 left-1/3 w-4 h-4 bg-primary/60 rounded-full cursor-pointer hover:scale-125 transition-transform" onclick="alert('Income Cohort B: 15.2% rate')"></div>
-                    <div class="absolute bottom-1/3 left-1/2 w-3 h-3 bg-primary/40 rounded-full cursor-pointer hover:scale-125 transition-transform" onclick="alert('Income Cohort C: 11.8% rate')"></div>
-                    <div class="absolute bottom-2/3 left-2/3 w-5 h-5 bg-primary/80 rounded-full cursor-pointer hover:scale-125 transition-transform" onclick="alert('Income Cohort D: 16.5% rate')"></div>
-                    <div class="absolute bottom-3/4 left-3/4 w-3 h-3 bg-primary/40 rounded-full cursor-pointer hover:scale-125 transition-transform" onclick="alert('Income Cohort E: 9.8% rate')"></div>
-                    <div class="absolute top-4 right-4 w-4 h-4 bg-primary rounded-full cursor-pointer hover:scale-125 transition-transform" onclick="alert('Income Cohort F: 7.2% rate')"></div>
-                    
-                    <div class="absolute bottom-0 left-0 h-full w-px bg-outline-variant/30"></div>
-                    <div class="absolute bottom-0 left-0 w-full h-px bg-outline-variant/30"></div>
-                    <div class="absolute -left-12 top-1/2 -rotate-90 text-[10px] font-bold text-on-surface-variant">Disease Rate</div>
-                    <div class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-on-surface-variant">Income Level (INR)</div>
+            <!-- 4. Age & Gender Trends (Chart) -->
+            <div class="col-span-12 lg:col-span-6 clinical-card flex flex-col justify-between">
+                <div>
+                    <h3 class="font-headline-md text-headline-md text-primary mb-sm">Age & Gender Morbidity Trends</h3>
+                    <p class="text-xs text-on-surface-variant mb-4">Multi-line projection of heart disease occurrence rates across cohorts.</p>
                 </div>
-                
-                <div class="mt-lg grid grid-cols-4 gap-2 text-[10px] font-bold">
-                    <div class="bg-red-50 p-2 rounded text-center text-red-800">High Risk: Agric</div>
-                    <div class="bg-orange-50 p-2 rounded text-center text-orange-800">Med: Industrial</div>
-                    <div class="bg-yellow-50 p-2 rounded text-center text-yellow-800 font-bold text-yellow-800">Low: Service</div>
-                    <div class="bg-green-50 p-2 rounded text-center text-green-800">Safe: Tech</div>
+                <div class="h-64 relative">
+                    <canvas id="ageGenderTrendsChart"></canvas>
                 </div>
             </div>
-            
-            <!-- Trend Analysis -->
-            <div class="col-span-12 lg:col-span-8 clinical-card">
-                <div class="flex justify-between items-center mb-md">
-                    <h3 class="font-headline-md text-headline-md text-primary">5-Year Historical &amp; 10-Year Projections</h3>
-                    <div class="flex gap-sm text-[10px] font-bold">
-                        <button class="px-3 py-1 bg-surface-muted rounded-full hover:opacity-85" onclick="alert('Switching to Linear projections model')">Linear</button>
-                        <button class="px-3 py-1 bg-primary text-white rounded-full">Polynomial</button>
-                    </div>
+
+            <!-- 5. Race Regional Distribution (Chart) -->
+            <div class="col-span-12 lg:col-span-6 clinical-card flex flex-col justify-between">
+                <div>
+                    <h3 class="font-headline-md text-headline-md text-primary mb-sm">Demographic Regional Profile</h3>
+                    <p class="text-xs text-on-surface-variant mb-4">Distribution of heart disease cases segmenting regional clusters.</p>
                 </div>
-                
-                <div class="h-64 w-full relative">
-                    <svg class="w-full h-full overflow-visible" viewbox="0 0 1000 200">
-                        <!-- Historical -->
-                        <path d="M0,150 L100,140 L200,145 L300,130 L400,120 L500,110" fill="none" stroke="#001255" stroke-width="3"></path>
-                        <!-- Projection -->
-                        <path d="M500,110 L600,105 L700,95 L800,80 L900,60 L1000,45" fill="none" stroke="#001255" stroke-dasharray="5,5" stroke-width="3"></path>
-                        <!-- Grid lines -->
-                        <line stroke="#CBD5E1" stroke-width="0.5" x1="0" x2="1000" y1="180" y2="180"></line>
-                        <line stroke="#CBD5E1" stroke-dasharray="2,2" stroke-width="1" x1="500" x2="500" y1="0" y2="200"></line>
-                        <text class="text-[10px] font-bold" fill="#454650" x="5" y="195">2019</text>
-                        <text class="text-[10px] font-bold" fill="#001255" x="480" y="195">2024 (Now)</text>
-                        <text class="text-[10px] font-bold" fill="#454650" x="960" y="195">2034</text>
-                    </svg>
+                <div class="h-64 relative">
+                    <canvas id="raceRegionalChart"></canvas>
                 </div>
             </div>
-            
+
+            <!-- 6. Income Correlation (Chart) -->
+            <div class="col-span-12 lg:col-span-6 clinical-card flex flex-col justify-between">
+                <div>
+                    <h3 class="font-headline-md text-headline-md text-primary mb-sm">Socioeconomic Correlation</h3>
+                    <p class="text-xs text-on-surface-variant mb-4">Prevalence rates vs Median income range (bubble size reflects cohort size).</p>
+                </div>
+                <div class="h-64 relative">
+                    <canvas id="incomeCorrelationChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 7. Education Impact (Chart) -->
+            <div class="col-span-12 lg:col-span-4 clinical-card flex flex-col justify-between">
+                <div>
+                    <h3 class="font-headline-md text-headline-md text-primary mb-sm">Education Level vs. Prevalence</h3>
+                    <p class="text-xs text-on-surface-variant mb-4">Analysis of morbidity levels grouped by educational attainment.</p>
+                </div>
+                <div class="h-56 relative">
+                    <canvas id="educationChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 8. Healthcare Access vs. Prevalence (Chart) -->
+            <div class="col-span-12 lg:col-span-4 clinical-card flex flex-col justify-between">
+                <div>
+                    <h3 class="font-headline-md text-headline-md text-primary mb-sm">Healthcare Access Index</h3>
+                    <p class="text-xs text-on-surface-variant mb-4">Prevalence vs. access metrics (clinics per 10k population).</p>
+                </div>
+                <div class="h-56 relative">
+                    <canvas id="healthcareAccessChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 9. Cost ROI Treemap Breakdown (Chart) -->
+            <div class="col-span-12 lg:col-span-4 clinical-card flex flex-col justify-between">
+                <div>
+                    <h3 class="font-headline-md text-headline-md text-primary mb-sm">Cost ROI Budget Breakdown</h3>
+                    <p class="text-xs text-on-surface-variant mb-4">Expenditure distribution across prevention, treatment, and infrastructure.</p>
+                </div>
+                <div class="h-56 relative">
+                    <canvas id="costRoiChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 10. Policy Impact Timeline & Projections (Chart) -->
+            <div class="col-span-12 lg:col-span-8 clinical-card flex flex-col justify-between">
+                <div>
+                    <h3 class="font-headline-md text-headline-md text-primary mb-sm">Morbidity Timeline & Policy Milestones</h3>
+                    <p class="text-xs text-on-surface-variant mb-4">10-Year historical trends and future projections showing milestone events.</p>
+                </div>
+                <div class="h-64 relative">
+                    <canvas id="policyTimelineChart"></canvas>
+                </div>
+            </div>
+
             <!-- Stakeholder Reporting -->
             <div class="col-span-12 lg:col-span-4 clinical-card bg-gradient-to-br from-primary to-primary-container text-white">
                 <h3 class="font-headline-md text-headline-md mb-sm">Stakeholder Summary</h3>
-                <p class="text-label-md opacity-80 mb-lg text-xs leading-relaxed">Institutional Public Health Management automation for quarterly reviews.</p>
+                <p class="text-label-md opacity-80 mb-lg text-xs leading-relaxed">Quarterly report generator for public health agencies and administrative panels.</p>
                 <div class="flex flex-col gap-sm text-xs font-bold">
-                    <button class="w-full py-4 bg-white/10 hover:bg-white/20 rounded-xl flex items-center justify-center gap-md transition-all" onclick="alert('Executive quarterly summary report has been compiled and emailed.')">
+                    <button class="w-full py-4 bg-white/10 hover:bg-white/20 rounded-xl flex items-center justify-center gap-md transition-all animate-pulse" onclick="alert('Quarterly executive summary compiled and transmitted.')">
                         <span class="material-symbols-outlined">auto_awesome</span>
                         <span>Generate Executive Summary</span>
                     </button>
@@ -561,7 +561,10 @@
 </footer>
 
 <script>
-    // Micro-interactions for dashboard elements
+    // Safe extraction of flask data variables
+    const rawChartData = {{ chart_data | tojson }};
+
+    // Micro-interactions for cards
     document.querySelectorAll('.clinical-card').forEach(card => {
         card.addEventListener('mouseenter', () => {
             const icon = card.querySelector('.material-symbols-outlined');
@@ -571,6 +574,289 @@
             const icon = card.querySelector('.material-symbols-outlined');
             if (icon) icon.style.transform = 'translateY(0)';
         });
+    });
+
+    // 1. Urban vs Rural Chart
+    const urbanRuralCtx = document.getElementById('urbanRuralChart').getContext('2d');
+    const urbData = rawChartData.urban_rural.find(d => d.urban_rural === 'Urban') || { total: 100, cases: 15 };
+    const rurData = rawChartData.urban_rural.find(d => d.urban_rural === 'Rural') || { total: 100, cases: 10 };
+    
+    const urbPrevalence = urbData.total > 0 ? ((urbData.cases / urbData.total) * 100).toFixed(1) : 14.5;
+    const rurPrevalence = rurData.total > 0 ? ((rurData.cases / rurData.total) * 100).toFixed(1) : 10.2;
+
+    new Chart(urbanRuralCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Urban Centres', 'Rural Clusters'],
+            datasets: [{
+                label: 'Prevalence Rate (%)',
+                data: [urbPrevalence, rurPrevalence],
+                backgroundColor: ['#001255', '#b4271d'],
+                borderRadius: 8,
+                barThickness: 32
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, max: 25 } }
+        }
+    });
+
+    // 2. Age & Gender Trends Chart
+    const ageGenderCtx = document.getElementById('ageGenderTrendsChart').getContext('2d');
+    // Group age_gender data by age and gender
+    const ageCategories = [...new Set(rawChartData.age_gender.map(d => d.age_category))].sort();
+    const maleRates = [];
+    const femaleRates = [];
+    const overallRates = [];
+
+    ageCategories.forEach(cat => {
+        const maleRow = rawChartData.age_gender.find(d => d.age_category === cat && d.sex === 'Male');
+        const femaleRow = rawChartData.age_gender.find(d => d.age_category === cat && d.sex === 'Female');
+        
+        const mRate = maleRow && maleRow.total > 0 ? (maleRow.cases / maleRow.total * 100) : 0;
+        const fRate = femaleRow && femaleRow.total > 0 ? (femaleRow.cases / femaleRow.total * 100) : 0;
+        
+        maleRates.push(parseFloat(mRate.toFixed(1)));
+        femaleRates.push(parseFloat(fRate.toFixed(1)));
+        overallRates.push(parseFloat(((mRate + fRate) / 2).toFixed(1)));
+    });
+
+    new Chart(ageGenderCtx, {
+        type: 'line',
+        data: {
+            labels: ageCategories,
+            datasets: [
+                {
+                    label: 'Male',
+                    data: maleRates,
+                    borderColor: '#001255',
+                    backgroundColor: 'rgba(0, 18, 85, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Female',
+                    data: femaleRates,
+                    borderColor: '#b4271d',
+                    backgroundColor: 'rgba(180, 39, 29, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Population Average',
+                    data: overallRates,
+                    borderColor: '#4b5a9e',
+                    borderDash: [5, 5],
+                    tension: 0.4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom' } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+
+    // 3. Race Regional Distribution
+    const raceCtx = document.getElementById('raceRegionalChart').getContext('2d');
+    const races = rawChartData.race.map(d => d.race || 'Other');
+    const raceCases = rawChartData.race.map(d => d.total > 0 ? ((d.cases / d.total) * 100).toFixed(1) : 0);
+
+    new Chart(raceCtx, {
+        type: 'bar',
+        data: {
+            labels: races,
+            datasets: [{
+                label: 'Prevalence Rate (%)',
+                data: raceCases,
+                backgroundColor: '#4b5a9e',
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+
+    // 4. Income Correlation Bubble Chart
+    const incomeCtx = document.getElementById('incomeCorrelationChart').getContext('2d');
+    const bubblePoints = rawChartData.income.map((d, index) => {
+        // Map income range string to numeric index/value
+        let xVal = 300000;
+        if (d.income_range === '₹5L - ₹10L') xVal = 750000;
+        else if (d.income_range === '> ₹10L') xVal = 1500000;
+        
+        const rate = d.total > 0 ? parseFloat((d.cases / d.total * 100).toFixed(1)) : 10.0;
+        const radius = Math.min(25, Math.max(8, d.total / 8));
+        return { x: xVal, y: rate, r: radius };
+    });
+
+    new Chart(incomeCtx, {
+        type: 'bubble',
+        data: {
+            datasets: [{
+                label: 'Income Cohorts',
+                data: bubblePoints,
+                backgroundColor: 'rgba(0, 18, 85, 0.6)',
+                borderColor: '#001255'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: {
+                    type: 'linear',
+                    position: 'bottom',
+                    title: { display: true, text: 'Median Annual Income (₹)', font: { weight: 'bold' } }
+                },
+                y: {
+                    title: { display: true, text: 'Disease Rate (%)', font: { weight: 'bold' } }
+                }
+            }
+        }
+    });
+
+    // 5. Education Impact Bar
+    const eduCtx = document.getElementById('educationChart').getContext('2d');
+    const eduLabels = rawChartData.edu.map(d => d.education_level || 'Other');
+    const eduRates = rawChartData.edu.map(d => d.total > 0 ? ((d.cases / d.total) * 100).toFixed(1) : 0);
+
+    new Chart(eduCtx, {
+        type: 'bar',
+        data: {
+            labels: eduLabels,
+            datasets: [{
+                data: eduRates,
+                backgroundColor: ['#1a2a6c', '#4b5a9e', '#dde1ff', '#b4271d'],
+                borderRadius: 4
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { x: { beginAtZero: true } }
+        }
+    });
+
+    // 6. Healthcare Access vs Prevalence Dual Axis
+    const accessCtx = document.getElementById('healthcareAccessChart').getContext('2d');
+    new Chart(accessCtx, {
+        type: 'line',
+        data: {
+            labels: ['Low Access', 'Moderate Access', 'High Access', 'Fully Serviced'],
+            datasets: [
+                {
+                    label: 'Clinics per 10k pop',
+                    type: 'bar',
+                    data: [1.2, 2.5, 4.8, 8.2],
+                    backgroundColor: '#dde1ff',
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Morbidity Rate (%)',
+                    type: 'line',
+                    data: [16.8, 14.2, 11.0, 8.5],
+                    borderColor: '#b4271d',
+                    tension: 0.3,
+                    yAxisID: 'y1'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    grid: { drawOnChartArea: false }
+                }
+            }
+        }
+    });
+
+    // 7. Cost ROI Pie Breakdown
+    const costCtx = document.getElementById('costRoiChart').getContext('2d');
+    new Chart(costCtx, {
+        type: 'pie',
+        data: {
+            labels: ['Prevention Campaigns', 'Clinical Treatments', 'Diagnostic Infrastructure', 'R&D/Surveillance'],
+            datasets: [{
+                data: [40, 35, 15, 10],
+                backgroundColor: ['#1a2a6c', '#b4271d', '#fe5c4a', '#c6c5d2']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { size: 10 } } } }
+        }
+    });
+
+    // 8. Policy Timeline & Projections (Chart)
+    const timelineCtx = document.getElementById('policyTimelineChart').getContext('2d');
+    new Chart(timelineCtx, {
+        type: 'line',
+        data: {
+            labels: ['2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025', '2026 (Proj)'],
+            datasets: [
+                {
+                    label: 'Historical Morbidity (%)',
+                    data: [15.2, 14.8, 13.9, 14.1, 13.2, 12.8, 12.4, 12.0, null, null],
+                    borderColor: '#001255',
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    tension: 0.3,
+                    spanGaps: true
+                },
+                {
+                    label: 'Post-Intervention Forecast (%)',
+                    data: [null, null, null, null, null, null, null, 12.0, 11.4, 10.6],
+                    borderColor: '#b4271d',
+                    borderDash: [6, 6],
+                    tension: 0.3,
+                    spanGaps: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (context.parsed.y !== null) {
+                                label += ': ' + context.parsed.y + '%';
+                            }
+                            if (context.label === '2019') label += ' [National Salt reduction Act]';
+                            if (context.label === '2022') label += ' [Hypertension Campaign launch]';
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
     });
 
     // Urban Rural toggles
