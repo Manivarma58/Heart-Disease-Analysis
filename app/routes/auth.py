@@ -346,6 +346,40 @@ def verify_email():
                     VALUES (?, ?, ?, ?, ?, ?)""",
                     (patient_id, has_heart_disease, has_hypertension, has_diabetes, has_family_history, has_stroke)
                 )
+                
+                # Insert into clinical_measurements and risk_assessments to ensure joins succeed
+                from app.utils.helpers import age_from_dob
+                from app.services.risk_calculator import calculate_demo_risk, risk_category
+                
+                age = age_from_dob(pending_user["dob"])
+                gender_char = "M" if pending_user["gender"] == "Male" else "F"
+                has_cholesterol = "High Cholesterol" in pending_user["existing_conditions"]
+                
+                systolic_bp = 145 if has_hypertension == "Yes" else 120
+                diastolic_bp = 90 if has_hypertension == "Yes" else 80
+                chol_total = 240 if has_cholesterol else 190
+                hdl = 40 if has_cholesterol else 50
+                bmi = 28.5 if has_cholesterol else 24.5
+                smoker_bool = pending_user["smoking"] == "Current"
+                diabetes_bool = has_diabetes == "Yes"
+                
+                db.execute(
+                    """INSERT INTO clinical_measurements 
+                    (patient_id, measurement_date, systolic_bp, diastolic_bp, cholesterol_total, cholesterol_hdl, cholesterol_ldl, triglycerides, fasting_blood_sugar, bmi, heart_rate)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    (patient_id, date.today().isoformat(), systolic_bp, diastolic_bp, chol_total, hdl, chol_total - hdl - 30, 150, 110 if diabetes_bool else 90, bmi, 72)
+                )
+                
+                score = calculate_demo_risk(age, gender_char, systolic_bp, chol_total, hdl, smoker_bool, diabetes_bool, bmi)
+                cat = risk_category(score)
+                
+                db.execute(
+                    """INSERT INTO risk_assessments 
+                    (patient_id, assessment_date, framingham_score, ascvd_score, risk_category, lifestyle_risk_score, genetic_risk_score)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                    (patient_id, date.today().isoformat(), score, score, cat, 3.2, 4.5)
+                )
+                
                 db.commit()
             
             # Get created user

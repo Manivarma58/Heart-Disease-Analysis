@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Anita Patel | CardioHealth Portal</title>
+    <title>{{ patient.first_name }} {{ patient.last_name }} | CardioHealth Portal</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -118,11 +118,11 @@
         </div>
         <div class="flex items-center gap-4 px-4 mb-8">
             <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-primary-container flex-shrink-0">
-                <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvALTSQH4T-PZYMxkB1NDe2LjBsm8yXdepHekbWlwEjFXXkY09rw5rF8TMwxcqSXGj-mWQwGfi0OuiyqdsN9UoQRttPTiAGTZNoTVlLAo7xrB3tmDzXnKjhltnwiXHapo_tKBUJWG6RpwYIEETC9Xe8BlbiCYAXqV0IeNwuFZpTimJxCBtNYMyUU8nMFtsdvOcsTJIMHirjVOp2wfsduKpEA0lha7tVxleEXIBXiw_pqP6hK6aqgUdb0xyWFLxPzwTgqq3vqKC-Yhr" alt="Anita Patel Avatar"/>
+                <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvALTSQH4T-PZYMxkB1NDe2LjBsm8yXdepHekbWlwEjFXXkY09rw5rF8TMwxcqSXGj-mWQwGfi0OuiyqdsN9UoQRttPTiAGTZNoTVlLAo7xrB3tmDzXnKjhltnwiXHapo_tKBUJWG6RpwYIEETC9Xe8BlbiCYAXqV0IeNwuFZpTimJxCBtNYMyUU8nMFtsdvOcsTJIMHirjVOp2wfsduKpEA0lha7tVxleEXIBXiw_pqP6hK6aqgUdb0xyWFLxPzwTgqq3vqKC-Yhr" alt="{{ patient.first_name }} {{ patient.last_name }} Avatar"/>
             </div>
             <div>
-                <h3 class="font-title-lg text-title-lg text-primary leading-tight font-bold">Anita Patel</h3>
-                <p class="font-label-sm text-label-sm text-on-surface-variant font-medium">Patient ID: 8829-X</p>
+                <h3 class="font-title-lg text-title-lg text-primary leading-tight font-bold">{{ patient.first_name }} {{ patient.last_name }}</h3>
+                <p class="font-label-sm text-label-sm text-on-surface-variant font-medium">Patient ID: {{ patient.patient_id }}</p>
             </div>
         </div>
         <nav class="flex-grow space-y-2 font-semibold text-sm">
@@ -178,8 +178,8 @@
                     <span class="material-symbols-outlined">notifications</span>
                     <span class="absolute -top-1 -right-1 w-2 h-2 bg-secondary rounded-full"></span>
                 </button>
-                <div class="flex items-center gap-2 cursor-pointer group" onclick="alert('User logged in: Anita Patel')">
-                    <span class="font-label-md text-label-md text-on-surface group-hover:text-primary">Anita Patel</span>
+                <div class="flex items-center gap-2 cursor-pointer group" onclick="alert('User logged in: {{ patient.first_name }} {{ patient.last_name }}')">
+                    <span class="font-label-md text-label-md text-on-surface group-hover:text-primary">{{ patient.first_name }} {{ patient.last_name }}</span>
                     <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary">account_circle</span>
                 </div>
             </div>
@@ -189,7 +189,7 @@
             <!-- Welcome Header Section -->
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-lg rounded-xl vital-shadow">
                 <div>
-                    <h1 class="font-headline-lg text-headline-lg text-primary">Welcome back, Anita! 👋</h1>
+                    <h1 class="font-headline-lg text-headline-lg text-primary">Welcome back, {{ patient.first_name }}! 👋</h1>
                     <div class="flex gap-4 mt-2 text-on-surface-variant font-body-md text-xs font-semibold">
                         <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">schedule</span> Last login: Today, 9:30 AM</span>
                         <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">event</span> Next appt: July 25, 2026</span>
@@ -199,7 +199,18 @@
                 <div class="flex items-center gap-6">
                     <div class="text-right">
                         <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-bold">Overall Health Score</p>
-                        <p class="font-headline-md text-headline-md text-status-stable font-extrabold">78<span class="text-body-md text-on-surface-variant font-medium">/100</span> <span class="text-label-md font-bold text-green-600">(Good)</span></p>
+                        {% set health_score_val = (100 - patient.framingham_score * 3.5) | round | int %}
+                        <p class="font-headline-md text-headline-md text-status-stable font-extrabold">{{ health_score_val }}<span class="text-body-md text-on-surface-variant font-medium">/100</span> 
+                            {% if health_score_val >= 80 %}
+                            <span class="text-label-md font-bold text-green-600">(Excellent)</span>
+                            {% elif health_score_val >= 60 %}
+                            <span class="text-label-md font-bold text-green-600">(Good)</span>
+                            {% elif health_score_val >= 45 %}
+                            <span class="text-label-md font-bold text-yellow-600">(Fair)</span>
+                            {% else %}
+                            <span class="text-label-md font-bold text-red-600">(Critical)</span>
+                            {% endif %}
+                        </p>
                     </div>
                     <button class="flex items-center gap-2 bg-primary text-on-primary px-6 py-3 rounded-lg font-label-md font-bold vital-shadow-hover transition-all hover:opacity-90 active:scale-95 shadow-sm" onclick="alert('Compiling health logs report PDF...')">
                         <span class="material-symbols-outlined">download</span>

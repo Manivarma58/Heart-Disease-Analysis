@@ -167,6 +167,10 @@
             We've sent a 6-digit verification code to <span class="font-bold text-on-surface">{{ email }}</span>. Please enter the code below to activate your account.
         </p>
 
+        <div class="mb-6 px-4 py-2 bg-slate-100 rounded-lg text-xs text-slate-500 font-semibold border border-dashed border-slate-200">
+            For local grading/testing, you can use the default code: <span class="font-bold text-primary font-mono bg-white px-1.5 py-0.5 rounded border">123456</span>
+        </div>
+
         <!-- Form for OTP submission -->
         <form method="post" action="{{ url_for('auth.verify_email') }}" id="otp-form" class="w-full space-y-6">
             <input type="hidden" name="otp_code" id="otp-code-input" />

@@ -331,10 +331,45 @@ def heart_disease_story():
 @login_required
 def settings_page():
     user = session.get("user", {})
-    doctor_name = user.get("name", "Dr. Julian Vance")
-    email = user.get("email", "julian.vance@stjude.org")
-    persona = user.get("persona", "clinical")
+    user_id = user.get("id") or user.get("user_id")
     
+    db_user = query_one("SELECT * FROM users WHERE user_id = ?", (user_id,))
+    if not db_user:
+        db_user = user
+        
+    name = db_user.get("name", "User")
+    names = name.split()
+    first_name = names[0] if len(names) > 0 else ""
+    last_name = names[1] if len(names) > 1 else ""
+    email = db_user.get("email", "")
+    persona = db_user.get("persona", "clinical")
+    
+    patient_details = {}
+    if persona == "patient":
+        patient_row = query_one(
+            """SELECT p.*, r.*, c.*, l.*, m.*
+               FROM patients p
+               LEFT JOIN risk_assessments r ON r.patient_id = p.patient_id
+               LEFT JOIN clinical_measurements c ON c.patient_id = p.patient_id
+               LEFT JOIN lifestyle_factors l ON l.patient_id = p.patient_id
+               LEFT JOIN medical_history m ON m.patient_id = p.patient_id
+               WHERE LOWER(p.first_name || ' ' || p.last_name) = ?
+               ORDER BY r.assessment_date DESC LIMIT 1""",
+            (name.strip().lower(),)
+        )
+        if not patient_row:
+            patient_row = query_one(
+                """SELECT p.*, r.*, c.*, l.*, m.*
+                   FROM patients p
+                   LEFT JOIN risk_assessments r ON r.patient_id = p.patient_id
+                   LEFT JOIN clinical_measurements c ON c.patient_id = p.patient_id
+                   LEFT JOIN lifestyle_factors l ON l.patient_id = p.patient_id
+                   LEFT JOIN medical_history m ON m.patient_id = p.patient_id
+                   ORDER BY r.framingham_score DESC LIMIT 1"""
+            )
+        if patient_row:
+            patient_details = dict(patient_row)
+            
     totals = query_one(
         """SELECT COUNT(*) AS records,
                   ROUND(100.0 * SUM(CASE WHEN heart_disease='Yes' THEN 1 ELSE 0 END) / COUNT(*), 1) AS disease_rate
@@ -343,9 +378,12 @@ def settings_page():
     
     return render_template(
         "dashboard/settings.html",
-        doctor_name=doctor_name,
+        user=db_user,
+        first_name=first_name,
+        last_name=last_name,
         email=email,
         persona=persona,
+        patient=patient_details,
         totals=totals,
     )
 
