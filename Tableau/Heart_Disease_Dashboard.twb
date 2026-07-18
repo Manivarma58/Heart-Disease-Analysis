@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<workbook source-build="CardioViz" version="2024.2">
+  <datasources>
+    <datasource caption="Heart Disease Dataset" name="heart_csv">
+      <connection class="textscan" filename="../Dataset/heart.csv" />
+    </datasource>
+  </datasources>
+  <worksheets>
+    <worksheet name="Gender vs Heart Disease" />
+    <worksheet name="Age vs Heart Disease" />
+    <worksheet name="Diabetic vs Stroke" />
+    <worksheet name="Smoking and Alcohol Impact" />
+    <worksheet name="Race wise Heart Disease" />
+    <worksheet name="Responsive Dashboard" />
+  </worksheets>
+  <dashboards>
+    <dashboard name="Heart Disease Analysis Dashboard" />
+  </dashboards>
+</workbook>
