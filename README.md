@@ -4,6 +4,60 @@ CardioViz is a Flask-based Heart Disease Analysis project for cardiovascular ris
 
 The project supports the full workflow shown in the assignment: data collection, dataset validation, database storage, SQL operations, Tableau connection, data preparation, unique visualizations, and a responsive dashboard.
 
+## Project Structure
+
+```text
+Heart_Disease_Analysis/
+├── api/                        # Vercel serverless functions entrypoint
+│   └── index.py
+├── app/                        # Flask application source
+│   ├── models/                 # Database models and schemas
+│   ├── routes/                 # Blueprint controllers (auth, dashboard, SQL console, etc.)
+│   ├── services/               # Heart disease risk calculation engine
+│   ├── static/                 # CSS/JS assets and images
+│   ├── templates/              # HTML template files
+│   ├── utils/                  # Utility functions
+│   ├── config.py               # Flask environment configuration
+│   └── __init__.py             # Flask App factory
+├── Data_Cleaning/              # Cleaned dataset & preprocessing steps for analysis
+│   ├── cleaned_heart.csv
+│   └── preprocessing_steps.docx
+├── data/                       # Local data store containing datasets
+│   ├── Heart_new2.csv
+│   ├── Heart_new2_clean.csv
+│   └── Heart_tableau_ready.csv
+├── Dataset/                    # Raw internship dataset and metadata
+│   ├── heart.csv
+│   └── data_dictionary.xlsx
+├── docs/                       # Project documentation pages
+│   ├── CALCULATED_FIELDS_AND_VISUALIZATIONS.md
+│   ├── DASHBOARD_DESIGN.md
+│   └── ...
+├── Report/                     # Submission assets (PDF reports, PowerPoint presentations)
+│   ├── Project_Report.pdf
+│   └── Presentation.pptx
+├── scripts/                    # CLI tools for dataset validation, prep, and db import
+│   ├── create_tableau_ready_csv.py
+│   ├── validate_and_prepare_dataset.py
+│   └── import_heart_csv.py
+├── SQL/                        # SQL schemas, imports, and analytical queries
+│   ├── create_database.sql
+│   ├── create_table.sql
+│   ├── import_data.sql
+│   └── analysis_queries.sql
+├── Tableau/                    # Tableau workbooks and dashboard screenshots
+│   ├── Heart_Disease_Dashboard.twb
+│   ├── Heart_Disease_Dashboard.twbx
+│   └── Dashboard_Screenshots/
+├── tests/                      # Automated unit and integration tests
+├── Dockerfile                  # Containerization files
+├── docker-compose.yml
+├── requirements.txt            # Python dependencies
+├── run.py                      # Flask development server entry point
+├── vercel.json                 # Vercel serverless deployment config
+└── README.md                   # This README file
+```
+
 ## Demo Accounts
 
 All accounts use `cardioviz123`.
